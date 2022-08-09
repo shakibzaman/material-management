@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Department;
 use App\Expense;
 use App\ExpenseCategory;
 use App\Http\Controllers\Controller;
@@ -28,8 +29,9 @@ class ExpenseController extends Controller
         abort_if(Gate::denies('expense_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $expense_categories = ExpenseCategory::all()->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
+        $departments = Department::all()->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
 
-        return view('admin.expenses.create', compact('expense_categories'));
+        return view('admin.expenses.create', compact('expense_categories','departments'));
     }
 
     public function store(StoreExpenseRequest $request)
@@ -44,10 +46,11 @@ class ExpenseController extends Controller
         abort_if(Gate::denies('expense_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $expense_categories = ExpenseCategory::all()->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
+        $departments = Department::all()->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
 
-        $expense->load('expense_category', 'created_by');
+        $expense->load('expense_category', 'created_by','department');
 
-        return view('admin.expenses.edit', compact('expense_categories', 'expense'));
+        return view('admin.expenses.edit', compact('expense_categories', 'expense','departments'));
     }
 
     public function update(UpdateExpenseRequest $request, Expense $expense)
@@ -61,7 +64,7 @@ class ExpenseController extends Controller
     {
         abort_if(Gate::denies('expense_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $expense->load('expense_category', 'created_by');
+        $expense->load('expense_category', 'created_by','department');
 
         return view('admin.expenses.show', compact('expense'));
     }

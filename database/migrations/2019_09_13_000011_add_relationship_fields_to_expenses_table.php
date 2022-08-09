@@ -16,6 +16,10 @@ class AddRelationshipFieldsToExpensesTable extends Migration
             $table->unsignedInteger('created_by_id')->nullable();
 
             $table->foreign('created_by_id', 'created_by_fk_335008')->references('id')->on('users');
+
+            $table->unsignedInteger('department_id')->nullable();
+
+            $table->foreign('department_id', 'department_by_skb')->references('id')->on('departments');
         });
     }
 }

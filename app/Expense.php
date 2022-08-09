@@ -29,11 +29,17 @@ class Expense extends Model
         'description',
         'created_by_id',
         'expense_category_id',
+        'department_id',
     ];
 
     public function expense_category()
     {
         return $this->belongsTo(ExpenseCategory::class, 'expense_category_id');
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class,'department_id');
     }
 
     public function getEntryDateAttribute($value)

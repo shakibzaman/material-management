@@ -37,4 +37,14 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     // Expensereports
     Route::delete('expense-reports/destroy', 'ExpenseReportController@massDestroy')->name('expense-reports.massDestroy');
     Route::resource('expense-reports', 'ExpenseReportController');
+
+    // Departments
+    Route::delete('departments/destroy', 'DepartmentController@massDestroy')->name('department.massDestroy');
+    Route::resource('department', 'DepartmentController');
+
+    // Stock In
+    Route::resource('material-in', 'MaterialInController');
+
+    // HR
+    Route::resource('employee', 'EmployeeController');
 });

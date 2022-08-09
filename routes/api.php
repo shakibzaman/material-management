@@ -23,5 +23,5 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1\Admin', '
     Route::apiResource('incomes', 'IncomeApiController');
 
     // Expensereports
-    Route::apiResource('expense-reports', 'ExpenseReportApiController');
+    // Route::apiResource('expense-reports', 'ExpenseReportApiController');
 });

@@ -31,6 +31,9 @@ class ExpenseCategoryController extends Controller
 
     public function store(StoreExpenseCategoryRequest $request)
     {
+        $validated = $request->validate([
+            'name' => 'required|unique:expense_categories|max:255',
+        ]);
         $expenseCategory = ExpenseCategory::create($request->all());
 
         return redirect()->route('admin.expense-categories.index');

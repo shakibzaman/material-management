@@ -3,7 +3,7 @@
 
 <div class="card">
     <div class="card-header">
-        {{ trans('global.show') }} {{ trans('cruds.expense.title') }}
+        {{ trans('global.show') }} {{ trans('cruds.user.title') }}
     </div>
 
     <div class="card-body">
@@ -12,50 +12,44 @@
                 <tbody>
                     <tr>
                         <th>
-                            {{ trans('cruds.expense.fields.id') }}
+                            {{ trans('cruds.user.fields.id') }}
                         </th>
                         <td>
-                            {{ $expense->id }}
+                            {{ $user->id }}
                         </td>
                     </tr>
                     <tr>
                         <th>
-                            {{ trans('cruds.expense.fields.expense_category') }}
+                            {{ trans('cruds.user.fields.name') }}
                         </th>
                         <td>
-                            {{ $expense->expense_category->name ?? '' }}
+                            {{ $user->name }}
                         </td>
                     </tr>
                     <tr>
                         <th>
-                            Expense Department
+                            {{ trans('cruds.user.fields.email') }}
                         </th>
                         <td>
-                            {{ $expense->department->name ?? '' }}
+                            {{ $user->email }}
                         </td>
                     </tr>
                     <tr>
                         <th>
-                            {{ trans('cruds.expense.fields.entry_date') }}
+                            {{ trans('cruds.user.fields.email_verified_at') }}
                         </th>
                         <td>
-                            {{ $expense->entry_date }}
+                            {{ $user->email_verified_at }}
                         </td>
                     </tr>
                     <tr>
                         <th>
-                            {{ trans('cruds.expense.fields.amount') }}
+                            Roles
                         </th>
                         <td>
-                            Tk. {{ $expense->amount }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            {{ trans('cruds.expense.fields.description') }}
-                        </th>
-                        <td>
-                            {{ $expense->description }}
+                            @foreach($user->roles as $id => $roles)
+                                <span class="label label-info label-many">{{ $roles->title }}</span>
+                            @endforeach
                         </td>
                     </tr>
                 </tbody>
@@ -65,7 +59,14 @@
             </a>
         </div>
 
+        <nav class="mb-3">
+            <div class="nav nav-tabs">
 
+            </div>
+        </nav>
+        <div class="tab-content">
+
+        </div>
     </div>
 </div>
 @endsection

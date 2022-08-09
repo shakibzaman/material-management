@@ -22,6 +22,19 @@
                     </em>
                 @endif
             </div>
+            <div class="form-group {{ $errors->has('expense_category_id') ? 'has-error' : '' }}">
+                <label for="expense_category">Department</label>
+                <select name="department_id" id="expense_category" class="form-control select2">
+                    @foreach($departments as $id => $department)
+                        <option value="{{ $id }}" >{{ $department }}</option>
+                    @endforeach
+                </select>
+                @if($errors->has('department_id'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('department_id') }}
+                    </em>
+                @endif
+            </div>
             <div class="form-group {{ $errors->has('entry_date') ? 'has-error' : '' }}">
                 <label for="entry_date">{{ trans('cruds.expense.fields.entry_date') }}*</label>
                 <input type="text" id="entry_date" name="entry_date" class="form-control date" value="{{ old('entry_date', isset($expense) ? $expense->entry_date : '') }}" required>

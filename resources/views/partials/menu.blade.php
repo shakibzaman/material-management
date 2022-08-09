@@ -55,6 +55,60 @@
                     </a>
                 </li>
             @endcan
+            @can('department_category_access')
+                <li class="nav-item">
+                    <a href="{{ route("admin.department.index") }}" class="nav-link {{ request()->is('admin/department') || request()->is('admin/department/*') ? 'active' : '' }}">
+                        <i class="fa-fw fas fa-list nav-icon">
+
+                        </i>
+                        Department
+                    </a>
+                </li>
+            @endcan
+            @can('employee_management_access')
+                <li class="nav-item nav-dropdown">
+                    <a class="nav-link  nav-dropdown-toggle" href="#">
+                        <i class="fa-fw fas fa-users nav-icon">
+
+                        </i>
+                        HR Management
+                    </a>
+                    <ul class="nav-dropdown-items">
+                        @can('employee_access')
+                            <li class="nav-item">
+                                <a href="{{ route("admin.employee.index") }}" class="nav-link {{ request()->is('admin/employee') || request()->is('admin/employee/*') ? 'active' : '' }}">
+                                    <i class="fa-fw fas fa-list nav-icon">
+
+                                    </i>
+                                    Employee
+                                </a>
+                            </li>
+                        @endcan
+                    </ul>
+                </li>
+            @endcan
+            @can('material_management_access')
+                <li class="nav-item nav-dropdown">
+                    <a class="nav-link  nav-dropdown-toggle" href="#">
+                        <i class="fa-fw fas fa-users nav-icon">
+
+                        </i>
+                        Material Management
+                    </a>
+                    <ul class="nav-dropdown-items">
+                        @can('material_access')
+                            <li class="nav-item">
+                                <a href="{{ route("admin.material-in.index") }}" class="nav-link {{ request()->is('admin/material-in') || request()->is('admin/material-in/*') ? 'active' : '' }}">
+                                    <i class="fa-fw fas fa-list nav-icon">
+
+                                    </i>
+                                    Material Stock
+                                </a>
+                            </li>
+                        @endcan
+                    </ul>
+                </li>
+            @endcan
             @can('income_category_access')
                 <li class="nav-item">
                     <a href="{{ route("admin.income-categories.index") }}" class="nav-link {{ request()->is('admin/income-categories') || request()->is('admin/income-categories/*') ? 'active' : '' }}">
