@@ -23,9 +23,6 @@ class Expense extends Model
     protected $fillable = [
         'amount',
         'entry_date',
-        'created_at',
-        'updated_at',
-        'deleted_at',
         'description',
         'created_by_id',
         'expense_category_id',
@@ -40,6 +37,10 @@ class Expense extends Model
     public function department()
     {
         return $this->belongsTo(Department::class,'department_id');
+    }
+    public function material()
+    {
+        return $this->belongsTo(MaterialConfig::class,'material_id');
     }
 
     public function getEntryDateAttribute($value)

@@ -44,6 +44,56 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
     // Stock In
     Route::resource('material-in', 'MaterialInController');
+    Route::get('transfer/material/{id}', 'MaterialInController@transfer')->name('transfer.material');
+
+    // Material Config
+    Route::resource('material-config', 'MaterialConfigController');
+
+    //Product
+    Route::resource('product', 'ProductController');
+    Route::get('purchase/product/create', 'ProductController@purchaseCreate')->name('product.purchase.create');
+    Route::get('purchase/product', 'ProductController@purchase')->name('product.purchase');
+
+    // Neeting
+    Route::get('neeting/index', 'NeetingController@index')->name('neeting.index');
+    Route::get('neeting/company/transfer-list/{id}', 'NeetingController@transferList')->name('netting.company.transfer');
+    Route::get('neeting/transfer/company/product/{id}', 'NeetingController@transferProduct')->name('netting.transfer.company.product');
+    Route::get('netting/transfer/show/{id}', 'NeetingController@transferShow')->name('transfer.show');
+    Route::get('netting/transfer/other/show/{id}', 'NeetingController@transferOtherShow')->name('transfer.other.show');
+    Route::get('neeting/stock/in', 'NeetingController@stockIn')->name('neeting.stock.in');
+    Route::get('neeting/stock/out', 'NeetingController@stockOut')->name('neeting.stock.out');
+    Route::post('neeting/stock/search', 'NeetingController@search')->name('neeting.stock.search');
+    Route::post('neeting/stock/in', 'NeetingController@store')->name('neeting.stock.store');
+    Route::get('netting/transfer/expense/{id}', 'NeetingController@expenseList')->name('netting.transfer.expense');
+    Route::get('netting/all/expense', 'NeetingController@expenses')->name('netting.all.expense');
+ 
+    // Dyeing
+
+    Route::post('dyeing/stock/search', 'DyeingController@search')->name('neeting.stock.search');
+    Route::post('dyeing/stock/in', 'DyeingController@store')->name('dyeing.stock.store');
+    Route::get('dyeing/index', 'DyeingController@index')->name('dyeing.index');
+    Route::get('dyeing/all/expense', 'DyeingController@expenses')->name('dyeing.all.expense');
+    Route::get('dyeing/transfer/company/product/{id}', 'DyeingController@transferProduct')->name('dyeing.transfer.company.product');
+    Route::get('dyeing/company/transfer-list/{id}', 'DyeingController@transferList')->name('dyeing.company.transfer');
+    Route::get('dyeing/transfer/show/{id}', 'DyeingController@transferShow')->name('dyeing.transfer.show');
+
+
+
+
+
+
+
+
+
+    // Color
+    Route::get('color/index', 'MaterialConfigController@color')->name('color.index');
+    Route::get('color/create', 'MaterialConfigController@colorCreate')->name('color.create');
+
+    // Company
+    Route::resource('company', 'CompanyController');
+
+
+
 
     // HR
     Route::resource('employee', 'EmployeeController');

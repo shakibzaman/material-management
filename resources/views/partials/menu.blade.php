@@ -45,24 +45,69 @@
                 </li>
             @endcan
 
-            @can('expense_category_access')
-                <li class="nav-item">
-                    <a href="{{ route("admin.expense-categories.index") }}" class="nav-link {{ request()->is('admin/expense-categories') || request()->is('admin/expense-categories/*') ? 'active' : '' }}">
-                        <i class="fa-fw fas fa-list nav-icon">
+            
+            @can('neeting_management_access')
+                <li class="nav-item nav-dropdown">
+                    <a class="nav-link  nav-dropdown-toggle" href="#">
+                        <i class="fa-fw fas fa-users nav-icon">
 
                         </i>
-                        {{ trans('cruds.expenseCategory.title') }}
+                        Knitting
                     </a>
+                    <ul class="nav-dropdown-items">
+                        @can('neeting_stock_access')
+                            <li class="nav-item">
+                                <a href="{{ route("admin.neeting.index") }}" class="nav-link {{ request()->is('admin/neeting') || request()->is('admin/neeting/index') ? 'active' : '' }}">
+                                    <i class="fa-fw fas fa-list nav-icon">
+
+                                    </i>
+                                    Product Stock
+                                </a>
+                            </li>
+                        @endcan
+                        @can('neeting_expense_list')
+                            <li class="nav-item">
+                                <a href="{{ route("admin.netting.all.expense") }}" class="nav-link {{ request()->is('admin/neeting/all/expense') || request()->is('admin/neeting/all/expense/*') ? 'active' : '' }}">
+                                    <i class="fa-fw fas fa-list nav-icon">
+
+                                    </i>
+                                    Expense List
+                                </a>
+                            </li>
+                        @endcan
+                    </ul>
                 </li>
             @endcan
-            @can('department_category_access')
-                <li class="nav-item">
-                    <a href="{{ route("admin.department.index") }}" class="nav-link {{ request()->is('admin/department') || request()->is('admin/department/*') ? 'active' : '' }}">
-                        <i class="fa-fw fas fa-list nav-icon">
+            @can('dyeing_management_access')
+                <li class="nav-item nav-dropdown">
+                    <a class="nav-link  nav-dropdown-toggle" href="#">
+                        <i class="fa-fw fas fa-users nav-icon">
 
                         </i>
-                        Department
+                        Dyeing
                     </a>
+                    <ul class="nav-dropdown-items">
+                        @can('dyeing_stock_access')
+                            <li class="nav-item">
+                                <a href="{{ route("admin.dyeing.index") }}" class="nav-link {{ request()->is('admin/dyeing') || request()->is('admin/dyeing/index') ? 'active' : '' }}">
+                                    <i class="fa-fw fas fa-list nav-icon">
+
+                                    </i>
+                                    Product Stock
+                                </a>
+                            </li>
+                        @endcan
+                        @can('dyeing_expense_list')
+                            <li class="nav-item">
+                                <a href="{{ route("admin.dyeing.all.expense") }}" class="nav-link {{ request()->is('admin/dyeing/all/expense') || request()->is('admin/dyeing/all/expense/*') ? 'active' : '' }}">
+                                    <i class="fa-fw fas fa-list nav-icon">
+
+                                    </i>
+                                    Expense List
+                                </a>
+                            </li>
+                        @endcan
+                    </ul>
                 </li>
             @endcan
             @can('employee_management_access')
@@ -96,47 +141,127 @@
                         Material Management
                     </a>
                     <ul class="nav-dropdown-items">
+                        @can('material_config_access')
+                            <li class="nav-item">
+                                <a href="{{ route("admin.material-config.index") }}" class="nav-link {{ request()->is('admin/material-config') || request()->is('admin/material-config/*') ? 'active' : '' }}">
+                                    <i class="fa-fw fas fa-list nav-icon">
+
+                                    </i>
+                                    Create Material
+                                </a>
+                            </li>
+                        @endcan
+                    </ul>
+                    <ul class="nav-dropdown-items">
                         @can('material_access')
                             <li class="nav-item">
                                 <a href="{{ route("admin.material-in.index") }}" class="nav-link {{ request()->is('admin/material-in') || request()->is('admin/material-in/*') ? 'active' : '' }}">
                                     <i class="fa-fw fas fa-list nav-icon">
 
                                     </i>
-                                    Material Stock
+                                    Material Purchased
                                 </a>
                             </li>
                         @endcan
                     </ul>
                 </li>
             @endcan
-            @can('income_category_access')
-                <li class="nav-item">
-                    <a href="{{ route("admin.income-categories.index") }}" class="nav-link {{ request()->is('admin/income-categories') || request()->is('admin/income-categories/*') ? 'active' : '' }}">
-                        <i class="fa-fw fas fa-list nav-icon">
+            @can('product_management_access')
+                <li class="nav-item nav-dropdown">
+                    <a class="nav-link  nav-dropdown-toggle" href="#">
+                        <i class="fa-fw fas fa-users nav-icon">
 
                         </i>
-                        {{ trans('cruds.incomeCategory.title') }}
+                        Product Management
                     </a>
+                    <ul class="nav-dropdown-items">
+                        @can('product_config_access')
+                            <li class="nav-item">
+                                <a href="{{ route("admin.product.index") }}" class="nav-link {{ request()->is('admin/product') || request()->is('admin/product/*') ? 'active' : '' }}">
+                                    <i class="fa-fw fas fa-list nav-icon">
+
+                                    </i>
+                                    Create Product
+                                </a>
+                            </li>
+                        @endcan
+                    </ul>
+                    <ul class="nav-dropdown-items">
+                        @can('product_access')
+                            <li class="nav-item">
+                                <a href="{{ route("admin.product.purchase") }}" class="nav-link {{ request()->is('admin/product') || request()->is('admin/product/*') ? 'active' : '' }}">
+                                    <i class="fa-fw fas fa-list nav-icon">
+
+                                    </i>
+                                    Product Purchased
+                                </a>
+                            </li>
+                        @endcan
+                    </ul>
                 </li>
             @endcan
-            @can('expense_access')
-                <li class="nav-item">
-                    <a href="{{ route("admin.expenses.index") }}" class="nav-link {{ request()->is('admin/expenses') || request()->is('admin/expenses/*') ? 'active' : '' }}">
-                        <i class="fa-fw fas fa-arrow-circle-right nav-icon">
+            @can('expense_management_access')
+                <li class="nav-item nav-dropdown">
+                    <a class="nav-link  nav-dropdown-toggle" href="#">
+                        <i class="fa-fw fas fa-users nav-icon">
 
                         </i>
-                        {{ trans('cruds.expense.title') }}
+                        Expense
                     </a>
+                    <ul class="nav-dropdown-items">
+                        @can('expense_category_access')
+                            <li class="nav-item">
+                                <a href="{{ route("admin.expense-categories.index") }}" class="nav-link {{ request()->is('admin/expense-categories') || request()->is('admin/expense-categories/*') ? 'active' : '' }}">
+                                    <i class="fa-fw fas fa-list nav-icon">
+
+                                    </i>
+                                    {{ trans('cruds.expenseCategory.title') }}
+                                </a>
+                            </li>
+                        @endcan
+                        @can('expense_access')
+                            <li class="nav-item">
+                                <a href="{{ route("admin.expenses.index") }}" class="nav-link {{ request()->is('admin/expenses') || request()->is('admin/expenses/*') ? 'active' : '' }}">
+                                    <i class="fa-fw fas fa-arrow-circle-right nav-icon">
+
+                                    </i>
+                                    {{ trans('cruds.expense.title') }}
+                                </a>
+                            </li>
+                        @endcan
+                    </ul>
                 </li>
             @endcan
-            @can('income_access')
-                <li class="nav-item">
-                    <a href="{{ route("admin.incomes.index") }}" class="nav-link {{ request()->is('admin/incomes') || request()->is('admin/incomes/*') ? 'active' : '' }}">
-                        <i class="fa-fw fas fa-arrow-circle-right nav-icon">
+            @can('income_management_access')
+                <li class="nav-item nav-dropdown">
+                    <a class="nav-link  nav-dropdown-toggle" href="#">
+                        <i class="fa-fw fas fa-users nav-icon">
 
                         </i>
-                        {{ trans('cruds.income.title') }}
+                        Income
                     </a>
+                    <ul class="nav-dropdown-items">
+                        @can('income_category_access')
+                            <li class="nav-item">
+                                <a href="{{ route("admin.income-categories.index") }}" class="nav-link {{ request()->is('admin/income-categories') || request()->is('admin/income-categories/*') ? 'active' : '' }}">
+                                    <i class="fa-fw fas fa-list nav-icon">
+
+                                    </i>
+                                    {{ trans('cruds.incomeCategory.title') }}
+                                </a>
+                            </li>
+                        @endcan
+                        @can('income_access')
+                            <li class="nav-item">
+                                <a href="{{ route("admin.incomes.index") }}" class="nav-link {{ request()->is('admin/incomes') || request()->is('admin/incomes/*') ? 'active' : '' }}">
+                                    <i class="fa-fw fas fa-arrow-circle-right nav-icon">
+
+                                    </i>
+                                    {{ trans('cruds.income.title') }}
+                                </a>
+                            </li>
+                        @endcan
+                    </ul>
                 </li>
             @endcan
             @can('expense_report_access')
@@ -149,6 +274,48 @@
                     </a>
                 </li>
             @endcan
+            @can('dyeing_management_access')
+                <li class="nav-item nav-dropdown">
+                    <a class="nav-link  nav-dropdown-toggle" href="#">
+                        <i class="fa-fw fas fa-users nav-icon">
+
+                        </i>
+                        Configaration
+                    </a>
+                    <ul class="nav-dropdown-items">
+                    @can('department_category_access')
+                        <li class="nav-item">
+                            <a href="{{ route("admin.department.index") }}" class="nav-link {{ request()->is('admin/department') || request()->is('admin/department/*') ? 'active' : '' }}">
+                                <i class="fa-fw fas fa-list nav-icon">
+
+                                </i>
+                                Department
+                            </a>
+                        </li>
+                    @endcan
+                    @can('color_access')
+                        <li class="nav-item">
+                            <a href="{{ route("admin.color.index") }}" class="nav-link {{ request()->is('admin/color') || request()->is('admin/color/*') ? 'active' : '' }}">
+                                <i class="fa-fw fas fa-list nav-icon">
+
+                                </i>
+                                Color
+                            </a>
+                        </li>
+                    @endcan
+                    @can('company_access')
+                        <li class="nav-item">
+                            <a href="{{ route("admin.company.index") }}" class="nav-link {{ request()->is('admin/company') || request()->is('admin/company/*') ? 'active' : '' }}">
+                                <i class="fa-fw fas fa-list nav-icon">
+
+                                </i>
+                                Company
+                            </a>
+                        </li>
+                    @endcan
+                    </ul>
+                </li>
+            @endcan 
 
             <li class="nav-item">
                 <a href="#" class="nav-link" onclick="event.preventDefault(); document.getElementById('logoutform').submit();">

@@ -3,7 +3,7 @@
 
 <div class="card">
     <div class="card-header">
-        {{ trans('global.create') }} Material
+        Purchase Products
     </div>
 
     <div class="card-body">
@@ -27,7 +27,7 @@
             <div class="form-group {{ $errors->has('quantity') ? 'has-error' : '' }}">
                 <label for="name"> Quantity *</label>
                 <input type="text" id="quantity" name="quantity" class="form-control" required>
-                <input type="hidden" id="type" name="type" value="1">
+                <input type="hidden" id="type" name="type" value="2">
                 @if($errors->has('quantity'))
                     <em class="invalid-feedback">
                         {{ $errors->first('quantity') }}

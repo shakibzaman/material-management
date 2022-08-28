@@ -9,74 +9,111 @@
     <div class="card-body">
         <div class="mb-2">
             <table class="table table-bordered table-striped">
-                <thead>
-                    <tr>
-                        <th> ID </th>
-                        <th>Material Name</th>
-                        <th>Material Quantity</th>
-                        <th>Unit</th>
-                        <th>Buying Date</th>
-                        <th>Unit Price</th>
-                        <th>Total price</th>
-                        <th>Rest Quantity</th>
-                        <th>Supplied By</th>
-                        <th>Invoice Number</th>
-                        <th>Purchased By</th>
-                        <th>Entry By</th>
-                        <th>Created at</th>
-                    </tr>
-                </thead>
                 <tbody>
-                    @foreach($materials as $material)
                     <tr>
-                        
+                        <th>
+                            ID
+                        </th>
                         <td>
                             {{ $material->id }}
                         </td>
-                    
+                    </tr>
+                    <tr>
+                        <th>
+                            Material Name
+                        </th>
                         <td>
-                            {{ $material->material->name ?? '' }}
+                            {{ $material->name ?? '' }}
                         </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            Material Quantity
+                        </th>
                         <td>
                             {{ $material->quantity ?? '' }}
                         </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            Unit
+                        </th>
                         <td>
                             {{$material->units->name ?? 'N/A'}}
                         </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            Buying Date
+                        </th>
                         <td>
                             Tk. {{ $material->buying_date }}
                         </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            Unit Price
+                        </th>
                         <td>
                             {{ $material->unit_price }}
                         </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            Total price
+                        </th>
                         <td>
                             {{ $material->total_price }}
                         </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            Rest Quantity
+                        </th>
                         <td>
                             {{ $material->rest }}
                         </td>
-                    
+                    </tr>
+                    <tr>
+                        <th>
+                            Supplied By
+                        </th>
                         <td>
                             {{ $material->supplied_by }}
                         </td>
-                
+                    </tr>
+                    <tr>
+                        <th>
+                            Invoice Number
+                        </th>
                         <td>
                             {{ $material->inv_number }}
                         </td>
-                    
+                    </tr>
+                    <tr>
+                        <th>
+                            Purchased By
+                        </th>
                         <td>
                             {{$material->employee->name}}
                         </td>
-                    
+                    </tr>
+                    <tr>
+                        <th>
+                            Entry By
+                        </th>
                         <td>
                            {{$material->user->name}}
                         </td>   
-                    
+                    </tr>
+                    <tr>
+                        <th>
+                            Created at
+                        </th>
                         <td>
                             {{ $material->created_at }}
                         </td>
                     </tr>
-                    @endforeach
                 </tbody>
             </table>
             <a style="margin-top:20px;" class="btn btn-default" href="{{ url()->previous() }}">

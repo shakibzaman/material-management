@@ -21,7 +21,7 @@ class MaterialIn extends Model
     ];
 
     protected $fillable = [
-        'name',
+        'material_id',
         'quantity',
         'unit',
         'nid',
@@ -33,7 +33,8 @@ class MaterialIn extends Model
         'created_at',
         'created_by',
         'purchased_by',
-        'rest'
+        'rest',
+        'type'
     ];
 
     public function user()
@@ -47,5 +48,9 @@ class MaterialIn extends Model
     public function units()
     {
         return $this->belongsTo(Unit::class,'unit');
+    }
+    public function material()
+    {
+        return $this->belongsTo(MaterialConfig::class,'material_id');
     }
 }

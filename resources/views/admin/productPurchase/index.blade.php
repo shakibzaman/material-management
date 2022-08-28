@@ -1,17 +1,17 @@
 @extends('layouts.admin')
 @section('content')
-@can('material_create')
+@can('product_create')
     <div style="margin-bottom: 10px;" class="row">
         <div class="col-lg-12">
-            <a class="btn btn-success" href="{{ route("admin.material-in.create") }}">
-                {{ trans('global.add') }} Material Purchased
+            <a class="btn btn-success" href="{{ route("admin.product.purchase.create") }}">
+                {{ trans('global.add') }} Product Purchased
             </a>
         </div>
     </div>
 @endcan
 <div class="card">
     <div class="card-header">
-        Material {{ trans('global.list') }}
+        Product {{ trans('global.list') }}
     </div>
 
     <div class="card-body">
@@ -32,10 +32,10 @@
                     @foreach($materials as $key => $material)
                         @isset($materialsPurchased[$material->id])
 
-                        @php
+                        @php 
                         $total_quantity = $materialsPurchased[$material->id]->sum('rest')
                         @endphp
-
+                        
                             <tr data-entry-id="{{ $material->id }}">
                                 <td>
 
@@ -53,15 +53,15 @@
                                 <td>
                                     {{$materialsPurchased[$material->id][0]->units->name}}
                                 </td>
-
+                               
                                 <td>
                                     @can('material_show')
                                         <a class="btn btn-xs btn-primary" href="{{ route('admin.material-in.show', $material->id) }}">
                                             {{ trans('global.view') }}
                                         </a>
                                     @endcan
-
-
+                                    
+                                    
                                     @can('material_transfer')
                                     <a class="btn btn-success text-light btn-xs" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
                                         data-attr="{{ route('admin.transfer.material', $material->id) }}" title="Create a project"> Transfer
@@ -96,7 +96,7 @@
 </div>
 <div class="modal fade" id="mediumModal" tabindex="-1" role="dialog" aria-labelledby="mediumModalLabel"
         aria-hidden="true">
-        <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
