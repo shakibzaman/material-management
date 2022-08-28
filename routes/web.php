@@ -77,6 +77,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('dyeing/company/transfer-list/{id}', 'DyeingController@transferList')->name('dyeing.company.transfer');
     Route::get('dyeing/transfer/show/{id}', 'DyeingController@transferShow')->name('dyeing.transfer.show');
 
+    //Showrrom
+
+
 
 
 

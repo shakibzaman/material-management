@@ -83,15 +83,21 @@ class DyeingController extends Controller
 
     public function transferProduct($id)
     {
-        $rest_quantity = ProductTransfer::with('transfer')->whereHas('transfer', function (Builder $query) use($id){
-            $query->where('company_id', '=', $id)->where('department_id',2);
-        })->get();
-        $materials = ProductTransfer::with('transfer','product')->whereHas('transfer', function (Builder $query) use($id){
-            $query->where('company_id', '=', $id);
-        })->get()->pluck('product.name','product.id')->prepend(trans('global.pleaseSelect'),'');
-        $colors = MaterialConfig::where('type',3)->pluck('name','id')->prepend(trans('global.pleaseSelect'));
-        $company_id = $id;
-        return view('admin.dyeing.stock-transfer',compact('rest_quantity','materials','colors','company_id'));
+    //    $rest_quantity = ProductTransfer::with('transfer')->whereHas('transfer', function (Builder $query) use($id){
+    //        $query->where('company_id', '=', $id)->where('department_id',2);
+    //    })->get();
+
+      $rest_quantity = ProductTransfer::with('transfer')->where('rest_quantity','>',0)->whereHas('transfer', function (Builder $query) use($id){
+        $query->where('company_id', '=', $id)->where('department_id',2);
+        })->get()->groupBy('product_id');
+
+       $materials = ProductTransfer::with('transfer','product')->whereHas('transfer', function (Builder $query) use($id){
+           $query->where('company_id', '=', $id);
+       })->get()->pluck('product.name','product.id')->prepend(trans('global.pleaseSelect'),'');
+       $colors = MaterialConfig::where('type',3)->pluck('name','id')->prepend(trans('global.pleaseSelect'));
+       $company_id = $id;
+       $material_key_by = MaterialConfig::get()->keyBy('id');
+       return view('admin.showroom.stock-transfer',compact('rest_quantity','materials','colors','company_id','material_key_by'));
     }
 
     public function expenses(){
