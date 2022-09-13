@@ -11,7 +11,7 @@
 @endcan
 <div class="card">
     <div class="card-header">
-        {{ trans('cruds.expense.title_singular') }} {{ trans('global.list') }}
+        <b>Knitting Product Stock List</b>
     </div>
 
     <div class="card-body">
@@ -63,10 +63,12 @@
                         </a>
                         @if($companyList[$key]->id == 1)
                             <a class="btn btn-xs btn-success" href="{{ route('admin.netting.transfer.company.product', $companyList[$key]->id) }}">
-                                Transfer
+                                Transfer to Dyeing
                             </a>
                         @endif
-
+                        <a class="btn btn-danger text-light btn-xs" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
+                           data-attr="{{ route('admin.netting.company.return', $companyList[$key]->id) }}" title="Create a project"> Return to Stock
+                        </a>
                     </td>
                 </tr>
                 @endforeach

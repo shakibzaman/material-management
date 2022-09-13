@@ -7,13 +7,17 @@ use App\Employee;
 use App\Http\Controllers\Controller;
 use App\MaterialConfig;
 use App\MaterialIn;
+use App\Payment;
+use App\SupplierProduct;
 use App\Unit;
 use App\User;
+use App\UserAccount;
 use Illuminate\Http\Request;
 use Gate;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 use DB;
+use Illuminate\Support\Facades\DB as FacadesDB;
 
 class MaterialInController extends Controller
 {
@@ -55,12 +59,39 @@ class MaterialInController extends Controller
      */
     public function store(Request $request)
     {
+        DB::beginTransaction();
         try {
+        $user_account_detail = UserAccount::where('user_id',$request->supplier_id)->first();
+        if(!$user_account_detail){
+            return ['status'=>105,'message'=>'Sorry your Supplier not founded'];
+        }
         $request['created_by'] = Auth::user()->id;
         $request['rest'] = $request->quantity;
-        $material = MaterialIn::create($request->all());
+        $materialIn = MaterialIn::create($request->all());
+        
+        if($materialIn){
+            $request['material_in_id'] = $materialIn->id;
+            $request['payment_process'] = $request->payment_process;
+            $request['payment_info'] = $request->payment_info;
+            SupplierProduct::create($request->all());
+            
+
+            if($request->paid_amount>0){
+                $request['amount'] = $request->paid_amount;
+                $request['user_account_id'] = $user_account_detail->id;
+                Payment::create($request->all());
+            }
+
+            
+            $user_account['total_due'] = $user_account_detail->total_due + ($request->total_price - $request->paid_amount);
+            $user_account['total_paid'] = $user_account_detail->total_paid + $request->paid_amount;
+            $user_account_detail->update($user_account);
+            
+            }
+            DB::commit();
         } catch (\Exception $e) {
 
+            DB::rollback();
             return $e->getMessage();
         }
         if($request->type == 1)

@@ -6,7 +6,7 @@
         Stock Transfer
     </div>
     <div class="card-body">
-        <h4>Transfer to Dyeing</h4>
+        <h4>Dyeing Process & Transfer to Showroom</h4>
 
         <table class="table table-bordered">
             <tbody>
@@ -39,6 +39,21 @@
                     </div>
                 </div>
                 <div class="col-md-2">
+                    <div class="form-group {{ $errors->has('material_id') ? 'has-error' : '' }}">
+                        <label for="name">Showroom Name *</label>
+                        <select name="showroom_id" id="showroom_id" class="form-control select2" required>
+                            @foreach($showrooms as $id => $showroom)
+                                <option value="{{ $id }}" >{{ $showroom }}</option>
+                            @endforeach
+                        </select>
+                        @if($errors->has('showroom_id'))
+                            <em class="invalid-feedback">
+                                {{ $errors->first('showroom_id') }}
+                            </em>
+                        @endif
+                    </div>
+                </div>
+                <div class="col-md-2">
                     <div class="form-group {{ $errors->has('color_id') ? 'has-error' : '' }}">
                         <label for="name">Color Name *</label>
                         <select name="color_id" id="color_id" class="form-control select2" required>
@@ -58,7 +73,7 @@
                     <div class="form-group {{ $errors->has('quantity') ? 'has-error' : '' }}">
                         <label for="name"> Quantity *</label>
                         <input type="number" id="quantity" name="quantity" class="form-control" required>
-                        <input type="hidden" id="type" name="type" value="1">
+                        <input type="hidden" id="type" name="type" value="3">
                             @if($errors->has('quantity'))
                                 <em class="invalid-feedback">
                                     {{ $errors->first('quantity') }}
@@ -119,6 +134,7 @@
                     },
 
                     success:function(data){
+                        console.log(data);
                         if(data) {
                             if(data.status == 103){
                             Swal.fire({

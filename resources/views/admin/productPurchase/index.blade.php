@@ -32,10 +32,10 @@
                     @foreach($materials as $key => $material)
                         @isset($materialsPurchased[$material->id])
 
-                        @php 
+                        @php
                         $total_quantity = $materialsPurchased[$material->id]->sum('rest')
                         @endphp
-                        
+
                             <tr data-entry-id="{{ $material->id }}">
                                 <td>
 
@@ -53,20 +53,17 @@
                                 <td>
                                     {{$materialsPurchased[$material->id][0]->units->name}}
                                 </td>
-                               
+
                                 <td>
                                     @can('material_show')
                                         <a class="btn btn-xs btn-primary" href="{{ route('admin.material-in.show', $material->id) }}">
                                             {{ trans('global.view') }}
                                         </a>
                                     @endcan
-                                    
-                                    
-                                    @can('material_transfer')
-                                    <a class="btn btn-success text-light btn-xs" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
-                                        data-attr="{{ route('admin.transfer.material', $material->id) }}" title="Create a project"> Transfer
-                                    </a>
-                                    @endcan
+
+                                    <a class="btn btn-xs btn-danger" href="{{ route('admin.material-in.show', $material->id) }}">
+                                            Return
+                                        </a>
 
                                     @can('expense_edit')
                                         <a class="btn btn-xs btn-info" href="{{ route('admin.material-in.edit', $material->id) }}">

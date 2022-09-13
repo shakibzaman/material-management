@@ -3,15 +3,15 @@
 @can('expense_create')
     <div style="margin-bottom: 10px;" class="row">
         <div class="col-lg-12">
-            <!-- <a class="btn btn-success" href="{{ route("admin.neeting.stock.in") }}">
-                Stock In
-            </a> -->
+            <a class="btn btn-success" href="{{ route("admin.add.set") }}">
+               Add Set
+            </a>
         </div>
     </div>
 @endcan
 <div class="card">
     <div class="card-header">
-        Dyeing Product List
+        Stock Set List
     </div>
 
     <div class="card-body">
@@ -26,13 +26,16 @@
                             ID
                         </th>
                         <th>
-                            Company Name
+                            Product
                         </th>
                         <th>
-                            Product Quantity
+                            Color
                         </th>
                         <th>
-                            material Quantity
+                            Start Quantity
+                        </th>
+                        <th>
+                            End Quantity
                         </th>
                         <th>
                             &nbsp;Action
@@ -40,41 +43,29 @@
                     </tr>
                 </thead>
                 <tbody>
-                @foreach($nettingsData as $key =>$nettingData)
-                    @php
-                        if(isset($transfer_products[$key])) {
-                                $productTotalSum = $transfer_products[$key]->sum('rest_quantity');
-                            }
-                        if(isset($transfer_materials[$key])) {
-                                $materialTotalSum = $transfer_materials[$key]->sum('quantity');
-                            }
-
-                    @endphp
+                @foreach($sets as $key =>$set)
                 <tr>
                     <td>
                     </td>
                     <td>
-                        {{$companyList[$key]->id}}
+                        {{$set->id}}
                     </td>
                     <td>
-                        {{$companyList[$key]->name}}
+                        {{$set->product->name}}
                     </td>
                     <td>
-                        {{$productTotalSum}}
+                        {{$set->color->name}}
                     </td>
                     <td>
-                        {{$materialTotalSum}}
+                        {{$set->start_quantity}}
                     </td>
                     <td>
-                        <a class="btn btn-xs btn-primary" href="{{ route('admin.dyeing.company.transfer', $companyList[$key]->id) }}">
+                        {{$set->end_quantity}}
+                    </td>
+                    <td>
+                        <a class="btn btn-xs btn-primary" href="{{ route('admin.show.set', $set->id) }}">
                             {{ trans('global.view') }}
                         </a>
-                        @if($companyList[$key]->id == 1)
-                            <a class="btn btn-xs btn-success" href="{{ route('admin.dyeing.process.company.product', $companyList[$key]->id) }}">
-                                Transfer to Showroom
-                            </a>
-                        @endif
-
                     </td>
                 </tr>
                 @endforeach

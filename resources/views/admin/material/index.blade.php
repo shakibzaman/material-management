@@ -60,7 +60,9 @@
                                             {{ trans('global.view') }}
                                         </a>
                                     @endcan
-
+                                    <a class="btn btn-xs btn-danger" href="{{ route('admin.material-in.show', $material->id) }}">
+                                            Return
+                                        </a>
 
                                     @can('material_transfer')
                                     <a class="btn btn-success text-light btn-xs" data-toggle="modal" id="mediumButton" data-target="#mediumModal"

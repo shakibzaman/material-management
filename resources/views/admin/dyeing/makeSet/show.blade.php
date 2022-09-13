@@ -11,10 +11,28 @@
 @endcan
 <div class="card">
     <div class="card-header">
-        Dyeing Product List
+        Set Material List
     </div>
 
     <div class="card-body">
+        <div class="table">
+            <table class="table table-striped">
+                <tbody>
+                <tr>
+                    <th>Material Name</th>
+                    <td>{{$set->product->name}}</td>
+                </tr>
+                <tr>
+                    <th>Start quantity</th>
+                    <td>{{$set->start_quantity}}</td>
+                </tr><tr>
+                    <th>End Quantity</th>
+                    <td>{{$set->end_quantity}}</td>
+
+                </tr>
+                </tbody>
+            </table>
+        </div>
         <div class="table-responsive">
             <table class=" table table-bordered table-striped table-hover datatable datatable-Expense">
                 <thead>
@@ -26,13 +44,10 @@
                             ID
                         </th>
                         <th>
-                            Company Name
+                            Material
                         </th>
                         <th>
-                            Product Quantity
-                        </th>
-                        <th>
-                            material Quantity
+                            Quantity
                         </th>
                         <th>
                             &nbsp;Action
@@ -40,49 +55,32 @@
                     </tr>
                 </thead>
                 <tbody>
-                @foreach($nettingsData as $key =>$nettingData)
-                    @php
-                        if(isset($transfer_products[$key])) {
-                                $productTotalSum = $transfer_products[$key]->sum('rest_quantity');
-                            }
-                        if(isset($transfer_materials[$key])) {
-                                $materialTotalSum = $transfer_materials[$key]->sum('quantity');
-                            }
-
-                    @endphp
+                @foreach($setMaterialDetails as $key =>$material)
                 <tr>
                     <td>
                     </td>
                     <td>
-                        {{$companyList[$key]->id}}
+                        {{$material->id}}
                     </td>
                     <td>
-                        {{$companyList[$key]->name}}
+                        {{$material->material->name}}
                     </td>
                     <td>
-                        {{$productTotalSum}}
+                        {{$material->material_quantity}}
                     </td>
                     <td>
-                        {{$materialTotalSum}}
-                    </td>
-                    <td>
-                        <a class="btn btn-xs btn-primary" href="{{ route('admin.dyeing.company.transfer', $companyList[$key]->id) }}">
-                            {{ trans('global.view') }}
-                        </a>
-                        @if($companyList[$key]->id == 1)
-                            <a class="btn btn-xs btn-success" href="{{ route('admin.dyeing.process.company.product', $companyList[$key]->id) }}">
-                                Transfer to Showroom
-                            </a>
-                        @endif
 
                     </td>
+
                 </tr>
                 @endforeach
                 </tbody>
             </table>
         </div>
 
-
+        <a style="margin-top:20px;" class="btn btn-default" href="{{ url()->previous() }}">
+            {{ trans('global.back_to_list') }}
+        </a>
     </div>
 </div>
 <div class="modal fade" id="mediumModal" tabindex="-1" role="dialog" aria-labelledby="mediumModalLabel"

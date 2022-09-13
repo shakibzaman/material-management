@@ -28,7 +28,7 @@ class MaterialIn extends Model
         'buying_date',
         'unit_price',
         'total_price',
-        'supplied_by',
+        'supplier_id',
         'inv_number',
         'created_at',
         'created_by',
@@ -53,4 +53,9 @@ class MaterialIn extends Model
     {
         return $this->belongsTo(MaterialConfig::class,'material_id');
     }
+    public function supplierProduct()
+    {
+        return $this->hasMany(SupplierProduct::class,'material_in_id');
+    }
+
 }

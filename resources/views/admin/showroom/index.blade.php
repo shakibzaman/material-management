@@ -3,15 +3,15 @@
 @can('expense_create')
     <div style="margin-bottom: 10px;" class="row">
         <div class="col-lg-12">
-            <!-- <a class="btn btn-success" href="{{ route("admin.neeting.stock.in") }}">
+            <a class="btn btn-success" href="{{ route("admin.neeting.stock.in") }}">
                 Stock In
-            </a> -->
+            </a>
         </div>
     </div>
 @endcan
 <div class="card">
     <div class="card-header">
-        Dyeing Product List
+        <b>Showroom Product Stock List</b>
     </div>
 
     <div class="card-body">
@@ -32,9 +32,6 @@
                             Product Quantity
                         </th>
                         <th>
-                            material Quantity
-                        </th>
-                        <th>
                             &nbsp;Action
                         </th>
                     </tr>
@@ -45,35 +42,30 @@
                         if(isset($transfer_products[$key])) {
                                 $productTotalSum = $transfer_products[$key]->sum('rest_quantity');
                             }
-                        if(isset($transfer_materials[$key])) {
-                                $materialTotalSum = $transfer_materials[$key]->sum('quantity');
-                            }
 
                     @endphp
                 <tr>
                     <td>
+
                     </td>
                     <td>
-                        {{$companyList[$key]->id}}
+                        {{$departments[$key]->id}}
                     </td>
                     <td>
-                        {{$companyList[$key]->name}}
+                        {{$departments[$key]->name}}
                     </td>
                     <td>
                         {{$productTotalSum}}
                     </td>
                     <td>
-                        {{$materialTotalSum}}
-                    </td>
-                    <td>
-                        <a class="btn btn-xs btn-primary" href="{{ route('admin.dyeing.company.transfer', $companyList[$key]->id) }}">
+                        <a class="btn btn-xs btn-primary" href="{{ route('admin.showroom.transfer', $departments[$key]->id) }}">
                             {{ trans('global.view') }}
                         </a>
-                        @if($companyList[$key]->id == 1)
-                            <a class="btn btn-xs btn-success" href="{{ route('admin.dyeing.process.company.product', $companyList[$key]->id) }}">
-                                Transfer to Showroom
-                            </a>
-                        @endif
+{{--                        @if($departments[$key]->id == 1)--}}
+{{--                            <a class="btn btn-xs btn-success" href="{{ route('admin.netting.transfer.company.product', $companyList[$key]->id) }}">--}}
+{{--                                Transfer to Dyeing--}}
+{{--                            </a>--}}
+{{--                        @endif--}}
 
                     </td>
                 </tr>
