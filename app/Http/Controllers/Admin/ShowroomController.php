@@ -7,6 +7,7 @@ use App\Expense;
 use App\Http\Controllers\Controller;
 use App\MaterialConfig;
 use App\MaterialIn;
+use App\MaterialTransfer;
 use App\ProductTransfer;
 use App\Transfer;
 use Illuminate\Database\Eloquent\Builder;
@@ -25,6 +26,23 @@ class ShowroomController extends Controller
         return view('admin.showroom.index',compact('nettingsData','departments','transfer_products'));
 
 
+    }
+    public function stock($id){
+        $transfer_products = ProductTransfer::with('transfer','product','color')->whereHas('transfer', function (Builder $query) use ($id){
+            $query->where('department_id', $id);
+        })->get()->groupBy('product_id');
+
+       $products = MaterialConfig::where('type',2)->get();
+       $colors = MaterialConfig::where('type',3)->get()->keyBy('id');
+
+        $transfer_materials = MaterialTransfer::with('transfer','material')->whereHas('transfer', function (Builder $query) use ($id){
+            $query->where('department_id', $id);
+        })->get()->groupBy('transfer.department_id');
+
+        $department_id = $id;
+
+
+        return view('admin.showroom.index',compact('transfer_products','products','colors','department_id'));
     }
     public function store(Request $request){
 

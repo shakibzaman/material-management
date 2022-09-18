@@ -4,7 +4,7 @@
     <div style="margin-bottom: 10px;" class="row">
         <div class="col-lg-12">
             <a class="btn btn-success" href="{{ route("admin.neeting.stock.in") }}">
-                Stock In
+                Stock Details
             </a>
         </div>
     </div>
@@ -23,10 +23,10 @@
 
                         </th>
                         <th>
-                            ID
+                            Product Name
                         </th>
                         <th>
-                            Company Name
+                            Color & Quantity
                         </th>
                         <th>
                             Product Quantity
@@ -37,38 +37,70 @@
                     </tr>
                 </thead>
                 <tbody>
-                @foreach($nettingsData as $key =>$nettingData)
+                @foreach($products as $key =>$product)
                     @php
-                        if(isset($transfer_products[$key])) {
-                                $productTotalSum = $transfer_products[$key]->sum('rest_quantity');
-                            }
+                        if(isset($transfer_products[$product->id])) {
+                                $productTotal = $transfer_products[$product->id]->sum('rest_quantity');
+                                $product_detail = $transfer_products[$product->id]->groupBy('color.id');
 
+                                }
+                        else{
+                            $productTotal = 0;
+                            $product_detail = [];
+                        }
                     @endphp
+                    @if($productTotal != 0)
                 <tr>
                     <td>
 
                     </td>
                     <td>
-                        {{$departments[$key]->id}}
+                        {{$product->name}}
                     </td>
                     <td>
-                        {{$departments[$key]->name}}
+                        @if($product_detail != null)
+                        @foreach($product_detail as $color_id => $detail)
+                            @php
+                                $qty = $detail->sum('rest_quantity')
+                                @endphp
+
+                            <table class="table table-hover">
+                                <tbody>
+                                <tr>
+                                    <th>{{($color_id!=null)?$colors[$color_id]->name:'N/A'}}</th>
+                                    <td>{{$qty}}</td>
+                                    <td>
+                                        <a class="btn btn-success text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
+                                           data-attr="{{ route('admin.dyeing.use.material.detail',[$department_id,$product->id,$color_id]) }}" title="Return"> Material
+                                        </a>
+                                        
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+
+                        @endforeach
+                        @endif
+
                     </td>
                     <td>
-                        {{$productTotalSum}}
+                        {{$productTotal}}
                     </td>
                     <td>
-                        <a class="btn btn-xs btn-primary" href="{{ route('admin.showroom.transfer', $departments[$key]->id) }}">
-                            {{ trans('global.view') }}
-                        </a>
-{{--                        @if($departments[$key]->id == 1)--}}
-{{--                            <a class="btn btn-xs btn-success" href="{{ route('admin.netting.transfer.company.product', $companyList[$key]->id) }}">--}}
-{{--                                Transfer to Dyeing--}}
-{{--                            </a>--}}
-{{--                        @endif--}}
+                    </td>
+                    <td>
+{{--                        <a class="btn btn-xs btn-primary" href="{{ route('admin.showroom.transfer', $departments[$key]->id) }}">--}}
+{{--                            {{ trans('global.view') }}--}}
+{{--                        </a>--}}
+{{--@if($departments[$key]->id == 1)--}}
+{{--<a class="btn btn-xs btn-success" href="{{ route('admin.netting.transfer.company.product', $companyList[$key]->id) }}">--}}
+{{--Transfer to Dyeing--}}
+{{--</a>--}}
+{{--@endif--}}
 
                     </td>
                 </tr>
+                @endif
                 @endforeach
                 </tbody>
             </table>

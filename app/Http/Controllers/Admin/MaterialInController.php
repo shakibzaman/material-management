@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\MaterialConfig;
 use App\MaterialIn;
 use App\Payment;
+use App\Supplier;
 use App\SupplierProduct;
 use App\Unit;
 use App\User;
@@ -47,7 +48,9 @@ class MaterialInController extends Controller
         $materials = MaterialConfig::where('type',1)->pluck('name','id')->prepend(trans('global.pleaseSelect'),'');
         $units = Unit::all()->pluck('name','id')->prepend(trans('global.pleaseSelect'),'');
         $employees = Employee::all()->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
-        return view('admin.material.create', compact('employees','materials','units'));
+        $suppliers = Supplier::all()->pluck( 'name', 'id' )->prepend( trans( 'global.pleaseSelect' ), '' );
+
+        return view('admin.material.create', compact('employees','materials','units','suppliers'));
 
     }
 
@@ -156,6 +159,12 @@ class MaterialInController extends Controller
         $departments = Department::all()->pluck('name','id')->prepend(trans('global.pleaseSelect'),'');
         $materials = MaterialIn::with('user','employee','units')->where('material_id',$id)->get();
         return view('admin.material.modal.transfer', compact('materials','departments'));
+
+    }
+    public function search($id){
+        $material = MaterialConfig::where('id',$id)->first();
+        return view('admin.cart.include.product-selection', compact('material'));
+
 
     }
 }

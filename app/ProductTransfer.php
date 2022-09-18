@@ -17,6 +17,10 @@ class ProductTransfer extends Model
     public function detail(){
         return $this->belongsTo(MaterialIn::class,'product_stock_id');
     }
+    public function color(){
+        return $this->belongsTo(MaterialConfig::class,'color_id');
+    }
+
     public function product_transfer_detail(){
         return $this->belongsTo(ProductTransfer::class,'product_stock_id');
     }

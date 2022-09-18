@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Company;
-use App\Department;
 use App\Expense;
 use App\StockSet;
 use App\Transfer;
+use App\Department;
 use App\MaterialIn;
 use App\MaterialConfig;
 use App\ProductTransfer;
@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
-
 
 class DyeingController extends Controller
 {
@@ -59,7 +58,6 @@ class DyeingController extends Controller
 
     }
 
-
     /**
      * @param $id
      */
@@ -90,9 +88,9 @@ class DyeingController extends Controller
      */
     public function transferShow( $id )
     {
-        $transfer                 = Transfer::with( 'company' )->where( 'id', $id )->first();
-        $transfer_products = ProductTransfer::with( 'product_transfer_detail', 'product' )->where( 'transfer_id', '=', $id )->get();
-        $transfer_materials       = MaterialTransfer::with( 'detail', 'material' )->where( 'transfer_id', '=', $id )->get();
+        $transfer           = Transfer::with( 'company' )->where( 'id', $id )->first();
+        $transfer_products  = ProductTransfer::with( 'product_transfer_detail', 'product' )->where( 'transfer_id', '=', $id )->get();
+        $transfer_materials = MaterialTransfer::with( 'detail', 'material' )->where( 'transfer_id', '=', $id )->get();
         return view( 'admin.dyeing.show', compact( 'transfer', 'transfer_products', 'transfer_materials' ) );
 
     }
@@ -112,24 +110,27 @@ class DyeingController extends Controller
         $colors          = MaterialConfig::where( 'type', 3 )->pluck( 'name', 'id' )->prepend( trans( 'global.pleaseSelect' ), '' );
         $company_id      = $id;
         $material_key_by = MaterialConfig::get()->keyBy( 'id' );
-        $showrooms = Department::whereNotIn('id',[1,2])->pluck( 'name', 'id' )->prepend( trans( 'global.pleaseSelect' ), '' );;
-        return view( 'admin.showroom.stock-transfer', compact( 'showrooms','rest_quantity', 'materials', 'colors', 'company_id', 'material_key_by' ) );
-    }
-    public function transferProduct($id)
-    {
-        $rest_quantity = ProductTransfer::with('transfer')->where('rest_quantity','>',0)->whereHas('transfer', function (Builder $query) use($id){
-            $query->where('company_id', '=', $id)->where('department_id',2);
-        })->get()->groupBy('product_id');
-        $materials = ProductTransfer::with('transfer','product')->whereHas('transfer', function (Builder $query) use($id){
-            $query->where('company_id', '=', $id);
-        })->get()->pluck('product.name','product.id')->prepend(trans('global.pleaseSelect'),'');
-        $colors = MaterialConfig::where('type',3)->pluck('name','id')->prepend(trans('global.pleaseSelect'),'');
-        $company_id = $id;
-        $material_key_by = MaterialConfig::get()->keyBy('id');
-        $showrooms = Department::whereNotIn('id',[1,2])->pluck( 'name', 'id' )->prepend( trans( 'global.pleaseSelect' ), '' );;
-        return view('admin.dyeing.stock-transfer',compact('showrooms','rest_quantity','materials','colors','company_id','material_key_by'));
+        $showrooms       = Department::whereNotIn( 'id', [1, 2] )->pluck( 'name', 'id' )->prepend( trans( 'global.pleaseSelect' ), '' );
+        return view( 'admin.showroom.stock-transfer', compact( 'showrooms', 'rest_quantity', 'materials', 'colors', 'company_id', 'material_key_by' ) );
     }
 
+    /**
+     * @param $id
+     */
+    public function transferProduct( $id )
+    {
+        $rest_quantity = ProductTransfer::with( 'transfer' )->where( 'rest_quantity', '>', 0 )->whereHas( 'transfer', function ( Builder $query ) use ( $id ) {
+            $query->where( 'company_id', '=', $id )->where( 'department_id', 2 );
+        } )->get()->groupBy( 'product_id' );
+        $materials = ProductTransfer::with( 'transfer', 'product' )->whereHas( 'transfer', function ( Builder $query ) use ( $id ) {
+            $query->where( 'company_id', '=', $id );
+        } )->get()->pluck( 'product.name', 'product.id' )->prepend( trans( 'global.pleaseSelect' ), '' );
+        $colors          = MaterialConfig::where( 'type', 3 )->pluck( 'name', 'id' )->prepend( trans( 'global.pleaseSelect' ), '' );
+        $company_id      = $id;
+        $material_key_by = MaterialConfig::get()->keyBy( 'id' );
+        $showrooms       = Department::whereNotIn( 'id', [1, 2] )->pluck( 'name', 'id' )->prepend( trans( 'global.pleaseSelect' ), '' );
+        return view( 'admin.dyeing.stock-transfer', compact( 'showrooms', 'rest_quantity', 'materials', 'colors', 'company_id', 'material_key_by' ) );
+    }
 
     public function expenses()
     {
@@ -156,12 +157,12 @@ class DyeingController extends Controller
             $material_name = MaterialConfig::find( $product_id );
             return ['status' => 103, 'message' => "Sorry !!!  " . $material_name->name . " Low Stock"];
         }
-        $sets = StockSet::where('start_quantity','<=',$quantity)->where('end_quantity','>=',$quantity)
-            ->where('product_id',$product_id)->where('color_id',$color_id)->first();
-        if(!$sets){
+        $sets = StockSet::where( 'start_quantity', '<=', $quantity )->where( 'end_quantity', '>=', $quantity )
+                                                                  ->where( 'product_id', $product_id )->where( 'color_id', $color_id )->first();
+        if ( !$sets ) {
             $sets = [];
         }
-        return view( 'admin.dyeing.include.stock-list', compact( 'showroom_id','sets','materials', 'product_id', 'quantity', 'company_id', 'color_id', 'process_fee' ) );
+        return view( 'admin.dyeing.include.stock-list', compact( 'showroom_id', 'sets', 'materials', 'product_id', 'quantity', 'company_id', 'color_id', 'process_fee' ) );
     }
 
     /**
@@ -172,6 +173,7 @@ class DyeingController extends Controller
      */
     public function store( Request $request )
     {
+        // return $request;
         DB::beginTransaction();
         try {
             $product_id  = $request->product_id;
@@ -198,8 +200,8 @@ class DyeingController extends Controller
                 $getAllStock = ProductTransfer::with( 'transfer' )
                     ->where( 'product_id', '=', $product )->where( 'rest_quantity', '>', 0 )
                     ->whereHas( 'transfer', function ( Builder $query ) use ( $company, $product ) {
-                    $query->where( 'company_id', '=', $company )->where( 'department_id',2);
-                } )->get();
+                        $query->where( 'company_id', '=', $company )->where( 'department_id', 2 );
+                    } )->get();
                 $contentQty = $quantity;
                 foreach ( $getAllStock as $stock ) {
                     $pro_qty = $contentQty;
@@ -208,16 +210,15 @@ class DyeingController extends Controller
                         $contentQty = $contentQty - $stock->rest_quantity;
 
                         $productTransfer                     = new ProductTransfer();
-                        $transferProduct['product_id']       = $product_id;
-                        $transferProduct['quantity']         = $pro_qty;
-                        $transferProduct['rest_quantity']    = $pro_qty;
-                        $transferProduct['transfer_id']      = $transfer_id;
-                        $transferProduct['product_stock_id'] = $stock->id;
-                        $transferProduct['color_id']         = $color_id;
-                        $transferProduct['process_fee']      = $process_fee;
-                        $transferProduct['created_by']       = Auth::user()->id;
-                        $storeTransfer                       = $productTransfer->create( $transferProduct );
-
+                        $productTransfer->product_id       = $product_id;
+                        $productTransfer->quantity         = $pro_qty;
+                        $productTransfer->rest_quantity    = $pro_qty;
+                        $productTransfer->transfer_id      = $transfer_id;
+                        $productTransfer->product_stock_id = $stock->id;
+                        $productTransfer->color_id         = $color_id;
+                        $productTransfer->process_fee      = $process_fee;
+                        $productTransfer->created_by       = Auth::user()->id;
+                        $storeTransfer                       = $productTransfer->save();
                         if ( $storeTransfer ) {
                             // reduce stock quantity
                             $data['rest_quantity'] = $stock->rest_quantity - $pro_qty;
@@ -229,28 +230,30 @@ class DyeingController extends Controller
                             $expense                      = new Expense();
                             $expense->entry_date          = date( "Y-m-d" );
                             $expense->amount              = ( $pro_qty * $stock->process_fee );
-                            $expense->description         = "Product Process Costing of Netting";
+                            $expense->description         = "Product Process Costing of Dyeing";
                             $expense->expense_category_id = 1;
                             $expense->department_id       = 2;
                             $expense->transfer_id         = $transfer_id;
                             $expense->created_by_id       = Auth::user()->id;
                             $expense->material_id         = $stock->product_id;
-                            $expense->transfer_product_id = $storeTransfer->id;
+                            $expense->transfer_product_id = $productTransfer->id;
                             $expense->save();
                             logger( 'Expense 1' . $expense );
                         }
                     } else {
                         $contentQty                          = 0;
                         $productTransfer                     = new ProductTransfer();
-                        $transferProduct['product_id']       = $product_id;
-                        $transferProduct['quantity']         = $pro_qty;
-                        $transferProduct['rest_quantity']    = $pro_qty;
-                        $transferProduct['transfer_id']      = $transfer_id;
-                        $transferProduct['product_stock_id'] = $stock->id;
-                        $transferProduct['color_id']         = $color_id;
-                        $transferProduct['process_fee']      = $process_fee;
-                        $transferProduct['created_by']       = Auth::user()->id;
-                        $storeTransfer                       = $productTransfer->create( $transferProduct );
+                        $productTransfer->product_id       = $product_id;
+                        $productTransfer->quantity         = $pro_qty;
+                        $productTransfer->rest_quantity    = $pro_qty;
+                        $productTransfer->transfer_id      = $transfer_id;
+                        $productTransfer->product_stock_id = $stock->id;
+                        $productTransfer->color_id         = $color_id;
+                        $productTransfer->process_fee      = $process_fee;
+                        $productTransfer->created_by       = Auth::user()->id;
+                        $storeTransfer                       = $productTransfer->save();
+                       
+
                         if ( $storeTransfer ) {
                             // reduce stock quantity
                             $data['rest_quantity'] = $stock->rest_quantity - $pro_qty;
@@ -262,13 +265,13 @@ class DyeingController extends Controller
                             $expense                      = new Expense();
                             $expense->entry_date          = date( "Y-m-d" );
                             $expense->amount              = ( $pro_qty * $stock->process_fee );
-                            $expense->description         = "Product Process Costing of Netting";
+                            $expense->description         = "Product Process Costing of Dyeing";
                             $expense->expense_category_id = 1;
                             $expense->department_id       = 2;
                             $expense->transfer_id         = $transfer_id;
                             $expense->created_by_id       = Auth::user()->id;
                             $expense->material_id         = $stock->product_id;
-                            $expense->transfer_product_id = $storeTransfer->id;
+                            $expense->transfer_product_id = $productTransfer->id;
                             $expense->save();
                             logger( 'Expense 2' . $expense );
 
@@ -292,10 +295,13 @@ class DyeingController extends Controller
                         DB::rollback();
                         return ['status' => 104, 'message' => "Sorry !!!  " . $material_name->name . " Low Stock"];
                     }
+                    logger("1");
                     $total_material_stocks = MaterialIn::where( 'material_id', $key )->get();
 
                     $contentQty = $quantity;
                     foreach ( $total_material_stocks as $stock ) {
+                    logger("2");
+
                         $pro_qty = $material;
                         if ( $stock->rest < $pro_qty ) {
                             $pro_qty    = $stock->rest;
@@ -325,12 +331,13 @@ class DyeingController extends Controller
                                 $expense->transfer_id         = $transfer_id;
                                 $expense->created_by_id       = Auth::user()->id;
                                 $expense->material_id         = $stock->id;
-                                $expense->transfer_product_id = $storeTransfer->id;
+                                $expense->transfer_product_id = $productTransfer->id;
                                 $expense->save();
                                 logger( 'Expense 3' . $expense );
 
                             }
                         } else {
+
                             $contentQty                       = 0;
                             $materialStore                    = new MaterialTransfer();
                             $materialStore->material_id       = $key;
@@ -341,6 +348,7 @@ class DyeingController extends Controller
                             $materialDataStore                = $materialStore->save();
 
                             if ( $materialDataStore ) {
+
                                 // reduce stock quantity
                                 $material_data['rest'] = $stock->rest - $pro_qty;
                                 DB::table( 'material_ins' )->where( 'id', $stock->id )->update( $material_data );
@@ -356,7 +364,7 @@ class DyeingController extends Controller
                                 $expense->transfer_id         = $transfer_id;
                                 $expense->created_by_id       = Auth::user()->id;
                                 $expense->material_id         = $stock->id;
-                                $expense->transfer_product_id = $storeTransfer->id;
+                                $expense->transfer_product_id = $productTransfer->id;
                                 $expense->save();
 
                                 logger( 'Expense 4' . $expense );
@@ -389,6 +397,24 @@ class DyeingController extends Controller
         //
     }
 
+    public function transferProductDetails($department_id,$product_id,$color_id){
+        $transfer_material_detail = DB::table('material_transfer')
+        ->join('transfer','material_transfer.transfer_id','transfer.id')
+        ->join('product_transfer','material_transfer.transfer_id','product_transfer.transfer_id')
+        ->join('material_configs','material_transfer.material_id','material_configs.id')
+        ->join('material_configs AS product_name','product_transfer.product_id','product_name.id')
+        ->where('transfer.department_id',$department_id)
+        ->where('product_transfer.color_id',$color_id)
+        ->where('product_transfer.product_id',$product_id)
+        ->select('material_configs.name','material_transfer.*','product_transfer.quantity AS product_quantity','product_name.name as product_name')
+        ->get()->groupBy('transfer_id');
+        // $transfer_materials = MaterialTransfer::with('transfer','material')
+        // ->whereHas('transfer', function (Builder $query) use ($department_id){
+        //     $query->where('department_id', $department_id);
+        // })->get()->groupBy('transfer.department_id');
+        // return [$company_id,$product_id,$color_id];
+        return view('admin.dyeing.material-details',compact('transfer_material_detail'));
+    }
     /**
      * Show the form for editing the specified resource.
      *

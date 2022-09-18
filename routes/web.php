@@ -35,6 +35,14 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('supplier/payment/{id}', 'SupplierController@payment')->name('supplier.payment');
     Route::post('supplier/payment/store', 'SupplierController@paymentStore')->name('supplier.payment.store');
 
+    // Customer
+    Route::resource('customer', 'CustomerController');
+    Route::get('customer/payment/{id}', 'SupplierController@payment')->name('customer.payment');
+
+    Route::get('cart', 'CartController@cart')->name('cart');
+
+
+
 
     // Incomes
     Route::delete('incomes/destroy', 'IncomeController@massDestroy')->name('incomes.massDestroy');
@@ -51,6 +59,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     // Stock In
     Route::resource('material-in', 'MaterialInController');
     Route::get('transfer/material/{id}', 'MaterialInController@transfer')->name('transfer.material');
+    Route::get('material/search/{id}', 'MaterialInController@search')->name('search.material');
 
     // Material Config
     Route::resource('material-config', 'MaterialConfigController');
@@ -64,11 +73,13 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
 
 
+
     // Neeting
     Route::get('neeting/index', 'NeetingController@index')->name('neeting.index');
     Route::get('neeting/company/transfer-list/{id}', 'NeetingController@transferList')->name('netting.company.transfer');
     Route::get('neeting/company/return-list/{id}', 'NeetingController@returnList')->name('netting.company.return');
     Route::get('neeting/transfer/company/product/{id}', 'NeetingController@dyeingInProduct')->name('netting.transfer.company.product');
+    Route::get('neeting/sell/company/product/{id}', 'NeetingController@knittingSellProduct')->name('netting.sell.company.product');
     Route::post('neeting/dyeing/transfer/company/product', 'NeetingController@dyeingTransferProduct')->name('netting.dyeing.transfer.company.product');
     Route::get('netting/transfer/show/{id}', 'NeetingController@transferShow')->name('transfer.show');
     Route::get('netting/transfer/other/show/{id}', 'NeetingController@transferOtherShow')->name('transfer.other.show');
@@ -87,6 +98,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('dyeing/index', 'DyeingController@index')->name('dyeing.index');
     Route::get('dyeing/all/expense', 'DyeingController@expenses')->name('dyeing.all.expense');
     Route::get('dyeing/process/company/product/{id}', 'DyeingController@transferProduct')->name('dyeing.process.company.product');
+    Route::get('dyeing/use/material/detail/{company_id}/{product_id}/{color_id}', 'DyeingController@transferProductDetails')->name('dyeing.use.material.detail');
+    
 
 //    Route::get('dyeing/transfer/company/product/{id}', 'DyeingController@transferProduct')->name('dyeing.transfer.company.product');
     Route::get('dyeing/company/transfer-list/{id}', 'DyeingController@transferList')->name('dyeing.company.transfer');
@@ -96,13 +109,15 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::post('showroom/stock/transfer', 'ShowroomController@store')->name('showroom.stock.store');
     Route::get('showroom/index', 'ShowroomController@index')->name('showroom.index');
     Route::get('showroom/transfer/{id}', 'ShowroomController@show')->name('showroom.transfer');
+    Route::get('showroom/stock/{id}', 'ShowroomController@stock')->name('showroom.stock');
 
     // Stock Set
     Route::get('stock/set', 'StockSetController@index')->name('stock.set');
-    Route::get('showroom/stock', 'StockSetController@index')->name('showroom.stock');
     Route::get('add/set', 'StockSetController@create')->name('add.set');
     Route::get('show/set/{id}', 'StockSetController@show')->name('show.set');
     Route::post('store/set', 'StockSetController@store')->name('store.set');
+
+
 
 
 
@@ -125,4 +140,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
     // HR
     Route::resource('employee', 'EmployeeController');
+    // Bank
+    Route::resource('bank', 'BankController');
+
 });

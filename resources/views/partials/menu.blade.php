@@ -118,7 +118,7 @@
                     </ul>
                 </li>
             @endcan
-            <!-- @can('dyeing_management_access')
+            @can('dyeing_management_access')
                 <li class="nav-item nav-dropdown">
                     <a class="nav-link  nav-dropdown-toggle" href="#">
                         <i class="fa-fw fas fa-users nav-icon">
@@ -129,7 +129,7 @@
                     <ul class="nav-dropdown-items">
                         @can('stock_set_access')
                             <li class="nav-item">
-                                <a href="{{ route("admin.showroom.stock") }}" class="nav-link {{ request()->is('admin/stock') || request()->is('admin/stock/set') ? 'active' : '' }}">
+                                <a href="{{ route("admin.showroom.stock",3) }}" class="nav-link {{ request()->is('admin/showroom/stock') || request()->is('admin/showroom/stock') ? 'active' : '' }}">
                                     <i class="fa-fw fas fa-list nav-icon">
 
                                     </i>
@@ -137,29 +137,9 @@
                                 </a>
                             </li>
                         @endcan
-                            @can('dyeing_stock_access')
-                            <li class="nav-item">
-                                <a href="{{ route("admin.dyeing.index") }}" class="nav-link {{ request()->is('admin/dyeing') || request()->is('admin/dyeing/index') ? 'active' : '' }}">
-                                    <i class="fa-fw fas fa-list nav-icon">
-
-                                    </i>
-                                    Product Stock
-                                </a>
-                            </li>
-                        @endcan
-                        @can('dyeing_expense_list')
-                            <li class="nav-item">
-                                <a href="{{ route("admin.dyeing.all.expense") }}" class="nav-link {{ request()->is('admin/dyeing/all/expense') || request()->is('admin/dyeing/all/expense/*') ? 'active' : '' }}">
-                                    <i class="fa-fw fas fa-list nav-icon">
-
-                                    </i>
-                                    Expense List
-                                </a>
-                            </li>
-                        @endcan
                     </ul>
                 </li>
-            @endcan -->
+            @endcan
             @can('employee_management_access')
                 <li class="nav-item nav-dropdown">
                     <a class="nav-link  nav-dropdown-toggle" href="#">
@@ -198,6 +178,28 @@
 
                                     </i>
                                     Supplier
+                                </a>
+                            </li>
+                        @endcan
+                    </ul>
+                </li>
+            @endcan
+            @can('employee_management_access')
+                <li class="nav-item nav-dropdown">
+                    <a class="nav-link  nav-dropdown-toggle" href="#">
+                        <i class="fa-fw fas fa-users nav-icon">
+
+                        </i>
+                        Customers
+                    </a>
+                    <ul class="nav-dropdown-items">
+                        @can('employee_access')
+                            <li class="nav-item">
+                                <a href="{{ route("admin.customer.index") }}" class="nav-link {{ request()->is('admin/customer') || request()->is('admin/customer/*') ? 'active' : '' }}">
+                                    <i class="fa-fw fas fa-list nav-icon">
+
+                                    </i>
+                                    Customer
                                 </a>
                             </li>
                         @endcan

@@ -6,6 +6,7 @@ use Gate;
 use App\User;
 use App\Company;
 use App\Expense;
+use App\Customer;
 use App\Transfer;
 use App\MaterialIn;
 use App\ProductReturn;
@@ -55,6 +56,27 @@ class NeetingController extends Controller
                                                                 $query->where( 'company_id', '=', $id )->where( 'department_id', 1 );
                                                             } )->get();
         return view( 'admin.neeting.stock-in-dyeing', compact( 'company_id', 'materials', 'knittingStock', 'material_key_by', 'rest_quantity' ) );
+    }
+
+    /**
+     * @param $id
+     */
+    public function knittingSellProduct( $id )
+    {
+        $company_id = $id;
+        $materials  = ProductTransfer::with( 'transfer', 'product' )->where( 'rest_quantity', '>', 0 )->whereHas( 'transfer', function ( Builder $query ) use ( $id ) {
+            $query->where( 'company_id', '=', $id )->where( 'department_id', 1 );
+        } )->get()->pluck( 'product.name', 'product.id' )->prepend( trans( 'global.pleaseSelect' ), '' );
+        $rest_quantity = ProductTransfer::with( 'transfer' )->where( 'rest_quantity', '>', 0 )->whereHas( 'transfer', function ( Builder $query ) use ( $id ) {
+            $query->where( 'company_id', '=', $id )->where( 'department_id', 1 );
+        } )->get()->groupBy( 'product_id' );
+        $customers       = Customer::get()->pluck( 'name', 'id' )->prepend( trans( 'global.pleaseSelect' ), '' );
+        $material_key_by = MaterialConfig::get()->keyBy( 'id' );
+        $knittingStock   = ProductTransfer::with( 'transfer' )->where( 'rest_quantity', '>', 0 )
+                                                            ->whereHas( 'transfer', function ( Builder $query ) use ( $id ) {
+                                                                $query->where( 'company_id', '=', $id )->where( 'department_id', 1 );
+                                                            } )->get();
+        return view( 'admin.neeting.stock-sell-knitting', compact( 'customers', 'company_id', 'materials', 'knittingStock', 'material_key_by', 'rest_quantity' ) );
     }
 
     /**
@@ -193,7 +215,7 @@ class NeetingController extends Controller
      */
     public function returnList( $id )
     {
-//        id is company id
+        //        id is company id
         $knittingStock = ProductTransfer::with( 'transfer' )->where( 'rest_quantity', '>', 0 )
                                                           ->whereHas( 'transfer', function ( Builder $query ) use ( $id ) {
                                                               $query->where( 'company_id', '=', $id )->where( 'department_id', 1 );
@@ -229,85 +251,85 @@ class NeetingController extends Controller
         if ( $total_quantity < $request->transfer_stock ) {
             return ['status' => 103, 'message' => 'Sorry you can\'t return more then you have'];
         }
-        if ( $request->type == 1 && $company_type->type == 1 ) {
-            DB::beginTransaction();
-            try {
-                $getAllStock = ProductTransfer::with( 'transfer' )->where( 'rest_quantity', '>', 0 )->where( 'product_id', $product_id )
-                                                                ->whereHas( 'transfer', function ( Builder $query ) use ( $company_id ) {
-                                                                    $query->where( 'company_id', '=', $company_id )->where( 'department_id', 1 );
-                                                                } )->get();
 
-                $contentQty = $request->transfer_stock;
-                foreach ( $getAllStock as $stock ) {
-                    $pro_qty = $contentQty;
-                    if ( $stock->rest_quantity < $contentQty ) {
-                        $pro_qty    = $stock->rest_quantity;
-                        $contentQty = $contentQty - $stock->rest_quantity;
+        DB::beginTransaction();
+        try {
+            $getAllStock = ProductTransfer::with( 'transfer' )->where( 'rest_quantity', '>', 0 )->where( 'product_id', $product_id )
+                                                            ->whereHas( 'transfer', function ( Builder $query ) use ( $company_id ) {
+                                                                $query->where( 'company_id', '=', $company_id )->where( 'department_id', 1 );
+                                                            } )->get();
 
-                        // Product Transfer update start
-                        $productTransfer['quantity']      = $stock->quantity - $pro_qty;
-                        $productTransfer['rest_quantity'] = $stock->rest_quantity - $pro_qty;
-                        $product_transfer                 = ProductTransfer::where( 'id', $stock->id )->first();
-                        $product_transfer->update( $productTransfer );
+            $contentQty = $request->transfer_stock;
+            foreach ( $getAllStock as $stock ) {
+                $pro_qty = $contentQty;
+                if ( $stock->rest_quantity < $contentQty ) {
+                    $pro_qty    = $stock->rest_quantity;
+                    $contentQty = $contentQty - $stock->rest_quantity;
 
-                        // Product Transfer update end
+                    // Product Transfer update start
+                    $productTransfer['quantity']      = $stock->quantity - $pro_qty;
+                    $productTransfer['rest_quantity'] = $stock->rest_quantity - $pro_qty;
+                    $product_transfer                 = ProductTransfer::where( 'id', $stock->id )->first();
+                    $product_transfer->update( $productTransfer );
 
+                    // Product Transfer update end
+
+                    if ( $request->type == 1 && $company_type->type == 1 ) {
                         // Material Stock update start
                         $orginal_stock                 = MaterialIn::where( 'id', $stock->product_stock_id )->first();
                         $return_stock                  = $orginal_stock->rest + $pro_qty;
                         $update_material_stock['rest'] = $return_stock;
                         $orginal_stock->update( $update_material_stock );
                         // Material Stock update end
+                    }
 
-                        // Product return data store
-                        $returnData                      = new ProductReturn();
-                        $returnData->product_transfer_id = $stock->id;
-                        $returnData->type                = 2;
-                        $returnData->quantity            = $pro_qty;
-                        $returnData->reason              = $request->reason;
-                        $returnData->return_by           = Auth::user()->id;
-                        $returnData->save();
+                    // Product return data store
+                    $returnData                      = new ProductReturn();
+                    $returnData->product_transfer_id = $stock->id;
+                    $returnData->type                = 2;
+                    $returnData->quantity            = $pro_qty;
+                    $returnData->reason              = $request->reason;
+                    $returnData->return_by           = Auth::user()->id;
+                    $returnData->save();
 
-                    } else {
-                        $contentQty = 0;
-                        // Product Transfer update start
-                        $productTransfer['quantity']      = $stock->quantity - $pro_qty;
-                        $productTransfer['rest_quantity'] = $stock->rest_quantity - $pro_qty;
-                        $product_transfer                 = ProductTransfer::where( 'id', $stock->id )->first();
-                        $product_transfer->update( $productTransfer );
-                        // Product Transfer update end
+                } else {
+                    $contentQty = 0;
+                    // Product Transfer update start
+                    $productTransfer['quantity']      = $stock->quantity - $pro_qty;
+                    $productTransfer['rest_quantity'] = $stock->rest_quantity - $pro_qty;
+                    $product_transfer                 = ProductTransfer::where( 'id', $stock->id )->first();
+                    $product_transfer->update( $productTransfer );
+                    // Product Transfer update end
 
+                    if ( $request->type == 1 && $company_type->type == 1 ) {
                         // Material Stock update start
                         $orginal_stock                 = MaterialIn::where( 'id', $stock->product_stock_id )->first();
                         $return_stock                  = $orginal_stock->rest + $pro_qty;
                         $update_material_stock['rest'] = $return_stock;
                         $orginal_stock->update( $update_material_stock );
                         // Material Stock update end
-
-                        // Product return data store
-                        $returnData                      = new ProductReturn();
-                        $returnData->product_transfer_id = $stock->id;
-                        $returnData->type                = 2;
-                        $returnData->quantity            = $pro_qty;
-                        $returnData->reason              = $request->reason;
-                        $returnData->return_by           = Auth::user()->id;
-                        $returnData->save();
-
                     }
 
-                    if ( $contentQty < 1 ) {
-                        break;
-                    }
+                    // Product return data store
+                    $returnData                      = new ProductReturn();
+                    $returnData->product_transfer_id = $stock->id;
+                    $returnData->type                = 2;
+                    $returnData->quantity            = $pro_qty;
+                    $returnData->reason              = $request->reason;
+                    $returnData->return_by           = Auth::user()->id;
+                    $returnData->save();
 
                 }
-                DB::commit();
-                logger( ' Commit Done' );
-                return ['status' => 200, 'message' => 'Successfully returned'];
-
-            } catch ( \Exception $e ) {
-                DB::rollback();
-                return $e;
+                if ( $contentQty < 1 ) {
+                    break;
+                }
             }
+            DB::commit();
+            return ['status' => 200, 'message' => 'Successfully returned'];
+
+        } catch ( \Exception $e ) {
+            DB::rollback();
+            return $e;
         }
     }
 
