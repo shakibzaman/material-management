@@ -4,14 +4,14 @@
     <div style="margin-bottom: 10px;" class="row">
         <div class="col-lg-12">
         <a class="btn btn-success text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
-                                                data-attr="{{ route('admin.bank.create') }}" title="Return"> Add Bank Detail
+                                                data-attr="{{ route('admin.fund.create') }}" title="Return"> Add Fund Detail
             </a>
         </div>
     </div>
 @endcan
 <div class="card">
     <div class="card-header">
-        Bank List
+        Fund List
     </div>
 
     <div class="card-body">
@@ -23,59 +23,44 @@
                         </th>
                         <th>ID</th>
                         <th>Name</th>
-                        <th>A/C No</th>
-                        <th>limit</th>
                         <th>Current Balance</th>
-                        <th>Interest</th>
-                        <th>Interest Type</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($banks as $key => $bank)
-                        <tr data-entry-id="{{ $bank->id }}">
+                    @foreach($funds as $key => $fund)
+                        <tr data-entry-id="{{ $fund->id }}">
                             <td>
 
                             </td>
                             <td>
-                                {{ $bank->id ?? '' }}
+                                {{ $fund->id ?? '' }}
                             </td>
                             <td>
-                                {{ $bank->name ?? '' }}
+                                {{ $fund->name ?? '' }}
                             </td>
                             <td>
-                                {{ $bank->ac_no ?? '' }}
+                                {{ $fund->current_balance ?? '' }}
                             </td>
-                            <td>
-                                {{ $bank->limit ?? '' }}
-                            </td>
-                            <td>
-                                {{ $bank->current_balance ?? '' }}
-                            </td>
-                            <td>
-                                {{ $bank->rate ?? '' }}
-                            </td>
-                            <td>
-                                {{ $bank->rate_type ?? '' }}
-                            </td>
+
                             <td>
                                 @can('material_show')
-                                    <a class="btn btn-xs btn-primary" href="{{ route('admin.bank.show', $bank->id) }}">
+                                    <a class="btn btn-xs btn-primary" href="{{ route('admin.fund.show', $fund->id) }}">
                                         {{ trans('global.view') }}
                                     </a>
                                 @endcan
                                 <a class="btn btn-xs btn-primary text-white" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
-                                   data-attr="{{ route('admin.bank.deposit', $bank->id) }}"> Deposit
+                                   data-attr="{{ route('admin.fund.deposit', $fund->id) }}"> Deposit
                                 </a>
 
                                 @can('expense_edit')
-                                    <a class="btn btn-xs btn-info" href="{{ route('admin.bank.edit', $bank->id) }}">
+                                    <a class="btn btn-xs btn-info" href="{{ route('admin.fund.edit', $fund->id) }}">
                                         {{ trans('global.edit') }}
                                     </a>
                                 @endcan
 
                                 @can('expense_delete')
-                                    <form action="{{ route('admin.bank.destroy', $bank->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
+                                    <form action="{{ route('admin.fund.destroy', $fund->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
                                         <input type="hidden" name="_method" value="DELETE">
                                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                         <input type="submit" class="btn btn-xs btn-danger" value="{{ trans('global.delete') }}">

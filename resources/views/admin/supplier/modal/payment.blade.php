@@ -1,6 +1,6 @@
 
     <div class="card-title">
-       <h3>Make Payment</h3> 
+       <h3>Make Payment</h3>
     </div>
     <div class="card-body">
         <table class="table table-bordered">
@@ -12,7 +12,7 @@
             </tbody>
         </table>
         <form id="payment-form">
-            @csrf 
+            @csrf
             <div class="form-group {{ $errors->has('total_amount') ? 'has-error' : '' }}">
                     <label for="total_amount">Total Amount </label>
                     <input type="hidden" name="supplier_id" value="{{$supplier_detail->id}}">
@@ -142,5 +142,5 @@
             });
         }
     });
-        
+
     </script>

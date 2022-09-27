@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Bank;
+use App\BankTransaction;
 use App\Payment;
 use App\Supplier;
 use App\MaterialIn;
@@ -146,7 +148,7 @@ class SupplierController extends Controller
     public function paymentStore( Request $request )
     {
         if($request->total_amount<$request->paid_amount){
-            return ['status' => 103, 'message' => 'Sorry you can not paid more then due']; 
+            return ['status' => 103, 'message' => 'Sorry you can not paid more then due'];
         }
         $all_dues = SupplierProduct::where( 'supplier_id', $request->supplier_id )->where( 'due_amount', '>', 0 )->get();
 
@@ -214,6 +216,22 @@ class SupplierController extends Controller
                 if ( $contentQty < 1 ) {
                     break;
                 }
+
+            }
+
+            if($request->payment_process == 'bank'){
+                $bank_info = Bank::where('id',1)->first();
+                $bank['current_balance'] = $bank_info->current_balance - $request->paid_amount;
+                $bank_info->update($bank);
+
+                $transaction = new BankTransaction();
+                $transaction->bank_id = $bank_info->id;
+                $transaction->type = 1;
+                $transaction->amount = $request->paid_amount;
+                $transaction->reason = 'Supplier Payment';
+                $transaction->created_by = Auth::user()->id;
+
+                $transaction->save();
 
             }
             DB::commit();

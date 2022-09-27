@@ -55,7 +55,7 @@ class CustomerController extends Controller
 
             if ( $supplier_id ) {
                 $supplier_account                  = new UserAccount();
-                $supplier_account->type            = 1; // 1 is for Supplier account, 2 is for Customer account
+                $supplier_account->type            = 2; // 1 is for Supplier account, 2 is for Customer account
                 $supplier_account->user_id         = $supplier_id;
                 $supplier_account->opening_balance = $request->opening_balance;
                 $supplier_account->total_due       = $request->opening_balance;

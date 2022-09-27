@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\MaterialConfig;
 use App\MaterialIn;
 use App\Payment;
+use App\ProductTransfer;
 use App\Supplier;
 use App\SupplierProduct;
 use App\Unit;
@@ -16,6 +17,7 @@ use App\UserAccount;
 use Illuminate\Http\Request;
 use Gate;
 use Illuminate\Support\Facades\Auth;
+use PhpParser\Builder;
 use Symfony\Component\HttpFoundation\Response;
 use DB;
 use Illuminate\Support\Facades\DB as FacadesDB;
@@ -33,7 +35,7 @@ class MaterialInController extends Controller
 
        $materialsPurchased = MaterialIn::with('material','units')->where('type',1)->get()->groupBy('material_id');
        $materials = MaterialConfig::all();
-       
+
         return view('admin.material.index', compact('materials','materialsPurchased'));
     }
 
@@ -71,13 +73,13 @@ class MaterialInController extends Controller
         $request['created_by'] = Auth::user()->id;
         $request['rest'] = $request->quantity;
         $materialIn = MaterialIn::create($request->all());
-        
+
         if($materialIn){
             $request['material_in_id'] = $materialIn->id;
             $request['payment_process'] = $request->payment_process;
             $request['payment_info'] = $request->payment_info;
             SupplierProduct::create($request->all());
-            
+
 
             if($request->paid_amount>0){
                 $request['amount'] = $request->paid_amount;
@@ -85,11 +87,11 @@ class MaterialInController extends Controller
                 Payment::create($request->all());
             }
 
-            
+
             $user_account['total_due'] = $user_account_detail->total_due + ($request->total_price - $request->paid_amount);
             $user_account['total_paid'] = $user_account_detail->total_paid + $request->paid_amount;
             $user_account_detail->update($user_account);
-            
+
             }
             DB::commit();
         } catch (\Exception $e) {
@@ -163,7 +165,45 @@ class MaterialInController extends Controller
     }
     public function search($id){
         $material = MaterialConfig::where('id',$id)->first();
-        return view('admin.cart.include.product-selection', compact('material'));
+
+         $transfer_product_color = ProductTransfer::with('transfer','color')->where('product_id',$material->id)
+            ->where('rest_quantity','>',0)
+            ->whereHas('transfer', function (\Illuminate\Database\Eloquent\Builder $query){
+            $query->where('department_id', 2);
+        })->get()->pluck('color.id');
+        $color = MaterialConfig::whereIn('id',$transfer_product_color)->get();
+
+        return ['material'=>$material,'color'=>$color];
+    }
+
+    public function searchwithColor($id,$color_id){
+        $color = MaterialConfig::where('id',$color_id)->first();
+        $material = MaterialConfig::where('id',$id)->first();
+        $material['color_name']=$color->name;
+        $material['color_id']=$color->id;
+
+        return $material;
+    }
+    public function price($id){
+        $price = MaterialConfig::where('id',$id)->first();
+        return view('admin.material.modal.price',compact('price'));
+    }
+
+    public function storePrice(Request $request){
+        $price = MaterialConfig::where('id',$request->material_id)->first();
+        DB::beginTransaction();
+        try{
+            $data['material_price']  = $request->material_price;
+            $data['knitting_price']  = $request->knitting_price;
+            $data['selling_price']  = $request->selling_price;
+            $update_price = $price->update($data);
+            DB::commit();
+            if($update_price){
+                return redirect()->back()->with('message','Price Updated');
+            }
+        }catch (\Exception $e){
+            return $e->getMessage();
+        }
 
 
     }

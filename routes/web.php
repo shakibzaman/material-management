@@ -39,7 +39,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::resource('customer', 'CustomerController');
     Route::get('customer/payment/{id}', 'SupplierController@payment')->name('customer.payment');
 
-    Route::get('cart', 'CartController@cart')->name('cart');
+    // cart
+    Route::get('showroom/cart/{id}', 'CartController@cart')->name('showroom.cart');
+    Route::post('showroom/cart/order', 'CartController@showroomCartOrder')->name('showroom.cart-order');
 
 
 
@@ -58,8 +60,11 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
     // Stock In
     Route::resource('material-in', 'MaterialInController');
+    Route::get('material-in/price/{id}', 'MaterialInController@price')->name('material-in.price');
+    Route::post('material-in/price', 'MaterialInController@storePrice')->name('material-in.price.store');
     Route::get('transfer/material/{id}', 'MaterialInController@transfer')->name('transfer.material');
     Route::get('material/search/{id}', 'MaterialInController@search')->name('search.material');
+    Route::get('material/search/color/{product_id}/{color_id}', 'MaterialInController@searchwithColor')->name('search.material.color');
 
     // Material Config
     Route::resource('material-config', 'MaterialConfigController');
@@ -99,7 +104,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('dyeing/all/expense', 'DyeingController@expenses')->name('dyeing.all.expense');
     Route::get('dyeing/process/company/product/{id}', 'DyeingController@transferProduct')->name('dyeing.process.company.product');
     Route::get('dyeing/use/material/detail/{company_id}/{product_id}/{color_id}', 'DyeingController@transferProductDetails')->name('dyeing.use.material.detail');
-    
+
 
 //    Route::get('dyeing/transfer/company/product/{id}', 'DyeingController@transferProduct')->name('dyeing.transfer.company.product');
     Route::get('dyeing/company/transfer-list/{id}', 'DyeingController@transferList')->name('dyeing.company.transfer');
@@ -110,6 +115,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('showroom/index', 'ShowroomController@index')->name('showroom.index');
     Route::get('showroom/transfer/{id}', 'ShowroomController@show')->name('showroom.transfer');
     Route::get('showroom/stock/{id}', 'ShowroomController@stock')->name('showroom.stock');
+    Route::get('showroom/orders/{id}', 'ShowroomController@showroomOrders')->name('showroom.orders');
+    Route::get('order/details/{id}', 'ShowroomController@orderDetails')->name('order.details');
 
     // Stock Set
     Route::get('stock/set', 'StockSetController@index')->name('stock.set');
@@ -142,5 +149,13 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::resource('employee', 'EmployeeController');
     // Bank
     Route::resource('bank', 'BankController');
+    Route::get('bank/deposit/{id}', 'BankController@deposit')->name('bank.deposit');
+    Route::post('bank/deposit', 'BankController@depositStore')->name('bank.deposit.store');
+
+    // Fund
+    Route::resource('fund', 'FundController');
+    Route::get('fund/deposit/{id}', 'FundController@deposit')->name('fund.deposit');
+    Route::post('fund/deposit', 'FundController@depositStore')->name('fund.deposit.store');
+
 
 });

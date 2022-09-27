@@ -63,12 +63,15 @@
                                     <a class="btn btn-xs btn-danger" href="{{ route('admin.material-in.show', $material->id) }}">
                                             Return
                                         </a>
+                                        <a class="btn btn-xs btn-success text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
+                                           data-attr="{{ route('admin.material-in.price',$material->id) }}" title="Price"> Add Price
+                                        </a>
 
-                                    @can('material_transfer')
-                                    <a class="btn btn-success text-light btn-xs" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
-                                        data-attr="{{ route('admin.transfer.material', $material->id) }}" title="Create a project"> Transfer
-                                    </a>
-                                    @endcan
+{{--                                    @can('material_transfer')--}}
+{{--                                    <a class="btn btn-success text-light btn-xs" data-toggle="modal" id="mediumButton" data-target="#mediumModal"--}}
+{{--                                        data-attr="{{ route('admin.transfer.material', $material->id) }}" title="Create a project"> Transfer--}}
+{{--                                    </a>--}}
+{{--                                    @endcan--}}
 
                                     @can('expense_edit')
                                         <a class="btn btn-xs btn-info" href="{{ route('admin.material-in.edit', $material->id) }}">

@@ -173,7 +173,7 @@ class DyeingController extends Controller
      */
     public function store( Request $request )
     {
-        // return $request;
+        return $request;
         DB::beginTransaction();
         try {
             $product_id  = $request->product_id;
@@ -181,7 +181,6 @@ class DyeingController extends Controller
             $company_id  = $request->company_id;
             $color_id    = $request->color_id;
             $process_fee = $request->process_fee;
-            $showroom_id = $request->showroom_id;
 
             $check_company_type = Company::where( 'id', $company_id )->first();
 

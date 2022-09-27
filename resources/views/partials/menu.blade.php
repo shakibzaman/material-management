@@ -137,9 +137,77 @@
                                 </a>
                             </li>
                         @endcan
+                            <li class="nav-item">
+                                <a href="{{ route("admin.showroom.orders",3) }}" class="nav-link {{ request()->is('admin/showroom/stock') || request()->is('admin/showroom/stock') ? 'active' : '' }}">
+                                    <i class="fa-fw fas fa-list nav-icon">
+
+                                    </i>
+                                    Showroom Orders
+                                </a>
+                            </li>
                     </ul>
                 </li>
             @endcan
+            @can('dyeing_management_access')
+                <li class="nav-item nav-dropdown">
+                    <a class="nav-link  nav-dropdown-toggle" href="#">
+                        <i class="fa-fw fas fa-users nav-icon">
+
+                        </i>
+                        Showroom 2
+                    </a>
+                    <ul class="nav-dropdown-items">
+                        @can('stock_set_access')
+                            <li class="nav-item">
+                                <a href="{{ route("admin.showroom.stock",4) }}" class="nav-link {{ request()->is('admin/showroom/stock') || request()->is('admin/showroom/stock') ? 'active' : '' }}">
+                                    <i class="fa-fw fas fa-list nav-icon">
+
+                                    </i>
+                                    Showroom Stock
+                                </a>
+                            </li>
+                        @endcan
+                            <li class="nav-item">
+                                <a href="{{ route("admin.showroom.orders",4) }}" class="nav-link {{ request()->is('admin/showroom/stock') || request()->is('admin/showroom/stock') ? 'active' : '' }}">
+                                    <i class="fa-fw fas fa-list nav-icon">
+
+                                    </i>
+                                    Showroom Orders
+                                </a>
+                            </li>
+                    </ul>
+                </li>
+            @endcan
+            @can('dyeing_management_access')
+                    <li class="nav-item nav-dropdown">
+                        <a class="nav-link  nav-dropdown-toggle" href="#">
+                            <i class="fa-fw fas fa-users nav-icon">
+
+                            </i>
+                            Accounts
+                        </a>
+                        <ul class="nav-dropdown-items">
+                            @can('stock_set_access')
+                                <li class="nav-item">
+                                    <a href="{{ route("admin.bank.index") }}" class="nav-link {{ request()->is('admin/bank/index') || request()->is('admin/bank/index') ? 'active' : '' }}">
+                                        <i class="fa-fw fas fa-list nav-icon">
+
+                                        </i>
+                                        Bank Info
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ route("admin.fund.index") }}" class="nav-link {{ request()->is('admin/fund/index') || request()->is('admin/fund/index') ? 'active' : '' }}">
+                                        <i class="fa-fw fas fa-list nav-icon">
+
+                                        </i>
+                                        Main Account
+                                    </a>
+                                </li>
+                            @endcan
+                        </ul>
+                    </li>
+                @endcan
             @can('employee_management_access')
                 <li class="nav-item nav-dropdown">
                     <a class="nav-link  nav-dropdown-toggle" href="#">

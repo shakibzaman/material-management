@@ -8,6 +8,8 @@ use App\Http\Controllers\Controller;
 use App\MaterialConfig;
 use App\MaterialIn;
 use App\MaterialTransfer;
+use App\Order;
+use App\OrderDetail;
 use App\ProductTransfer;
 use App\Transfer;
 use Illuminate\Database\Eloquent\Builder;
@@ -26,6 +28,14 @@ class ShowroomController extends Controller
         return view('admin.showroom.index',compact('nettingsData','departments','transfer_products'));
 
 
+    }
+    public function showroomOrders($id){
+        $orders = Order::with('customer')->where('department_id',$id)->get();
+        return view('admin.showroom.orders',compact('orders'));
+    }
+    public function orderDetails($id){
+        $orderDetails = OrderDetail::with('product','color')->where('order_id',$id)->get();
+        return view('admin.showroom.orderDetails',compact('orderDetails'));
     }
     public function stock($id){
         $transfer_products = ProductTransfer::with('transfer','product','color')->whereHas('transfer', function (Builder $query) use ($id){

@@ -4,13 +4,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\Bank;
 use App\BankTransaction;
+use App\Fund;
+use App\FundTransaction;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 
-class BankController extends Controller
+class FundController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -19,8 +21,8 @@ class BankController extends Controller
      */
     public function index()
     {
-        $banks = Bank::all();
-        return view('admin.bank.index',compact('banks'));
+        $funds = Fund::all();
+        return view('admin.fund.index',compact('funds'));
     }
 
     /**
@@ -30,8 +32,7 @@ class BankController extends Controller
      */
     public function create()
     {
-        return view('admin.bank.create');
-
+        return view('admin.fund.create');
     }
 
     /**
@@ -44,13 +45,12 @@ class BankController extends Controller
     {
         DB::beginTransaction();
         try {
-            $request['created_by'] = Auth::user()->id;
-            Bank::create($request->all());
+            Fund::create($request->all());
             DB::commit();
-            return Redirect::back()->with('success', 'Bank details added');
+            return Redirect::back()->with('success', 'Fund details added');
         }catch (\Exception $e){
             return $e->getMessage();
-    }
+        }
     }
 
     /**
@@ -99,19 +99,19 @@ class BankController extends Controller
     }
 
     public function deposit($id){
-        $bank_id = $id;
-        return view('admin.bank.deposit',compact('bank_id'));
+        $fund_id = $id;
+        return view('admin.fund.deposit',compact('fund_id'));
 
     }
     public function depositStore(Request $request){
         DB::beginTransaction();
         try{
-            $bank_info = Bank::where('id',$request->bank_id)->first();
-            $bank['current_balance'] = $bank_info->current_balance + $request->deposit;
-            $bank_info->update($bank);
+            $fund_info = Fund::where('id',$request->fund_id)->first();
+            $fund['current_balance'] = $fund_info->current_balance + $request->deposit;
+            $fund_info->update($fund);
 
-            $transaction = new BankTransaction();
-            $transaction->bank_id = $bank_info->id;
+            $transaction = new FundTransaction();
+            $transaction->fund_id = $fund_info->id;
             $transaction->type = 2;
             $transaction->amount = $request->deposit;
             $transaction->reason = $request->reason;

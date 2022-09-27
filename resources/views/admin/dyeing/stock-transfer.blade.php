@@ -69,7 +69,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-2">
+                <div class="col-md-1">
                     <div class="form-group {{ $errors->has('quantity') ? 'has-error' : '' }}">
                         <label for="name"> Quantity *</label>
                         <input type="number" id="quantity" name="quantity" class="form-control" required>
@@ -99,7 +99,7 @@
                         </p>
                     </div>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-1">
                     <label for=""></label>
                     <button id="teacher_list_search_btn" type="submit" class="btn btn-primary pull-right">Search</button>
                 </div>
