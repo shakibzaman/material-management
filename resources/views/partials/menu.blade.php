@@ -124,7 +124,7 @@
                         <i class="fa-fw fas fa-users nav-icon">
 
                         </i>
-                        Showroom 1
+                        SHOWROOM NGONJ
                     </a>
                     <ul class="nav-dropdown-items">
                         @can('stock_set_access')
@@ -133,7 +133,7 @@
                                     <i class="fa-fw fas fa-list nav-icon">
 
                                     </i>
-                                    SHOWROOM NGONJ
+                                    Showroom Stock
                                 </a>
                             </li>
                         @endcan
@@ -142,7 +142,7 @@
                                     <i class="fa-fw fas fa-list nav-icon">
 
                                     </i>
-                                    SHOWROOM MIRPUR
+                                    Showroom Orders
                                 </a>
                             </li>
                     </ul>
@@ -154,7 +154,7 @@
                         <i class="fa-fw fas fa-users nav-icon">
 
                         </i>
-                        Showroom 2
+                        SHOWROOM MIRPUR
                     </a>
                     <ul class="nav-dropdown-items">
                         @can('stock_set_access')
