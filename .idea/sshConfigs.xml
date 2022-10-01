@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SshConfigs">
+    <configs>
+      <sshConfig authType="PASSWORD" connectionConfig="{&quot;hostKeyVerifier&quot;:{&quot;hashKnownHosts&quot;:true,&quot;stringHostKeyChecking&quot;:&quot;ACCEPT_NEW&quot;},&quot;serverAliveInterval&quot;:300}" host="142.93.211.160" id="ee74a860-6ef4-4299-aae1-a14f1ffea4a6" port="22" customName="Alzeena" nameFormat="CUSTOM" username="root" useOpenSSHConfig="true">
+        <option name="customName" value="Alzeena" />
+      </sshConfig>
+    </configs>
+  </component>
+</project>

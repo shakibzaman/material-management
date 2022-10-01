@@ -3,7 +3,7 @@
 @can('expense_create')
     <div style="margin-bottom: 10px;" class="row">
         <div class="col-lg-12">
-            <a class="btn btn-success" href="{{ route("admin.showroom.cart",3) }}">
+            <a class="btn btn-success" href="{{ route("admin.showroom.cart",$department_id) }}">
                 Cart
             </a>
         </div>

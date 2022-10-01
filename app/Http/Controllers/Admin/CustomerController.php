@@ -2,9 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Bank;
+use App\BankTransaction;
 use App\Customer;
+use App\Fund;
+use App\FundTransaction;
 use App\Http\Controllers\Controller;
 use App\MaterialIn;
+use App\Order;
+use App\Payment;
+use App\SupplierProduct;
 use App\UserAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -80,9 +87,9 @@ class CustomerController extends Controller
      */
     public function show($id)
     {
-        $supplierDetail = Customer::where( 'id', $id )->first();
-        $materials      = MaterialIn::with( 'material', 'user', 'supplierProduct' )->where( 'supplier_id', $supplierDetail->id )->orderBy( 'id', 'DESC' )->get();
-        return view( 'admin.supplier.show', compact( 'materials', 'supplierDetail' ) );
+        $customerDetail = Customer::where( 'id', $id )->first();
+        $orders      = Order::where( 'customer_id', $id )->get();
+        return view( 'admin.customer.show', compact( 'customerDetail', 'orders' ) );
     }
 
     /**
@@ -121,12 +128,111 @@ class CustomerController extends Controller
 
     public function payment( $id )
     {
-        $supplier_detail = Supplier::where( 'id', $id )->first();
-        if ( !$supplier_detail ) {
-            return ['status' => 105, 'message' => 'Sorry your Supplier not founded'];
+        $customer_detail = Customer::where( 'id', $id )->first();
+        if ( !$customer_detail ) {
+            return ['status' => 105, 'message' => 'Sorry your Customer not founded'];
         }
-        $all_dues = SupplierProduct::where( 'supplier_id', $id )->where( 'due_amount', '>', 0 )->sum( 'due_amount' );
-        return view( 'admin.supplier.modal.payment', compact( 'all_dues', 'supplier_detail' ) );
+        $all_dues = Order::where( 'customer_id', $id )->where( 'due', '>', 0 )->sum( 'due' );
+        return view( 'admin.customer.modal.payment', compact( 'all_dues', 'customer_detail' ) );
 
     }
+
+    public function paymentStore( Request $request )
+    {
+        if($request->total_amount<$request->paid_amount){
+            return ['status' => 103, 'message' => 'Sorry you can not paid more then due'];
+        }
+        $all_dues = Order::where( 'customer_id', $request->customer_id )->where( 'due', '>', 0 )->get();
+        if(count($all_dues)>0){
+            $contentQty = $request->paid_amount;
+            DB::beginTransaction();
+            try {
+                foreach ( $all_dues as $due ) {
+                    $paid_amt = $contentQty;
+                    if ( $due->due < $contentQty ) {
+                        $paid_amt   = $due->due;
+                        $contentQty = $contentQty - $due->due;
+
+                        // Order Amount update start
+                        $order_amount['paid'] = $due->paid + $paid_amt;
+                        $order_amount['due']  = $due->due - $paid_amt;
+                        $customer_order              = Order::where( 'id', $due->id )->first();
+                        $customer_order->update( $order_amount );
+
+                        // Order Amount update end
+
+                        // User Account update start
+                        $users_account           = UserAccount::where( 'user_id', $due->customer_id )->where('type',2)->first();
+                        $update_due['total_due'] = $users_account->total_due - $paid_amt;
+                        $users_account->update( $update_due );
+                        // User Account update end
+
+                        // Payment data store start
+                        $payment                  = new Payment();
+                        $payment->amount          = $paid_amt;
+                        $payment->payment_process = $request->payment_process;
+                        $payment->payment_info    = $request->payment_info;
+                        $payment->user_account_id = $users_account->id;
+                        $payment->created_by = Auth::user()->id;
+                        $payment->save();
+                        // Payment data store end
+
+                    } else {
+                        $contentQty = 0;
+                        // Order Amount update start
+                        $order_amount['paid'] = $due->paid + $paid_amt;
+                        $order_amount['due']  = $due->due - $paid_amt;
+                        $customer_order              = Order::where( 'id', $due->id )->first();
+                        $customer_order->update( $order_amount );
+
+                        // Order Amount update end
+
+                        // User Account update start
+                        $users_account           = UserAccount::where( 'user_id', $due->customer_id )->where('type',2)->first();
+                        $update_due['total_due'] = $users_account->total_due - $paid_amt;
+                        $users_account->update( $update_due );
+                        // User Account update end
+
+                        // Payment data store start
+                        $payment                  = new Payment();
+                        $payment->amount          = $paid_amt;
+                        $payment->payment_process = $request->payment_process;
+                        $payment->payment_info    = $request->payment_info;
+                        $payment->user_account_id = $users_account->id;
+                        $payment->created_by = Auth::user()->id;
+                        $payment->save();
+                        // Payment data store end
+
+                    }
+
+                    if ( $contentQty < 1 ) {
+                        break;
+                    }
+
+                }
+
+                if($request->payment_process == 'cash'){
+                    $fund_info = Fund::where('id',1)->first();
+                    $bank['current_balance'] = $fund_info->current_balance - $request->paid_amount;
+                    $fund_info->update($bank);
+
+                    $transaction = new FundTransaction();
+                    $transaction->fund_id = $fund_info->id;
+                    $transaction->type = 2;
+                    $transaction->amount = $request->paid_amount;
+                    $transaction->reason = 'Order Due Payment';
+                    $transaction->created_by = Auth::user()->id;
+                    $transaction->save();
+
+                }
+                DB::commit();
+                return ['status' => 200, 'message' => 'Successfully Payment Done for Customer'];
+
+            } catch ( \Exception $e ) {
+                DB::rollback();
+                return $e;
+            }
+        }
+    }
+
 }

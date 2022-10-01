@@ -163,13 +163,14 @@ class MaterialInController extends Controller
         return view('admin.material.modal.transfer', compact('materials','departments'));
 
     }
-    public function search($id){
+    public function search($department_id,$id){
+        $department_id = $department_id;
         $material = MaterialConfig::where('id',$id)->first();
 
          $transfer_product_color = ProductTransfer::with('transfer','color')->where('product_id',$material->id)
             ->where('rest_quantity','>',0)
-            ->whereHas('transfer', function (\Illuminate\Database\Eloquent\Builder $query){
-            $query->where('department_id', 2);
+            ->whereHas('transfer', function (\Illuminate\Database\Eloquent\Builder $query) use ($department_id){
+            $query->where('department_id', $department_id);
         })->get()->pluck('color.id');
         $color = MaterialConfig::whereIn('id',$transfer_product_color)->get();
 

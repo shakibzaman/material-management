@@ -37,13 +37,24 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
     // Customer
     Route::resource('customer', 'CustomerController');
-    Route::get('customer/payment/{id}', 'SupplierController@payment')->name('customer.payment');
+    Route::get('customer/payment/{id}', 'CustomerController@payment')->name('customer.payment');
+    Route::post('customer/payment/store', 'CustomerController@paymentStore')->name('customer.payment.store');
 
     // cart
     Route::get('showroom/cart/{id}', 'CartController@cart')->name('showroom.cart');
+    Route::get('showroom/cart-test', 'CartController@cartTest')->name('showroom.cart.test');
     Route::post('showroom/cart/order', 'CartController@showroomCartOrder')->name('showroom.cart-order');
 
+    Route::get('products', 'CartController@index')->name('products');
+    Route::get('pos', 'CartController@pos')->name('showroom.pos');
+    Route::get('add-to-cart/{id}', 'CartController@addToCart')->name('add.to.cart');
+    Route::get('add-to-cart-test/{dept}/{id}/{color}', 'CartController@addToCartTest')->name('add.to.cart.test');
+    Route::patch('update-cart', 'CartController@update')->name('update.cart');
+    Route::delete('remove-from-cart', 'CartController@remove')->name('remove.from.cart');
 
+
+
+    Route::get('dashboard','DashboardController@index')->name('dashboard');
 
 
     // Incomes
@@ -63,7 +74,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('material-in/price/{id}', 'MaterialInController@price')->name('material-in.price');
     Route::post('material-in/price', 'MaterialInController@storePrice')->name('material-in.price.store');
     Route::get('transfer/material/{id}', 'MaterialInController@transfer')->name('transfer.material');
-    Route::get('material/search/{id}', 'MaterialInController@search')->name('search.material');
+    Route::get('material/search/{dept}/{id}', 'MaterialInController@search')->name('search.material');
     Route::get('material/search/color/{product_id}/{color_id}', 'MaterialInController@searchwithColor')->name('search.material.color');
 
     // Material Config
@@ -117,6 +128,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('showroom/stock/{id}', 'ShowroomController@stock')->name('showroom.stock');
     Route::get('showroom/orders/{id}', 'ShowroomController@showroomOrders')->name('showroom.orders');
     Route::get('order/details/{id}', 'ShowroomController@orderDetails')->name('order.details');
+    Route::get('order/payment/{id}', 'ShowroomController@orderPayment')->name('order.payment');
+    Route::post('order/payment/store', 'ShowroomController@orderPaymentStore')->name('order.payment.store');
+
 
     // Stock Set
     Route::get('stock/set', 'StockSetController@index')->name('stock.set');

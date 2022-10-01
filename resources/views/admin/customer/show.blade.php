@@ -1,114 +1,129 @@
 @extends('layouts.admin')
 @section('content')
-
-<div class="card">
-    <div class="card-header">
-        Supplied Details 
-    </div>
-
-    <div class="card-body">
-        <div class="mb-2">
-            <table class="table table-bordered table-striped">
-                <thead>
-                    <tr>
-                        <th> ID </th>
-                        <th>Material Name</th>
-                        <th>Material Quantity</th>
-                        <th>Unit</th>
-                        <th>Buying Date</th>
-                        <th>Unit Price</th>
-                        <th>Total price</th>
-                        <th>Rest Quantity</th>
-                        <th>Paid</th>
-                        <th>Due</th>
-                        <th>Invoice Number</th>
-                        <th>Purchased By</th>
-                        <th>Entry By</th>
-                        <th>Created at</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- {{$materials}} -->
-                    @php
-                    $total_due = 0;
-                    $total_paid = 0;
-                    @endphp
-                    @foreach($materials as $material)
-                    @php 
-                        
-                        $paid_amount = $material->supplierProduct->sum('paid_amount');
-                        $total_paid+= $paid_amount;
-                        $due_amount = $material->supplierProduct->sum('due_amount');
-                        $total_due+= $due_amount;
-                        
-                    @endphp
-                    <tr>
-                        
-                        <td>
-                            {{ $material->id }}
-                        </td>
-                    
-                        <td>
-                            {{ $material->material->name ?? '' }}
-                        </td>
-                        <td>
-                            {{ $material->quantity ?? '' }}
-                        </td>
-                        <td>
-                            {{$material->units->name ?? 'N/A'}}
-                        </td>
-                        <td>
-                            Tk. {{ $material->buying_date }}
-                        </td>
-                        <td>
-                            {{ $material->unit_price }}
-                        </td>
-                        <td>
-                            {{ $material->total_price }}
-                        </td>
-                        <td>
-                            {{ $material->rest }}
-                        </td>
-                        <td>
-                            {{$paid_amount}}
-                        </td>
-                        <td>
-                            {{$due_amount}}
-                        </td>
-                        <td>
-                            {{ $material->inv_number }}
-                        </td>
-                    
-                        <td>
-                            {{$material->employee->name}}
-                        </td>
-                    
-                        <td>
-                           {{$material->user->name}}
-                        </td>   
-                    
-                        <td>
-                            {{ $material->created_at }}
-                        </td>
-                        
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <th>Total Due</th>
-                        <td>{{$total_due}}</td>
-                    </tr>
-                </tbody>
-            </table>
-            <a style="margin-top:20px;" class="btn btn-default" href="{{ url()->previous() }}">
-                {{ trans('global.back_to_list') }}
-            </a>
+    <div class="card">
+        <div class="card-header">
+            <b>Order List</b>
         </div>
 
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class=" table table-bordered table-striped table-hover datatable datatable-Expense">
+                    <thead>
+                    <tr>
+                        <th width="10">
 
+                        </th>
+                        <th>
+                            Invoice ID
+                        </th>
+                        <th>
+                            Customer
+                        </th>
+                        <th>
+                            Total
+                        </th>
+                        <th>
+                            Paid
+                        </th>
+                        <th>
+                            Due
+                        </th>
+                        <th>
+                            Discount
+                        </th>
+                        <th>
+                            &nbsp;Action
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach($orders as $order)
+                        <tr>
+                            <td>
+
+                            </td>
+                            <td>
+                                {{$order->invoice_id}}
+                            </td>
+                            <td>
+                                {{$order->customer->name}}
+                            </td>
+                            <td>
+                                {{$order->total}}
+                            </td>
+                            <td>
+                                {{$order->paid}}
+                            </td>
+                            <td>
+                                {{$order->due}}
+                            </td>
+                            <td>
+                                {{$order->discount}}
+                            </td>
+                            <td>
+                                <a class="btn btn-success text-light btn-xs" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
+                                   data-attr="{{ route('admin.order.details',$order->id) }}" title="Return"> Details
+                                </a>
+                                <a href="" class="btn btn-info btn-xs">Invoice</a>
+                                @if($order->due >0)
+                                    <a class="btn btn-success btn-xs text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
+                                       data-attr="{{ route('admin.order.payment',$order->id) }}" title="Return"> Payment
+                                    </a>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+
+        </div>
     </div>
-</div>
+    <div class="modal fade" id="mediumModal" tabindex="-1" role="dialog" aria-labelledby="mediumModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="mediumBody">
+                    <div>
+                        <!-- the result to be displayed apply here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+@section('scripts')
+    @parent
+    <script>
+        $(document).on('click', '#mediumButton', function(event) {
+            event.preventDefault();
+            let href = $(this).attr('data-attr');
+            $.ajax({
+                url: href,
+                beforeSend: function() {
+                    $('#loader').show();
+                },
+                // return the result
+                success: function(result) {
+                    $('#mediumModal').modal("show");
+                    $('#mediumBody').html(result).show();
+                },
+                complete: function() {
+                    $('#loader').hide();
+                },
+                error: function(jqXHR, testStatus, error) {
+                    console.log(error);
+                    alert("Page " + href + " cannot open. Error:" + error);
+                    $('#loader').hide();
+                },
+                timeout: 8000
+            })
+        });
+    </script>
 @endsection

@@ -2,16 +2,22 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Bank;
+use App\BankTransaction;
 use App\Department;
 use App\Expense;
+use App\Fund;
+use App\FundTransaction;
 use App\Http\Controllers\Controller;
 use App\MaterialConfig;
 use App\MaterialIn;
 use App\MaterialTransfer;
 use App\Order;
 use App\OrderDetail;
+use App\Payment;
 use App\ProductTransfer;
 use App\Transfer;
+use App\UserAccount;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -30,8 +36,9 @@ class ShowroomController extends Controller
 
     }
     public function showroomOrders($id){
-        $orders = Order::with('customer')->where('department_id',$id)->get();
-        return view('admin.showroom.orders',compact('orders'));
+        $department_id = $id;
+        $orders = Order::with('customer')->where('department_id',$department_id)->get();
+        return view('admin.showroom.orders',compact('orders','department_id'));
     }
     public function orderDetails($id){
         $orderDetails = OrderDetail::with('product','color')->where('order_id',$id)->get();
@@ -53,6 +60,70 @@ class ShowroomController extends Controller
 
 
         return view('admin.showroom.index',compact('transfer_products','products','colors','department_id'));
+    }
+    public function orderPayment($id){
+        $order = Order::with('customer')->where('id',$id)->first();
+        return view('admin.showroom.modal.payment',compact('order'));
+    }
+    public function orderPaymentStore(Request $request){
+        if($request->paid_amount<=0){
+            return ['status' => 103, 'message' => 'Paid more then 0'];
+        }
+        if($request->total_amount<$request->paid_amount){
+            return ['status' => 103, 'message' => 'Sorry you can not paid more then due'];
+        }
+
+        $order = Order::with('customer')->where('id',$request->order_id)->first();
+        $user_account = UserAccount::where('user_id',$order->customer_id)->where('type',2)->first();
+        DB::beginTransaction();
+        try{
+            // Order Due Adjust Start
+
+            $data['paid'] = $request->paid_amount + $order->paid;
+            $data['due'] = $request->due_amount;
+            $order->update($data);
+
+            // Order Due Adjust End
+
+            // User Account update
+
+            $update_due['total_due'] = $user_account->total_due - $request->paid_amount;
+            $user_account->update($update_due);
+
+            // User Account update end
+
+            // Payment data store start
+            $payment                  = new Payment();
+            $payment->amount          = $request->paid_amount;
+            $payment->payment_process = $request->payment_process;
+            $payment->payment_info    = $request->payment_info;
+            $payment->user_account_id = $user_account->id;
+            $payment->created_by = Auth::user()->id;
+            $payment->save();
+            // Payment data store end
+
+            if($request->payment_process == 'cash'){
+                $fund_info = Fund::where('id',1)->first();
+                $bank['current_balance'] = $fund_info->current_balance - $request->paid_amount;
+                $fund_info->update($bank);
+
+                $transaction = new FundTransaction();
+                $transaction->fund_id = $fund_info->id;
+                $transaction->type = 2;
+                $transaction->amount = $request->paid_amount;
+                $transaction->reason = 'Order Due Payment';
+                $transaction->created_by = Auth::user()->id;
+
+                $transaction->save();
+
+            }
+
+            DB::commit();
+            return ['status'=>200,'message'=>'Payment Successfully Done'];
+        }catch (\Exception $e){
+            DB::rollBack();
+            return $e->getMessage();
+        }
     }
     public function store(Request $request){
 

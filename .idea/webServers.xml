@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="26dc1e11-ad30-44ab-81c4-f6c79dca367d" name="Alzeena" url="http://alzeena.com.bd">
+        <fileTransfer rootFolder="/var/www/laravel-vue-boilerplate" accessType="SFTP" host="142.93.211.160" port="22" sshConfigId="ee74a860-6ef4-4299-aae1-a14f1ffea4a6" sshConfig="Alzeena">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="aeabdca5-2622-4781-9844-70d6ec7f5cb0" name="alz2" url="http://www.alzeena.com.bd">
+        <fileTransfer rootFolder="/var/www/laravel-vue-boilerplate" accessType="SFTP" host="142.93.211.160" port="22" sshConfigId="ee74a860-6ef4-4299-aae1-a14f1ffea4a6" sshConfig="Alzeena">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

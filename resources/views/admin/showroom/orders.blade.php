@@ -3,7 +3,7 @@
 @can('expense_create')
     <div style="margin-bottom: 10px;" class="row">
         <div class="col-lg-12">
-            <a class="btn btn-success" href="{{ route("admin.showroom.cart",3) }}">
+            <a class="btn btn-success" href="{{ route("admin.showroom.cart",$department_id) }}">
                 POS
             </a>
         </div>
@@ -75,7 +75,9 @@
                         </a>
                         <a href="" class="btn btn-info btn-xs">Invoice</a>
                         @if($order->due >0)
-                            <a href="" class="btn btn-primary btn-xs">Payment</a>
+                            <a class="btn btn-success btn-xs text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
+                               data-attr="{{ route('admin.order.payment',$order->id) }}" title="Return"> Payment
+                            </a>
                         @endif
                     </td>
                 </tr>

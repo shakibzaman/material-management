@@ -173,7 +173,6 @@ class DyeingController extends Controller
      */
     public function store( Request $request )
     {
-        return $request;
         DB::beginTransaction();
         try {
             $product_id  = $request->product_id;
@@ -186,7 +185,7 @@ class DyeingController extends Controller
 
             $transfer                      = new Transfer();
             $transferData['company_id']    = $company_id;
-            $transferData['department_id'] = 3;
+            $transferData['department_id'] = $request->showroom_id;
             $transferData['created_by']    = Auth::user()->id;
             $transferData['date']          = date( "Y-m-d" );
             $storeTransfer                 = $transfer->create( $transferData );
@@ -251,7 +250,7 @@ class DyeingController extends Controller
                         $productTransfer->process_fee      = $process_fee;
                         $productTransfer->created_by       = Auth::user()->id;
                         $storeTransfer                       = $productTransfer->save();
-                       
+
 
                         if ( $storeTransfer ) {
                             // reduce stock quantity
@@ -295,7 +294,7 @@ class DyeingController extends Controller
                         return ['status' => 104, 'message' => "Sorry !!!  " . $material_name->name . " Low Stock"];
                     }
                     logger("1");
-                    $total_material_stocks = MaterialIn::where( 'material_id', $key )->get();
+                    $total_material_stocks = MaterialIn::where( 'material_id', $key )->where('rest','>',0)->get();
 
                     $contentQty = $quantity;
                     foreach ( $total_material_stocks as $stock ) {

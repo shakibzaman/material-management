@@ -6,8 +6,14 @@
         <table class="table table-bordered">
             <tbody>
                 <tr>
-                    <th>Supplier Name</th>
-                    <td>{{$customer_detail->name}}</td>
+                    <th>Order Id</th>
+                    <td>
+                        {{$order->invoice_id}}
+                    </td>
+                    <th>Customer Name</th>
+                    <td>
+                        {{$order->customer->name}}
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -15,8 +21,8 @@
             @csrf
             <div class="form-group {{ $errors->has('total_amount') ? 'has-error' : '' }}">
                     <label for="total_amount">Total Amount </label>
-                    <input type="hidden" name="customer_id" value="{{$customer_detail->id}}">
-                    <input type="number" id="total_amount" name="total_amount" class="form-control" value="{{$all_dues}}" readonly>
+                    <input type="hidden" name="order_id" value="{{$order->id}}">
+                    <input type="number" id="total_amount" name="total_amount" class="form-control" value="{{$order->due}}" readonly>
             </div>
             <div class="form-group {{ $errors->has('paid_amount') ? 'has-error' : '' }}">
                     <label for="paid_amount">Paid Amount *</label>
@@ -91,7 +97,7 @@
 
         function searchStockSet(){
             $.ajax({
-                url: '/admin/customer/payment/store',
+                url: '/admin/order/payment/store',
                 type: 'POST',
                 cache: false,
                 data: $('form#payment-form').serialize(),

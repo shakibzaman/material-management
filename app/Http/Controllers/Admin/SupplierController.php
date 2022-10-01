@@ -170,7 +170,7 @@ class SupplierController extends Controller
                     // Supplier Amount update end
 
                     // User Account update start
-                    $users_account           = UserAccount::where( 'user_id', $due->supplier_id )->first();
+                    $users_account           = UserAccount::where( 'user_id', $due->supplier_id )->where('type',1)->first();
                     $update_due['total_due'] = $users_account->total_due - $paid_amt;
                     $users_account->update( $update_due );
                     // User Account update end
