@@ -133,7 +133,7 @@
                                     <i class="fa-fw fas fa-list nav-icon">
 
                                     </i>
-                                    Showroom Stock
+                                    SHOWROOM NGONJ
                                 </a>
                             </li>
                         @endcan
@@ -142,7 +142,7 @@
                                     <i class="fa-fw fas fa-list nav-icon">
 
                                     </i>
-                                    Showroom Orders
+                                    SHOWROOM MIRPUR
                                 </a>
                             </li>
                     </ul>
