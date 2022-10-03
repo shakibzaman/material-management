@@ -33,9 +33,10 @@
                     <td>{{$list->paid}}</td>
                     <td>{{$list->due}}</td>
                     <td>
-                        <a class="btn btn-success text-light btn-xs" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
-                           data-attr="{{ route('admin.netting.company.delivered.list', 2) }}"> Delivered List
-                        </a>
+{{--                        <a class="btn btn-success text-light btn-xs" data-toggle="modal" id="mediumButton" data-target="#mediumModal"--}}
+{{--                           data-attr="{{ route('admin.netting.company.delivered.list', 2) }}"> Delivered List--}}
+{{--                        </a>--}}
+                        <a href="" class="btn btn-primary">Delivered List</a>
                     </td>
                 </tr>
             @endforeach
