@@ -61,7 +61,12 @@
                     {{ trans('cruds.user.fields.roles_helper') }}
                 </p>
             </div>
-            
+
+            <div class="form-group">
+                <label>Opening Balance</label>
+                <input type="number" name="opening_balance" class="form-control" >
+            </div>
+
             <div>
                 <input class="btn btn-danger" type="submit" value="{{ trans('global.save') }}">
             </div>

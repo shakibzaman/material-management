@@ -4,7 +4,9 @@ namespace App\Http\Controllers\admin;
 
 use App\Company;
 use App\Http\Controllers\Controller;
+use App\UserAccount;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CompanyController extends Controller
 {
@@ -27,7 +29,7 @@ class CompanyController extends Controller
     public function create()
     {
         return view('admin.company.create');
-        
+
     }
 
     /**
@@ -38,7 +40,18 @@ class CompanyController extends Controller
      */
     public function store(Request $request)
     {
-        Company::create($request->all());
+       $company = Company::create($request->all());
+
+        if ( $company ) {
+            $supplier_account                  = new UserAccount();
+            $supplier_account->type            = 3; // 1 is for Supplier account, 2 is for Customer account , 3 is for Company Account
+            $supplier_account->user_id         = $company->id;
+            $supplier_account->opening_balance = $request->opening_balance;
+            $supplier_account->total_due       = $request->opening_balance;
+            $supplier_account->total_paid      = 0;
+            $supplier_account->created_by      = Auth::user()->id;
+            $supplier_account->save();
+        }
         return redirect()->route('admin.company.index');
     }
 

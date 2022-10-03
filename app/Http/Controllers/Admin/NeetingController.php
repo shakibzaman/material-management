@@ -4,16 +4,21 @@ namespace App\Http\Controllers\admin;
 
 use Gate;
 use App\User;
+use App\Income;
 use App\Company;
 use App\Expense;
+use App\Payment;
 use App\Customer;
 use App\Transfer;
 use App\MaterialIn;
+use App\UserAccount;
 use App\ProductReturn;
 use App\MaterialConfig;
 use App\ProductTransfer;
 use App\MaterialTransfer;
+use App\ProductDelivered;
 use Illuminate\Http\Request;
+use App\ProductDeliveredDetail;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -145,7 +150,6 @@ class NeetingController extends Controller
                         if ( $storeTransfer ) {
                             // reduce stock quantity
                             $data['rest_quantity'] = $stock->rest_quantity - $pro_qty;
-                            return $data;
                             DB::table( 'product_transfer' )->where( 'id', $stock->id )->update( $data );
 
                             // Add expense
@@ -232,6 +236,178 @@ class NeetingController extends Controller
 
         $material_key_by = MaterialConfig::get()->keyBy( 'id' );
         return view( 'admin.neeting.modal.return-to-stock', compact( 'product_list', 'material_key_by', 'knittingStock', 'company_id', 'type', 'rest_quantity' ) );
+    }
+
+    /**
+     * @param $id
+     */
+    public function stockDelivered( $id )
+    {
+        //        id is company id
+        $knittingStock = ProductTransfer::with( 'transfer' )->where( 'rest_quantity', '>', 0 )
+                                                          ->whereHas( 'transfer', function ( Builder $query ) use ( $id ) {
+                                                              $query->where( 'company_id', '=', $id )->where( 'department_id', 1 );
+                                                          } )->get();
+        $type          = 1;
+        $company_id    = $id;
+        $rest_quantity = ProductTransfer::with( 'transfer' )->where( 'rest_quantity', '>', 0 )->whereHas( 'transfer', function ( Builder $query ) use ( $id ) {
+            $query->where( 'company_id', '=', $id )->where( 'department_id', 1 );
+        } )->get()->groupBy( 'product_id' );
+
+        $product_list = ProductTransfer::with( 'transfer', 'product' )->where( 'rest_quantity', '>', 0 )->whereHas( 'transfer', function ( Builder $query ) use ( $id ) {
+            $query->where( 'company_id', '=', $id )->where( 'department_id', 1 );
+        } )->get()->pluck( 'product.name', 'product.id' )->prepend( trans( 'global.pleaseSelect' ), '' );
+
+        $material_key_by = MaterialConfig::get()->keyBy( 'id' );
+        return view( 'admin.neeting.modal.stock-delivered', compact( 'product_list', 'material_key_by', 'knittingStock', 'company_id', 'type', 'rest_quantity' ) );
+
+    }
+
+    /**
+     * @param Request $request
+     */
+    public function stockDeliveredCheck( Request $request )
+    {
+        $company_id = $request->company_id;
+
+        $getAllStock = ProductTransfer::with( 'transfer' )
+            ->where( 'product_id', $request->product_id )
+            ->where( 'rest_quantity', '>', 0 )
+            ->whereHas( 'transfer', function ( Builder $query ) use ( $company_id ) {
+                $query->where( 'company_id', '=', $company_id )->where( 'department_id', 1 );
+            } )->get();
+        $total_quantity = $getAllStock->sum( 'rest_quantity' );
+        if ( $total_quantity < $request->transfer_stock ) {
+            return ['status' => 103, 'message' => 'Sorry you can\'t Delivered more then you have'];
+        }
+        $stockDetails = [];
+        $contentQty   = $request->transfer_stock;
+        foreach ( $getAllStock as $stock ) {
+            $pro_qty = $contentQty;
+            if ( $stock->rest_quantity < $contentQty ) {
+                $pro_qty    = $stock->rest_quantity;
+                $contentQty = $contentQty - $stock->rest_quantity;
+
+                // Product Transfer update start
+                $stockDetails[$stock->id] = $pro_qty;
+
+            } else {
+                $contentQty               = 0;
+                $stockDetails[$stock->id] = $pro_qty;
+
+            }
+            if ( $contentQty < 1 ) {
+                break;
+            }
+        }
+
+        $stocks = ProductTransfer::whereIn( 'id', array_keys( $stockDetails ) )->get()->keyBy( 'id' );
+        return view( 'admin.neeting.include.delivered-bill', compact( 'stockDetails', 'stocks' ) );
+
+    }
+
+    /**
+     * @param $id
+     */
+    public function stockDeliveredList( $id )
+    {
+        $delivered_list = ProductDelivered::with( 'product' )->where( 'company_id', $id )->get();
+        return view( 'admin.neeting.modal.stock-delivered-list', compact( 'delivered_list' ) );
+    }
+
+    /**
+     * @param Request $request
+     * @return mixed
+     */
+    public function stockDeliveredToCompany( Request $request )
+    {
+
+        DB::beginTransaction();
+        try {
+            // Bill Generate
+            $delivered              = new ProductDelivered();
+            $delivered->product_id  = $request->product_id;
+            $delivered->quantity    = $request->transfer_stock;
+            $delivered->company_id  = $request->company_id;
+            $delivered->process_fee = $request->total_process_fee;
+            $delivered->bill_fee    = $request->bill_total;
+            $delivered->sub_total   = $request->bill_total;
+            $delivered->total       = ( $request->bill_total - $request->discount );
+            $delivered->paid        = $request->paid;
+            $delivered->due         = $request->due;
+            $delivered->discount    = $request->discount;
+            $delivered->date        = $request->date;
+            $delivered->created_by  = Auth::user()->id;
+            $delivered->save();
+
+            logger( " Bill Generate " );
+
+            // Adjust Company due amount
+            // User Account update start
+            if ( $request->due > 0 ) {
+                $users_account           = UserAccount::where( 'user_id', $request->company_id )->where( 'type', 3 )->first();
+                $update_due['total_due'] = $users_account->total_due + $request->due;
+                $users_account->update( $update_due );
+
+                logger( " Update user account due" );
+            }
+            // User Account update end
+
+            // Income generate start
+            $income                     = new Income();
+            $income->entry_date         = $request->date;
+            $income->amount             = $request->bill_total - $request->total_process_fee;
+            $income->description        = 'Income from Knitting product delivered';
+            $income->created_by_id      = Auth::user()->id;
+            $income->income_category_id = 1; // 1 is for Knitting
+            $income->releted_id         = $delivered->id;
+            $income->releted_id_type    = 3;
+            $income->save();
+            // Income generate End
+
+            // Delivered details Info start
+            // Deduct Quantity from Stock start
+            for ( $i = 0; $i < count( $request->stock_id ); $i++ ) {
+                logger( "Deduction start" );
+                $stock = ProductTransfer::where( 'id', $request->stock_id[$i] )->first();
+
+                $data['rest_quantity'] = $stock->rest_quantity - $request->stock_value[$i];
+                DB::table( 'product_transfer' )->where( 'id', $stock->id )->update( $data );
+
+                logger( "Deduct Quantity from Stock" );
+
+                $deliveryDetails                       = new ProductDeliveredDetail();
+                $deliveryDetails->product_delivered_id = $delivered->id;
+                $deliveryDetails->product_id           = $stock->product_id;
+                $deliveryDetails->product_stock_id     = $stock->id;
+                $deliveryDetails->process_fee          = $stock->process_fee;
+                $deliveryDetails->quantity             = $request->stock_value[$i];
+                $deliveryDetails->save();
+
+                logger( "Delivered details Info" );
+
+            }
+            if ( $request->paid ) {
+                // Payment data store start
+                $payment                  = new Payment();
+                $payment->amount          = $request->paid;
+                $payment->payment_process = $request->payment_process;
+                $payment->payment_info    = $request->payment_info;
+                $payment->user_account_id = $request->company_id;
+                $payment->releted_id      = $delivered->id;
+                $payment->releted_id_type = 3;
+                $payment->created_by      = Auth::user()->id;
+                $payment->save();
+                // Payment data store end
+            }
+
+            DB::commit();
+            return ['status' => 200, 'message' => 'Delivered Successfully'];
+        } catch ( \Exception $e ) {
+            DB::rollBack();
+            return $e->getMessage();
+        }
+
     }
 
     /**

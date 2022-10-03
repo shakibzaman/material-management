@@ -94,6 +94,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('neeting/index', 'NeetingController@index')->name('neeting.index');
     Route::get('neeting/company/transfer-list/{id}', 'NeetingController@transferList')->name('netting.company.transfer');
     Route::get('neeting/company/return-list/{id}', 'NeetingController@returnList')->name('netting.company.return');
+    Route::get('neeting/company/delivered/{id}', 'NeetingController@stockDelivered')->name('netting.company.delivered');
+    Route::get('neeting/company/delivered/list/{id}', 'NeetingController@stockDeliveredList')->name('netting.company.delivered.list');
+    Route::post('knitting/delivered/stock/check', 'NeetingController@stockDeliveredCheck')->name('netting.company.delivered.stock.check');
+    Route::post('knitting/delivered/stock', 'NeetingController@stockDeliveredToCompany')->name('netting.company.delivered.stock');
     Route::get('neeting/transfer/company/product/{id}', 'NeetingController@dyeingInProduct')->name('netting.transfer.company.product');
     Route::get('neeting/sell/company/product/{id}', 'NeetingController@knittingSellProduct')->name('netting.sell.company.product');
     Route::post('neeting/dyeing/transfer/company/product', 'NeetingController@dyeingTransferProduct')->name('netting.dyeing.transfer.company.product');
