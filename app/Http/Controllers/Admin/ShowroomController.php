@@ -98,6 +98,8 @@ class ShowroomController extends Controller
             $payment->payment_process = $request->payment_process;
             $payment->payment_info    = $request->payment_info;
             $payment->user_account_id = $user_account->id;
+            $payment->releted_id = $request->order_id;
+            $payment->releted_id_type = 1;
             $payment->created_by = Auth::user()->id;
             $payment->save();
             // Payment data store end

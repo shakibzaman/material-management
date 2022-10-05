@@ -7,17 +7,17 @@
                 <a class="btn btn-primary" href="{{ route("admin.knitting.cart",$department_id) }}">
                     Cart
                 </a>
-                @else
-            <a class="btn btn-success" href="{{ route("admin.showroom.cart",$department_id) }}">
-                Cart
-            </a>
-                @endif
+            @else
+                <a class="btn btn-success" href="{{ route("admin.showroom.cart",$department_id) }}">
+                    Cart
+                </a>
+            @endif
         </div>
     </div>
 @endcan
 <div class="card">
     <div class="card-header">
-        <b>Showroom Product Stock List</b>
+        <b>Knitting Order List</b>
     </div>
 
     <div class="card-body">
@@ -29,13 +29,22 @@
 
                         </th>
                         <th>
-                            Product Name
+                            Invoice ID
                         </th>
                         <th>
-                            Color & Quantity
+                            Customer
                         </th>
                         <th>
-                            Product Quantity
+                            Total
+                        </th>
+                        <th>
+                            Paid
+                        </th>
+                        <th>
+                            Due
+                        </th>
+                        <th>
+                            Discount
                         </th>
                         <th>
                             &nbsp;Action
@@ -43,70 +52,41 @@
                     </tr>
                 </thead>
                 <tbody>
-                @foreach($products as $key =>$product)
-                    @php
-                        if(isset($transfer_products[$product->id])) {
-                                $productTotal = $transfer_products[$product->id]->sum('rest_quantity');
-                                $product_detail = $transfer_products[$product->id]->groupBy('color.id');
-
-                                }
-                        else{
-                            $productTotal = 0;
-                            $product_detail = [];
-                        }
-                    @endphp
-                    @if($productTotal != 0)
+                @foreach($orders as $order)
                 <tr>
                     <td>
 
                     </td>
                     <td>
-                        {{$product->name}}
+                        {{$order->invoice_id}}
                     </td>
                     <td>
-                        @if($product_detail != null)
-                        @foreach($product_detail as $color_id => $detail)
-                            @php
-                                $qty = $detail->sum('rest_quantity')
-                                @endphp
-
-                            <table class="table table-hover">
-                                <tbody>
-                                <tr>
-                                    <th>{{($color_id!=null)?$colors[$color_id]->name:'N/A'}}</th>
-                                    <td>{{$qty}}</td>
-                                    <td>
-                                        <a class="btn btn-success text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
-                                           data-attr="{{ route('admin.dyeing.use.material.detail',[$department_id,$product->id,$color_id]) }}" title="Return"> Material
-                                        </a>
-
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-
-                        @endforeach
+                        {{$order->customer->name}}
+                    </td>
+                    <td>
+                        {{$order->total}}
+                    </td>
+                    <td>
+                        {{$order->paid}}
+                    </td>
+                    <td>
+                        {{$order->due}}
+                    </td>
+                    <td>
+                        {{$order->discount}}
+                    </td>
+                    <td>
+                        <a class="btn btn-success text-light btn-xs" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
+                           data-attr="{{ route('admin.knitting.order.details',$order->id) }}" title="Return"> Details
+                        </a>
+                        <a href="" class="btn btn-info btn-xs">Invoice</a>
+                        @if($order->due >0)
+                            <a class="btn btn-success btn-xs text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
+                               data-attr="{{ route('admin.order.payment',$order->id) }}" title="Return"> Payment
+                            </a>
                         @endif
-
-                    </td>
-                    <td>
-                        {{$productTotal}}
-                    </td>
-                    <td>
-                    </td>
-                    <td>
-{{--                        <a class="btn btn-xs btn-primary" href="{{ route('admin.showroom.transfer', $departments[$key]->id) }}">--}}
-{{--                            {{ trans('global.view') }}--}}
-{{--                        </a>--}}
-{{--@if($departments[$key]->id == 1)--}}
-{{--<a class="btn btn-xs btn-success" href="{{ route('admin.netting.transfer.company.product', $companyList[$key]->id) }}">--}}
-{{--Transfer to Dyeing--}}
-{{--</a>--}}
-{{--@endif--}}
-
                     </td>
                 </tr>
-                @endif
                 @endforeach
                 </tbody>
             </table>

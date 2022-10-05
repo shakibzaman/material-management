@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\admin;
 
+use App\Order;
+use App\OrderDetail;
 use Gate;
 use App\User;
 use App\Income;
@@ -315,6 +317,18 @@ class NeetingController extends Controller
         return view( 'admin.neeting.modal.stock-delivered-list', compact( 'delivered_list' ) );
     }
 
+    public function knittingOrders($id){
+//        $id is Department id
+        $department_id = $id;
+        $orders = Order::with('customer')->where('department_id',$department_id)->get();
+        return view('admin.neeting.cart.orders',compact('orders','department_id'));
+
+    }
+    public function orderDetails($id){
+       $orderDetails = OrderDetail::with('product')->where('order_id',$id)->get();
+        return view('admin.neeting.cart.orderDetails',compact('orderDetails'));
+    }
+
     /**
      * @param Request $request
      * @return mixed
@@ -361,6 +375,7 @@ class NeetingController extends Controller
             $income->created_by_id      = Auth::user()->id;
             $income->income_category_id = 1; // 1 is for Knitting
             $income->releted_id         = $delivered->id;
+            $income->department_id         = 1;
             $income->releted_id_type    = 3;
             $income->save();
             // Income generate End
@@ -385,6 +400,22 @@ class NeetingController extends Controller
                 $deliveryDetails->save();
 
                 logger( "Delivered details Info" );
+
+                // Expense Generate
+
+                // Add expense
+
+                $expense                      = new Expense();
+                $expense->entry_date          = date( "Y-m-d" );
+                $expense->amount              = ($stock->process_fee*$request->stock_value[$i]);
+                $expense->description         = "Product Processing Costing for Netting";
+                $expense->expense_category_id = 1;
+                $expense->department_id       = 1;
+                $expense->created_by_id       = Auth::user()->id;
+                $expense->material_id         = $request->product_id;
+                $expense->transfer_id         = $stock->transfer_id;
+                $expense->transfer_product_id = $stock->id;
+                $expense->save();
 
             }
             if ( $request->paid ) {
@@ -559,6 +590,12 @@ class NeetingController extends Controller
         $expenses = Expense::where( 'department_id', 1 )->get();
 
         return view( 'admin.expenses.index', compact( 'expenses' ) );
+    }
+    public function incomes()
+    {
+        $incomes = Income::where( 'department_id', 1 )->get();
+
+        return view( 'admin.neeting.income', compact( 'incomes' ) );
     }
 
     public function stockIn()

@@ -72,7 +72,21 @@
                                     Expense List
                                 </a>
                             </li>
+                                <li class="nav-item">
+                                    <a href="{{ route("admin.netting.all.income") }}" class="nav-link {{ request()->is('admin/netting/all/income') || request()->is('admin/netting/all/income/*') ? 'active' : '' }}">
+                                        <i class="fa-fw fas fa-list nav-icon">
+
+                                        </i>
+                                        Income List
+                                    </a>
+                                </li>
                         @endcan
+                            <a href="{{ route("admin.knitting.orders",1) }}" class="nav-link {{ request()->is('admin/knitting/orders') || request()->is('admin/knitting/orders') ? 'active' : '' }}">
+                                <i class="fa-fw fas fa-list nav-icon">
+
+                                </i>
+                                Knitting Orders
+                            </a>
                     </ul>
                 </li>
             @endcan

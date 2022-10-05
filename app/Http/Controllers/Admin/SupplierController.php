@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Bank;
 use App\BankTransaction;
 use App\Payment;
+use App\ProductReturn;
 use App\Supplier;
 use App\MaterialIn;
 use App\UserAccount;
@@ -13,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use PhpParser\Builder;
 
 class SupplierController extends Controller
 {
@@ -38,6 +40,19 @@ class SupplierController extends Controller
     public function create()
     {
         return view( 'admin.supplier.create' );
+    }
+
+    public function returnList($id){
+        $return_list = DB::table('product_return')
+            ->join('material_ins','product_return.product_transfer_id','material_ins.id')
+            ->join('material_configs','material_ins.material_id','material_configs.id')
+            ->join('users','product_return.return_by','users.id')
+            ->where('supplier_id',$id)
+            ->where('product_return.type',1)
+            ->select('material_configs.name','product_return.*','users.name AS return_by_user')
+            ->get();
+        return view( 'admin.supplier.return-list', compact( 'return_list' ) );
+
     }
 
     /**

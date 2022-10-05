@@ -2,16 +2,11 @@
 @section('content')
 @can('employee_create')
     <div style="margin-bottom: 10px;" class="row">
-        <div class="col-lg-12">
-            <a class="btn btn-success text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
-                                                data-attr="{{ route('admin.supplier.create') }}" title="Return"> Add Supplier
-            </a>
-        </div>
     </div>
 @endcan
 <div class="card">
     <div class="card-header">
-    Employee {{ trans('global.list') }}
+    Material Return List
     </div>
 
     <div class="card-body">
@@ -29,13 +24,13 @@
                             Name
                         </th>
                         <th>
-                            Phone
+                            Quantity
                         </th>
                         <th>
-                            Address
+                            Reason
                         </th>
                         <th>
-                            Total Due
+                            Return
                         </th>
                         <th>
                             Action
@@ -43,29 +38,15 @@
                     </tr>
                 </thead>
                 <tbody>
-                @foreach($users as $user)
+                @foreach($return_list as $list)
                     <tr>
                         <td></td>
-                        <td>{{$user->id}}</td>
-                        <td> {{$user->name}} </td>
-                        <td> {{$user->phone}} </td>
-                        <td>{{$user->address}}  </td>
-                        <td>{{$user->account->total_due}}  </td>
+                        <td>{{$list->id}}</td>
+                        <td> {{$list->name}} </td>
+                        <td> {{$list->quantity}} </td>
+                        <td>{{$list->reason}}  </td>
+                        <td>{{$list->return_by_user}}  </td>
                         <td>
-                        @can('user_edit')
-                            <a class="btn btn-xs btn-info" href="{{ route('admin.supplier.edit', $user->id) }}">
-                                {{ trans('global.edit') }}
-                            </a>
-                        @endcan
-                            <a class="btn btn-xs btn-info" href="{{ route('admin.supplier.show', $user->id) }}">
-                                Details
-                            </a>
-                            <a class="btn btn-xs btn-success" href="{{ route('admin.supplier.return.list', $user->id) }}">
-                                Return List
-                            </a>
-                            <a class="btn btn-success btn-xs text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
-                                                data-attr="{{ route('admin.supplier.payment',$user->id) }}" title="Return"> Payment
-                                            </a>
                         </td>
                     </tr>
                     @endforeach

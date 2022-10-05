@@ -34,6 +34,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::resource('supplier', 'SupplierController');
     Route::get('supplier/payment/{id}', 'SupplierController@payment')->name('supplier.payment');
     Route::post('supplier/payment/store', 'SupplierController@paymentStore')->name('supplier.payment.store');
+    Route::get('supplier/return/list/{id}', 'SupplierController@returnList')->name('supplier.return.list');
 
     // Customer
     Route::resource('customer', 'CustomerController');
@@ -42,13 +43,16 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
     // cart
     Route::get('showroom/cart/{id}', 'CartController@cart')->name('showroom.cart');
+    Route::get('knitting/cart/{id}', 'CartController@knittingcart')->name('knitting.cart');
     Route::get('showroom/cart-test', 'CartController@cartTest')->name('showroom.cart.test');
     Route::post('showroom/cart/order', 'CartController@showroomCartOrder')->name('showroom.cart-order');
+    Route::post('knitting/cart/order', 'CartController@KnittingCartOrder')->name('knitting.cart-order');
 
     Route::get('products', 'CartController@index')->name('products');
     Route::get('pos', 'CartController@pos')->name('showroom.pos');
     Route::get('add-to-cart/{id}', 'CartController@addToCart')->name('add.to.cart');
     Route::get('add-to-cart-test/{dept}/{id}/{color}', 'CartController@addToCartTest')->name('add.to.cart.test');
+    Route::get('add-to-cart-knitting/{dept}/{id}', 'CartController@addToCartKnitting')->name('add.to.cart.knitting');
     Route::patch('update-cart', 'CartController@update')->name('update.cart');
     Route::delete('remove-from-cart', 'CartController@remove')->name('remove.from.cart');
 
@@ -110,6 +114,11 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::post('knitting/return/stock/main', 'NeetingController@returnStock')->name('knitting.stock.return');
     Route::get('netting/transfer/expense/{id}', 'NeetingController@expenseList')->name('netting.transfer.expense');
     Route::get('netting/all/expense', 'NeetingController@expenses')->name('netting.all.expense');
+    Route::get('netting/all/income', 'NeetingController@incomes')->name('netting.all.income');
+
+    Route::get('knitting/orders/{id}', 'NeetingController@knittingOrders')->name('knitting.orders');
+    Route::get('knitting/order/details/{id}', 'NeetingController@orderDetails')->name('knitting.order.details');
+
 
     // Dyeing
 
@@ -143,22 +152,17 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::post('store/set', 'StockSetController@store')->name('store.set');
 
 
-
-
-
-
-
-
-
-
-
-
     // Color
     Route::get('color/index', 'MaterialConfigController@color')->name('color.index');
     Route::get('color/create', 'MaterialConfigController@colorCreate')->name('color.create');
 
     // Company
     Route::resource('company', 'CompanyController');
+    Route::get('company/payment/{id}', 'CompanyController@payment')->name('company.payment');
+    Route::post('company/payment/store', 'CompanyController@paymentStore')->name('customer.payment.store');
+    Route::get('company/return/list/{id}', 'CompanyController@returnList')->name('company.return.list');
+
+
 
 
 

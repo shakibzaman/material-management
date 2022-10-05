@@ -1,19 +1,13 @@
 
     <div class="card-title">
-       <h3>Make Payment</h3>
+       <h3>Company Make Payment</h3>
     </div>
     <div class="card-body">
         <table class="table table-bordered">
             <tbody>
                 <tr>
-                    <th>Order Id</th>
-                    <td>
-                        {{$order->invoice_id}}
-                    </td>
-                    <th>Customer Name</th>
-                    <td>
-                        {{$order->customer->name}}
-                    </td>
+                    <th>Company Name</th>
+                    <td>{{$customer_detail->name}}</td>
                 </tr>
             </tbody>
         </table>
@@ -21,8 +15,8 @@
             @csrf
             <div class="form-group {{ $errors->has('total_amount') ? 'has-error' : '' }}">
                     <label for="total_amount">Total Amount </label>
-                    <input type="hidden" name="order_id" value="{{$order->id}}">
-                    <input type="number" id="total_amount" name="total_amount" class="form-control" value="{{$order->due}}" readonly>
+                    <input type="hidden" name="company_id" value="{{$customer_detail->id}}">
+                    <input type="number" id="total_amount" name="total_amount" class="form-control" value="{{$all_dues}}" readonly>
             </div>
             <div class="form-group {{ $errors->has('paid_amount') ? 'has-error' : '' }}">
                     <label for="paid_amount">Paid Amount *</label>
@@ -97,7 +91,7 @@
 
         function searchStockSet(){
             $.ajax({
-                url: '/admin/order/payment/store',
+                url: '/admin/company/payment/store',
                 type: 'POST',
                 cache: false,
                 data: $('form#payment-form').serialize(),
@@ -120,7 +114,7 @@
                                 footer: 'Check your Stock'
                             })
                         }
-                        else if(data.status == 200){
+                        else{
                             Swal.fire({
                                 position: 'top-end',
                                 icon: 'success',
@@ -130,14 +124,7 @@
                             })
                             $('#mediumModal').modal('hide');
                             window.location.reload();
-                        }
-                        else{
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Oops...',
-                                text: "Unable to load data form server",
-                                footer: 'Contact with Your Admin'
-                            })
+
                         }
                     }
                 },

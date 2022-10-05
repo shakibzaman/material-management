@@ -3,9 +3,15 @@
 @can('expense_create')
     <div style="margin-bottom: 10px;" class="row">
         <div class="col-lg-12">
-            <a class="btn btn-success" href="{{ route("admin.showroom.cart",$department_id) }}">
-                POS
-            </a>
+            @if($department_id == 1)
+                <a class="btn btn-primary" href="{{ route("admin.knitting.cart",$department_id) }}">
+                    Cart
+                </a>
+            @else
+                <a class="btn btn-success" href="{{ route("admin.showroom.cart",$department_id) }}">
+                    Cart
+                </a>
+            @endif
         </div>
     </div>
 @endcan

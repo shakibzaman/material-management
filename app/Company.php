@@ -10,4 +10,8 @@ class Company extends Model
     use HasFactory;
 
     protected $fillable =['name','phone','address','type'];
+
+    public function account(){
+        return $this->belongsTo(UserAccount::class,'id','user_id')->where('type',3);
+    }
 }

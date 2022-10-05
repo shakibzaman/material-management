@@ -1,22 +1,22 @@
 @extends('layouts.admin')
 @section('content')
-@can('expense_create')
-    <div style="margin-bottom: 10px;" class="row">
-        <div class="col-lg-12">
+    @can('expense_create')
+        <div style="margin-bottom: 10px;" class="row">
+            <div class="col-lg-12">
 
+            </div>
         </div>
-    </div>
-@endcan
-<div class="card">
-    <div class="card-header">
-        Transfer Details
-    </div>
-    @php
-        $transfer_total_product = $transfer_products->sum('quantity') ?? '';
-        $transfer_total_material = $transfer_materials->sum('quantity') ?? '';
-    @endphp
-    <div class="card-body">
-        <table class="table table-bordered table-striped">
+    @endcan
+    <div class="card">
+        <div class="card-header">
+            Transfer Details
+        </div>
+        @php
+            $transfer_total_product = $transfer_products->sum('quantity') ?? '';
+            $process_cost = $transfer_products[0]->process_fee ? $transfer_products[0]->process_fee * $transfer_total_product : 0;
+        @endphp
+        <div class="card-body">
+            <table class="table table-bordered table-striped">
                 <tbody>
                 <tr>
                     <th>
@@ -45,15 +45,6 @@
                 </tr>
                 <tr>
                     <th>
-                        Total material Quantity
-
-                    </th>
-                    <td>
-                        {{$transfer_total_material}}
-                    </td>
-                </tr>
-                <tr>
-                    <th>
                         Date
 
                     </th>
@@ -63,78 +54,50 @@
                 </tr>
                 </tbody>
             </table>
-        <div class="row">
-            <div class="col-md-6">
-                <h3>Product Details</h3>
-                <table class="table">
-                    <thead>
+            <div class="row">
+                <div class="col-md-12">
+                    <h3>Product Details</h3>
+                    <table class="table">
+                        <thead>
                         <tr>
                             <th>SL</th>
                             <th>Name</th>
                             <th>Qty</th>
                             <th>Rest Qty</th>
-{{--                            <th>Unit Price</th>--}}
-{{--                            <th>Total Price</th>--}}
+                            <th>Process Fee/Unit</th>
                         </tr>
-                    </thead>
-                    <tbody>
-                    @php $total_product = 0; @endphp
-                    @foreach($transfer_products as $product)
-                        <tr>
-                            <th>{{$product->id}}</th>
-                            <th>{{$product->product->name}}</th>
-                            <th>{{$product->quantity}}</th>
-                            <th>{{$product->rest_quantity}}</th>
-{{--                            <th> {{$product->detail->unit_price}} </th>--}}
-{{--                            <th>{{$product->detail->unit_price * $product->quantity}}</th>--}}
-{{--                            @php  $total_product+= ($product->detail->unit_price * $product->quantity) @endphp--}}
-                        </tr>
-                    @endforeach
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                        @php $total_product = 0; @endphp
+                        @foreach($transfer_products as $product)
+                            <tr>
+                                <th>{{$product->id}}</th>
+                                <th>{{$product->product->name}}</th>
+                                <th>{{$product->quantity}}</th>
+                                <th>{{$product->rest_quantity}}</th>
+                                <th> {{$product->process_fee}} </th>
+                                @php  $total_product+= ($product->quantity) @endphp
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <div class="col-md-6">
-                <h3>Material Details</h3>
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th>SL</th>
-                        <th>Name</th>
-                        <th>Qty</th>
-                        <th>Unit Price</th>
-                        <th>Total Price</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @php $total_material = 0; @endphp
-                    @foreach($transfer_materials as $material)
-                        <tr>
-                            <th>{{$material->id}}</th>
-                            <th>{{$material->material->name}}</th>
-                            <th>{{$material->quantity}}</th>
-                            <th>{{$material->detail->unit_price}}</th>
-                            <th>{{$material->detail->unit_price * $material->quantity}}</th>
-                            @php  $total_material+= ($material->detail->unit_price * $material->quantity) @endphp
-                        </tr>
-                    @endforeach
-                    </tbody>
-                </table>
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>Total Product Amount = <span>{{$total_product}}</span></h5>
+                </div>
+                <div class="col-md-4">
+                    <h5>Cost Per KG = {{($process_cost)/$transfer_total_product}} </h5>
+                </div>
+                <div class="col-md-4">
+                    <h5>Process Cost = {{$process_cost}}</h5>
+                </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-md-3">
-{{--                <h5>Total Amount = <span>{{$total_material+$total_product}}</span></h5>--}}
-            </div>
-            <div class="col-md-3">
-{{--                <h5>Cost Per KG = {{($total_material+$total_product??0)/$transfer_total_product}} </h5>--}}
-            </div>
-            <div class="col-md-3"></div>
-            <div class="col-md-3"></div>
         </div>
     </div>
-</div>
 @endsection
 @section('scripts')
-@parent
+    @parent
 
 @endsection

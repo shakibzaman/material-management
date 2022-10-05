@@ -11,7 +11,7 @@
 @endcan
 <div class="card">
     <div class="card-header">
-    Employee {{ trans('global.list') }}
+    Company {{ trans('global.list') }}
     </div>
 
     <div class="card-body">
@@ -35,6 +35,9 @@
                             Address
                         </th>
                         <th>
+                            Due
+                        </th>
+                        <th>
                             Action
                         </th>
                     </tr>
@@ -47,28 +50,74 @@
                         <td> {{$company->name}} </td>
                         <td> {{$company->phone}} </td>
                         <td> {{$company->address}} </td>
+                        <td> {{$company->account->total_due}} </td>
                         <td>
                         @can('user_edit')
                             <a class="btn btn-xs btn-info" href="{{ route('admin.company.edit', $company->id) }}">
                                 {{ trans('global.edit') }}
                             </a>
                         @endcan
+                            <a class="btn btn-xs btn-success" href="{{ route('admin.company.return.list', $company->id) }}">
+                                Return List
+                            </a>
                             <a href="" class="btn btn-info btn-xs">View</a>
-                            <!-- <a href="" class="btn btn-info">Salary</a> -->
+                            <a class="btn btn-success btn-xs text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
+                               data-attr="{{ route('admin.company.payment',$company->id) }}" title="Return"> Payment
+                            </a>
                         </td>
                     </tr>
                     @endforeach
                 </tbody>
             </table>
         </div>
-
-
+    </div>
+</div>
+<div class="modal fade" id="mediumModal" tabindex="-1" role="dialog" aria-labelledby="mediumModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="mediumBody">
+                <div>
+                    <!-- the result to be displayed apply here -->
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 @endsection
 @section('scripts')
 @parent
 <script>
+    $(document).on('click', '#mediumButton', function(event) {
+        event.preventDefault();
+        let href = $(this).attr('data-attr');
+        $.ajax({
+            url: href,
+            beforeSend: function() {
+                $('#loader').show();
+            },
+            // return the result
+            success: function(result) {
+                $('#mediumModal').modal("show");
+                $('#mediumBody').html(result).show();
+            },
+            complete: function() {
+                $('#loader').hide();
+            },
+            error: function(jqXHR, testStatus, error) {
+                console.log(error);
+                alert("Page " + href + " cannot open. Error:" + error);
+                $('#loader').hide();
+            },
+            timeout: 8000
+        })
+    });
+
     $(function () {
   let dtButtons = $.extend(true, [], $.fn.dataTable.defaults.buttons)
 @can('user_delete')

@@ -10,6 +10,7 @@ class ProductDelivered extends Model
     use HasFactory;
 
     protected $table = 'product_delivered';
+    protected $fillable =['paid','total_due'];
 
     public function product()
     {

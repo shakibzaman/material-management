@@ -28,19 +28,6 @@
                                 @endif
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group {{ $errors->has('material_id') ? 'has-error' : '' }}">
-                                <label for="name">Color Name *</label>
-                                <select name="product_color_id" id="product_color_id" class="form-control select2 product_color_id" >
-
-                                </select>
-                                @if($errors->has('product_id'))
-                                    <em class="invalid-feedback">
-                                        {{ $errors->first('product_id') }}
-                                    </em>
-                                @endif
-                            </div>
-                        </div>
                     </div>
                 </div>
                 <div class="row">
@@ -50,7 +37,6 @@
                                 <thead>
                                 <tr>
                                     <th style="width:30%">Product</th>
-                                    <th style="width:30%">Color</th>
                                     <th style="width:10%">Price</th>
                                     <th style="width:8%">Quantity</th>
                                     <th style="width:12%" class="text-center">Subtotal</th>
@@ -67,10 +53,6 @@
                                             <td data-th="Product">
                                                 <input type="hidden" name="material_id[]" value="{{ $cart->id }}">
                                                 {{ $cart->name }}
-                                            </td>
-                                            <td data-th="Color">
-                                                <input type="hidden" name="color_id[]" value="{{ $cart->options->color_id }}">
-                                                {{ $cart->options->color }}
                                             </td>
                                             <td data-th="Price">
                                                 <input type="hidden" name="selling_price[]" value="{{ $cart->price }}">
@@ -229,68 +211,27 @@
                 let due = total - $("#paid").val()
                 $("#due").val(due);
             }
+
             $( "#product_id" ).change(function() {
-                let department_id = $("#department_id").val();
-                let product_id_number = $("#product_id").val();
-
-                $.ajax({
-                    url: '/admin/material/search/'+department_id+'/'+product_id_number,
-                    type: 'GET',
-                    cache: false,
-                    datatype: 'application/json',
-
-                    success:function(data){
-                        // console.log(data);
-                        // console.log(data.color);
-                        var op ='<option value="0" selected>--- Select Color ---</option>';
-                        for(var i=0;i<data.color.length;i++){
-                            op+='<option value="'+data.color[i].id+'">'+data.color[i].name+'</option>';
-                        }
-                        // set value to the Color
-                        $('.product_color_id').html("");
-                        $('.product_color_id').append(op);
-                        // renderList(data.material);
-
-
-                    },
-                    error:function(data){
-                        // console.log(data);
-                        // sweet alert
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Oops...',
-                            text: "Unable to load data form server",
-                            footer: 'Contact with Your Admin'
-                        })
-                        // swal("Error", 'Unable to load data form server', "error");
-                    }
-                });
-            });
-
-            $( "#product_color_id" ).change(function() {
 
                 let product_id_number = $("#product_id").val();
-                let product_color_id = $("#product_color_id").val();
                 let department_id = $("#department_id").val();
                 console.log(department_id);
 
 
                 $.ajax({
-                    url: '/admin/add-to-cart-test/'+department_id+'/'+product_id_number+'/'+product_color_id,
+                    url: '/admin/add-to-cart-knitting/'+department_id+'/'+product_id_number,
                     type: 'GET',
                     cache: false,
                     datatype: 'application/json',
 
                     success:function(data){
-                        console.log(data);
                         Swal.fire({
                             position: 'top-end',
                             icon: 'success',
                             title: 'Product Added to Cart',
                             timer: 1500
                         })
-                        // $( "#cart-box" ).load(window.location.href + " #cart-box" );
-                        // $( "#filter-box" ).load(window.location.href + " #filter-box" );
                         window.location.reload();
 
                         let total = $("#sub-total").val() - $("#discount").val();
@@ -321,7 +262,7 @@
             })
             function showroomOrder(){
                 $.ajax({
-                    url:'/admin/showroom/cart/order',
+                    url:'/admin/knitting/cart/order',
                     type:'POST',
                     data:$("form#checkout").serialize(),
 

@@ -67,9 +67,11 @@
                             </a>
                         @endif
                         @if($companyList[$key]->id == 1)
-                            <a class="btn btn-xs btn-primary" href="{{ route('admin.netting.sell.company.product', $companyList[$key]->id) }}">
+
+                            <a class="btn btn-xs btn-primary" href="{{ route("admin.knitting.cart",$companyList[$key]->id) }}">
                                 Sell
                             </a>
+
                         @endif
                         <a class="btn btn-danger text-light btn-xs" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
                            data-attr="{{ route('admin.netting.company.return', $companyList[$key]->id) }}" title="Create a project"> Return to Stock

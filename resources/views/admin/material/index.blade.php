@@ -1,23 +1,23 @@
 @extends('layouts.admin')
 @section('content')
-@can('material_create')
-    <div style="margin-bottom: 10px;" class="row">
-        <div class="col-lg-12">
-            <a class="btn btn-success" href="{{ route("admin.material-in.create") }}">
-                {{ trans('global.add') }} Material Purchased
-            </a>
+    @can('material_create')
+        <div style="margin-bottom: 10px;" class="row">
+            <div class="col-lg-12">
+                <a class="btn btn-success" href="{{ route("admin.material-in.create") }}">
+                    {{ trans('global.add') }} Material Purchased
+                </a>
+            </div>
         </div>
-    </div>
-@endcan
-<div class="card">
-    <div class="card-header">
-        Material {{ trans('global.list') }}
-    </div>
+    @endcan
+    <div class="card">
+        <div class="card-header">
+            Material {{ trans('global.list') }}
+        </div>
 
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class=" table table-bordered table-striped table-hover datatable datatable-Expense">
-                <thead>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class=" table table-bordered table-striped table-hover datatable datatable-Expense">
+                    <thead>
                     <tr>
                         <th width="10">
                         </th>
@@ -27,14 +27,14 @@
                         <th>Unit</th>
                         <th>Action</th>
                     </tr>
-                </thead>
-                <tbody>
+                    </thead>
+                    <tbody>
                     @foreach($materials as $key => $material)
                         @isset($materialsPurchased[$material->id])
 
-                        @php
-                        $total_quantity = $materialsPurchased[$material->id]->sum('rest')
-                        @endphp
+                            @php
+                                $total_quantity = $materialsPurchased[$material->id]->sum('rest')
+                            @endphp
 
                             <tr data-entry-id="{{ $material->id }}">
                                 <td>
@@ -56,51 +56,56 @@
 
                                 <td>
                                     @can('material_show')
-                                        <a class="btn btn-xs btn-primary" href="{{ route('admin.material-in.show', $material->id) }}">
+                                        <a class="btn btn-xs btn-primary"
+                                           href="{{ route('admin.material-in.show', $material->id) }}">
                                             {{ trans('global.view') }}
                                         </a>
                                     @endcan
-                                    <a class="btn btn-xs btn-danger" href="{{ route('admin.material-in.show', $material->id) }}">
-                                            Return
-                                        </a>
-                                        <a class="btn btn-xs btn-success text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
-                                           data-attr="{{ route('admin.material-in.price',$material->id) }}" title="Price"> Add Price
-                                        </a>
+                                    <a class="btn btn-xs btn-danger"
+                                       href="{{ route('admin.material-in.show', $material->id) }}">
+                                        Return
+                                    </a>
+                                    <a class="btn btn-xs btn-success text-light" data-toggle="modal" id="mediumButton"
+                                       data-target="#mediumModal"
+                                       data-attr="{{ route('admin.material-in.price',$material->id) }}" title="Price">
+                                        Add Price
+                                    </a>
 
-{{--                                    @can('material_transfer')--}}
-{{--                                    <a class="btn btn-success text-light btn-xs" data-toggle="modal" id="mediumButton" data-target="#mediumModal"--}}
-{{--                                        data-attr="{{ route('admin.transfer.material', $material->id) }}" title="Create a project"> Transfer--}}
-{{--                                    </a>--}}
-{{--                                    @endcan--}}
+                                    {{--                                    @can('material_transfer')--}}
+                                    {{--                                    <a class="btn btn-success text-light btn-xs" data-toggle="modal" id="mediumButton" data-target="#mediumModal"--}}
+                                    {{--                                        data-attr="{{ route('admin.transfer.material', $material->id) }}" title="Create a project"> Transfer--}}
+                                    {{--                                    </a>--}}
+                                    {{--                                    @endcan--}}
 
                                     @can('expense_edit')
-                                        <a class="btn btn-xs btn-info" href="{{ route('admin.material-in.edit', $material->id) }}">
+                                        <a class="btn btn-xs btn-info"
+                                           href="{{ route('admin.material-in.edit', $material->id) }}">
                                             {{ trans('global.edit') }}
                                         </a>
                                     @endcan
 
                                     @can('expense_delete')
-                                        <form action="{{ route('admin.material-in.destroy', $material->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
+                                        <form action="{{ route('admin.material-in.destroy', $material->id) }}"
+                                              method="POST"
+                                              onsubmit="return confirm('{{ trans('global.areYouSure') }}');"
+                                              style="display: inline-block;">
                                             <input type="hidden" name="_method" value="DELETE">
                                             <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                            <input type="submit" class="btn btn-xs btn-danger" value="{{ trans('global.delete') }}">
+                                            <input type="submit" class="btn btn-xs btn-danger"
+                                                   value="{{ trans('global.delete') }}">
                                         </form>
                                     @endcan
-
                                 </td>
-
                             </tr>
                         @endisset
                     @endforeach
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
-
-
     </div>
-</div>
-<div class="modal fade" id="mediumModal" tabindex="-1" role="dialog" aria-labelledby="mediumModalLabel"
-        aria-hidden="true">
+    <div class="modal fade" id="mediumModal" tabindex="-1" role="dialog" aria-labelledby="mediumModalLabel"
+         aria-hidden="true">
         <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -118,25 +123,25 @@
     </div>
 @endsection
 @section('scripts')
-@parent
-<script>
-     $(document).on('click', '#mediumButton', function(event) {
+    @parent
+    <script>
+        $(document).on('click', '#mediumButton', function (event) {
             event.preventDefault();
             let href = $(this).attr('data-attr');
             $.ajax({
                 url: href,
-                beforeSend: function() {
+                beforeSend: function () {
                     $('#loader').show();
                 },
                 // return the result
-                success: function(result) {
+                success: function (result) {
                     $('#mediumModal').modal("show");
                     $('#mediumBody').html(result).show();
                 },
-                complete: function() {
+                complete: function () {
                     $('#loader').hide();
                 },
-                error: function(jqXHR, testStatus, error) {
+                error: function (jqXHR, testStatus, error) {
                     console.log(error);
                     alert("Page " + href + " cannot open. Error:" + error);
                     $('#loader').hide();
@@ -144,5 +149,5 @@
                 timeout: 8000
             })
         });
-</script>
+    </script>
 @endsection
