@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Bank;
-use App\BankTransaction;
 use App\Department;
 use App\Expense;
 use App\Fund;
-use App\FundTransaction;
 use App\Http\Controllers\Controller;
 use App\MaterialConfig;
 use App\MaterialIn;
@@ -16,6 +14,7 @@ use App\Order;
 use App\OrderDetail;
 use App\Payment;
 use App\ProductTransfer;
+use App\Transaction;
 use App\Transfer;
 use App\UserAccount;
 use Illuminate\Database\Eloquent\Builder;
@@ -65,6 +64,10 @@ class ShowroomController extends Controller
         $order = Order::with('customer')->where('id',$id)->first();
         return view('admin.showroom.modal.payment',compact('order'));
     }
+    public function orderPaymentHistory($id){
+        $payments = Payment::with('transaction')->where('releted_id',$id)->where('releted_id_type',1)->where('releted_department_id',6)->get();
+        return view('admin.showroom.modal.payment-history',compact('payments'));
+    }
     public function orderPaymentStore(Request $request){
         if($request->paid_amount<=0){
             return ['status' => 103, 'message' => 'Paid more then 0'];
@@ -99,21 +102,41 @@ class ShowroomController extends Controller
             $payment->payment_info    = $request->payment_info;
             $payment->user_account_id = $user_account->id;
             $payment->releted_id = $request->order_id;
+            $payment->releted_department_id = 6; // 6 is for knitting showroom
             $payment->releted_id_type = 1;
             $payment->created_by = Auth::user()->id;
             $payment->save();
             // Payment data store end
 
-            if($request->payment_process == 'cash'){
-                $fund_info = Fund::where('id',1)->first();
-                $bank['current_balance'] = $fund_info->current_balance - $request->paid_amount;
-                $fund_info->update($bank);
+            if($request->payment_process == 'bank'){
+                $bank_info = Bank::where('id',$request->payment_type)->first();
+                $bank['current_balance'] = $bank_info->current_balance + $request->paid_amount;
+                $bank_info->update($bank);
 
-                $transaction = new FundTransaction();
-                $transaction->fund_id = $fund_info->id;
-                $transaction->type = 2;
+                $transaction = new Transaction();
+                $transaction->bank_id = $bank_info->id;
+                $transaction->source_type = 1;
+                $transaction->type = 2; // 1 is Widthrow
+                $transaction->payment_id = $payment->id;
                 $transaction->amount = $request->paid_amount;
-                $transaction->reason = 'Order Due Payment';
+                $transaction->reason = 'Order Payment for Order ID '.$request->order_id;
+                $transaction->created_by = Auth::user()->id;
+
+                $transaction->save();
+
+            }
+            if($request->payment_process == 'account'){
+                $fund_info = Fund::where('id',$request->payment_type)->first();
+                $fund['current_balance'] = $fund_info->current_balance + $request->paid_amount;
+                $fund_info->update($fund);
+
+                $transaction = new Transaction();
+                $transaction->bank_id = $fund_info->id;
+                $transaction->source_type = 2;
+                $transaction->type = 2;
+                $transaction->payment_id = $payment->id;
+                $transaction->amount = $request->paid_amount;
+                $transaction->reason = 'Order Payment for Order ID '.$request->order_id;
                 $transaction->created_by = Auth::user()->id;
 
                 $transaction->save();

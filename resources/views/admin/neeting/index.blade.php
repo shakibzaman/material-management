@@ -76,6 +76,9 @@
                         <a class="btn btn-danger text-light btn-xs" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
                            data-attr="{{ route('admin.netting.company.return', $companyList[$key]->id) }}" title="Create a project"> Return to Stock
                         </a>
+                        <a class="btn btn-xs btn-primary" href="{{ route('admin.netting.company.return.list', $companyList[$key]->id) }}">
+                            Return List
+                        </a>
                         @if($companyList[$key]->id == 2)
                             <a class="btn btn-success text-light btn-xs" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
                                data-attr="{{ route('admin.netting.company.delivered', $companyList[$key]->id) }}"> Delivered

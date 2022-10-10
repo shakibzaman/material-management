@@ -5,11 +5,11 @@ namespace App\Http\Controllers\admin;
 use App\Company;
 use App\Customer;
 use App\Fund;
-use App\FundTransaction;
 use App\Http\Controllers\Controller;
 use App\Order;
 use App\Payment;
 use App\ProductDelivered;
+use App\Transaction;
 use App\UserAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -127,8 +127,9 @@ class CompanyController extends Controller
                     $bank['current_balance'] = $fund_info->current_balance - $request->paid_amount;
                     $fund_info->update($bank);
 
-                    $transaction = new FundTransaction();
-                    $transaction->fund_id = $fund_info->id;
+                    $transaction = new Transaction();
+                    $transaction->bank_id = $fund_info->id;
+                    $transaction->source_type = 2; // 2 is account 1 is bank
                     $transaction->type = 2;
                     $transaction->amount = $request->paid_amount;
                     $transaction->reason = 'Company Due Payment';

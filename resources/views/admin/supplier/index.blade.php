@@ -66,6 +66,9 @@
                             <a class="btn btn-success btn-xs text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
                                                 data-attr="{{ route('admin.supplier.payment',$user->id) }}" title="Return"> Payment
                                             </a>
+                            <a class="btn btn-xs btn-info" href="{{ route('admin.supplier.payment.all.list', $user->id) }}">
+                                Payment List
+                            </a>
                         </td>
                     </tr>
                     @endforeach

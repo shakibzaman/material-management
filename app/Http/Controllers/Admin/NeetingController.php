@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers\admin;
 
+use App\Bank;
+use App\Fund;
 use App\Order;
 use App\OrderDetail;
+use App\Transaction;
 use Gate;
 use App\User;
 use App\Income;
@@ -86,6 +89,17 @@ class NeetingController extends Controller
         return view( 'admin.neeting.stock-sell-knitting', compact( 'customers', 'company_id', 'materials', 'knittingStock', 'material_key_by', 'rest_quantity' ) );
     }
 
+    public function getReturnList($id){
+        $company_id = $id;
+       $return_list = ProductReturn::join('product_transfer','product_return.product_transfer_id','product_transfer.id')
+           ->join('material_configs','product_transfer.product_id','material_configs.id')
+           ->join('users','product_return.return_by','users.id')
+           ->join('transfer','product_transfer.transfer_id','transfer.id')
+           ->where('product_return.type',2)
+           ->where('transfer.company_id',$company_id)
+           ->select('product_return.*','material_configs.name','users.name as return_by_user','transfer.company_id')->get();
+        return view( 'admin.neeting.return-list',compact('return_list'));
+    }
     /**
      * @param  Request $request
      * @return mixed
@@ -417,20 +431,57 @@ class NeetingController extends Controller
                 $expense->transfer_product_id = $stock->id;
                 $expense->save();
 
+
+                if ( $request->paid ) {
+                    // Payment data store start
+                    $payment                  = new Payment();
+                    $payment->amount          = ($stock->process_fee*$request->stock_value[$i]);
+                    $payment->payment_process = $request->payment_process;
+                    $payment->payment_info    = $request->payment_info;
+                    $payment->user_account_id = $request->company_id;
+                    $payment->releted_id      = $delivered->id;
+                    $payment->releted_id_type = 3;
+                    $payment->created_by      = Auth::user()->id;
+                    $payment->save();
+                    // Payment data store end
+                }
+                if($request->payment_process == 'bank'){
+                    $bank_info = Bank::where('id',$request->payment_type)->first();
+                    $bank['current_balance'] = $bank_info->current_balance + ($stock->process_fee*$request->stock_value[$i]);
+                    $bank_info->update($bank);
+
+                    $transaction = new Transaction();
+                    $transaction->bank_id = $bank_info->id;
+                    $transaction->source_type = 1;
+                    $transaction->type = 2; // 1 is Widthrow
+                    $transaction->payment_id = $payment->id;
+                    $transaction->amount = ($stock->process_fee*$request->stock_value[$i]);
+                    $transaction->reason = 'Supplier Payment';
+                    $transaction->created_by = Auth::user()->id;
+
+                    $transaction->save();
+
+                }
+                if($request->payment_process == 'account'){
+                    $fund_info = Fund::where('id',$request->payment_type)->first();
+                    $fund['current_balance'] = $fund_info->current_balance + ($stock->process_fee*$request->stock_value[$i]);
+                    $fund_info->update($fund);
+
+                    $transaction = new Transaction();
+                    $transaction->bank_id = $fund_info->id;
+                    $transaction->source_type = 2;
+                    $transaction->type = 2;
+                    $transaction->payment_id = $payment->id;
+                    $transaction->amount = ($stock->process_fee*$request->stock_value[$i]);
+                    $transaction->reason = 'Supplier Payment';
+                    $transaction->created_by = Auth::user()->id;
+
+                    $transaction->save();
+
+                }
+
             }
-            if ( $request->paid ) {
-                // Payment data store start
-                $payment                  = new Payment();
-                $payment->amount          = $request->paid;
-                $payment->payment_process = $request->payment_process;
-                $payment->payment_info    = $request->payment_info;
-                $payment->user_account_id = $request->company_id;
-                $payment->releted_id      = $delivered->id;
-                $payment->releted_id_type = 3;
-                $payment->created_by      = Auth::user()->id;
-                $payment->save();
-                // Payment data store end
-            }
+
 
             DB::commit();
             return ['status' => 200, 'message' => 'Delivered Successfully'];
@@ -489,6 +540,12 @@ class NeetingController extends Controller
                         $orginal_stock->update( $update_material_stock );
                         // Material Stock update end
                     }
+                    $expense_data = Expense::where('expense_category_id',1)->where('transfer_product_id',$stock->id)->first();
+                    if($expense_data){
+                        $data['amount'] = $expense_data->amount -  ($pro_qty*$orginal_stock->unit_price);
+                        $expense_data->update($data);
+                        logger("Expense Updated");
+                    }
 
                     // Product return data store
                     $returnData                      = new ProductReturn();
@@ -516,7 +573,12 @@ class NeetingController extends Controller
                         $orginal_stock->update( $update_material_stock );
                         // Material Stock update end
                     }
-
+                    $expense_data = Expense::where('expense_category_id',1)->where('transfer_product_id',$stock->id)->first();
+                    if($expense_data){
+                        $data['amount'] = $expense_data->amount -  ($pro_qty*$orginal_stock->unit_price);
+                        $expense_data->update($data);
+                        logger("Expense Updated");
+                    }
                     // Product return data store
                     $returnData                      = new ProductReturn();
                     $returnData->product_transfer_id = $stock->id;
@@ -640,6 +702,8 @@ class NeetingController extends Controller
 
         if ( $storeProduct ) {
             logger( 'Store ' );
+            return ['status' => 200, 'message' => 'Successfully Transfer'];
+
         }
     }
 
@@ -700,7 +764,7 @@ class NeetingController extends Controller
                             $expense                      = new Expense();
                             $expense->entry_date          = date( "Y-m-d" );
                             $expense->amount              = ( $pro_qty * $stock->unit_price );
-                            $expense->description         = "Product Purchase Costing for Netting";
+                            $expense->description         = "Product Purchase Costing for Netting Qty for ".$pro_qty ;
                             $expense->expense_category_id = 1;
                             $expense->department_id       = 1;
                             $expense->created_by_id       = Auth::user()->id;
@@ -731,7 +795,7 @@ class NeetingController extends Controller
                             $expense                      = new Expense();
                             $expense->entry_date          = date( "Y-m-d" );
                             $expense->amount              = ( $pro_qty * $stock->unit_price );
-                            $expense->description         = "Product Purchase Costing for Netting";
+                            $expense->description         = "Product Purchase Costing for Netting Qty for ".$pro_qty ;
                             $expense->expense_category_id = 1;
                             $expense->department_id       = 1;
                             $expense->created_by_id       = Auth::user()->id;

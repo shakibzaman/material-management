@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Bank;
-use App\BankTransaction;
+use App\Fund;
 use App\Payment;
 use App\ProductReturn;
 use App\Supplier;
 use App\MaterialIn;
+use App\Transaction;
 use App\UserAccount;
 use App\SupplierProduct;
 use Illuminate\Http\Request;
@@ -40,6 +41,20 @@ class SupplierController extends Controller
     public function create()
     {
         return view( 'admin.supplier.create' );
+    }
+
+    public function getPaymentType($type){
+        if($type == 'bank'){
+            $payment_type = Bank::get();
+        }
+        else if($type == 'account'){
+            $payment_type = Fund::get();
+        }
+        else{
+            $payment_type ='';
+        }
+
+        return $payment_type;
     }
 
     public function returnList($id){
@@ -155,6 +170,35 @@ class SupplierController extends Controller
         return view( 'admin.supplier.modal.payment', compact( 'all_dues', 'supplier_detail' ) );
 
     }
+    public function paymentList( $id )
+    {
+        $supplier_detail = Supplier::where( 'id', $id )->first();
+        if ( !$supplier_detail ) {
+            return ['status' => 105, 'message' => 'Sorry your Supplier not founded'];
+        }
+        $user_account = UserAccount::where('user_id',$id)->where('type',1)->first();
+        $all_dues = Payment::with('transaction')->where( 'user_account_id', $user_account->id )->where('releted_id_type',2)->get();
+        return view( 'admin.supplier.modal.payment', compact( 'all_dues', 'supplier_detail' ) );
+
+    }
+    public function paymentAllList( $id )
+    {
+        $supplier_detail = Supplier::where( 'id', $id )->first();
+        if ( !$supplier_detail ) {
+            return ['status' => 105, 'message' => 'Sorry your Supplier not founded'];
+        }
+        $user_account = UserAccount::where('user_id',$id)->where('type',1)->first();
+        $user_account_id = $user_account->id;
+        $transactions = Transaction::with('payment','user')
+            ->whereHas('payment',function (\Illuminate\Database\Eloquent\Builder $query) use ($user_account_id){
+            $query->where('user_account_id', $user_account_id);
+        })->get();
+        $bank_info = Bank::get()->keyBy('id');
+        $fund_info = Fund::get()->keyBy('id');
+
+        return view( 'admin.supplier.payment-all-list', compact( 'transactions', 'supplier_detail','bank_info','fund_info' ) );
+
+    }
 
     /**
      * @param  Request $request
@@ -196,9 +240,46 @@ class SupplierController extends Controller
                     $payment->payment_process = $request->payment_process;
                     $payment->payment_info    = $request->payment_info;
                     $payment->user_account_id = $users_account->id;
+                    $payment->releted_id = $due->id;
+                    $payment->releted_id_type = 2;
                     $payment->created_by = Auth::user()->id;
                     $payment->save();
                     // Payment data store end
+
+                    if($request->payment_process == 'bank'){
+                        $bank_info = Bank::where('id',$request->payment_type)->first();
+                        $bank['current_balance'] = $bank_info->current_balance - $paid_amt;
+                        $bank_info->update($bank);
+
+                        $transaction = new Transaction();
+                        $transaction->bank_id = $bank_info->id;
+                        $transaction->source_type = 1;
+                        $transaction->type = 1; // 1 is Widthrow
+                        $transaction->payment_id = $payment->id;
+                        $transaction->amount = $paid_amt;
+                        $transaction->reason = 'Supplier Payment';
+                        $transaction->created_by = Auth::user()->id;
+
+                        $transaction->save();
+
+                    }
+                    if($request->payment_process == 'account'){
+                        $fund_info = Fund::where('id',$request->payment_type)->first();
+                        $fund['current_balance'] = $fund_info->current_balance - $paid_amt;
+                        $fund_info->update($fund);
+
+                        $transaction = new Transaction();
+                        $transaction->bank_id = $fund_info->id;
+                        $transaction->source_type = 2;
+                        $transaction->type = 1;
+                        $transaction->payment_id = $payment->id;
+                        $transaction->amount = $paid_amt;
+                        $transaction->reason = 'Supplier Payment';
+                        $transaction->created_by = Auth::user()->id;
+
+                        $transaction->save();
+
+                    }
 
                 } else {
                     $contentQty = 0;
@@ -220,11 +301,49 @@ class SupplierController extends Controller
                     $payment                  = new Payment();
                     $payment->amount          = $paid_amt;
                     $payment->payment_process = $request->payment_process;
+                    $payment->releted_department_id = 5;
                     $payment->payment_info    = $request->payment_info;
                     $payment->user_account_id = $users_account->id;
+                    $payment->releted_id = $due->id;
+                    $payment->releted_id_type = 2;
                     $payment->created_by = Auth::user()->id;
                     $payment->save();
                     // Payment data store end
+
+                    if($request->payment_process == 'bank'){
+                        $bank_info = Bank::where('id',$request->payment_type)->first();
+                        $bank['current_balance'] = $bank_info->current_balance - $request->paid_amount;
+                        $bank_info->update($bank);
+
+                        $transaction = new Transaction();
+                        $transaction->bank_id = $bank_info->id;
+                        $transaction->source_type = 1;
+                        $transaction->type = 1; // 1 is Widthrow
+                        $transaction->payment_id = $payment->id;
+                        $transaction->amount = $request->paid_amount;
+                        $transaction->reason = 'Supplier Payment';
+                        $transaction->created_by = Auth::user()->id;
+
+                        $transaction->save();
+
+                    }
+                    if($request->payment_process == 'account'){
+                        $fund_info = Fund::where('id',$request->payment_type)->first();
+                        $fund['current_balance'] = $fund_info->current_balance - $request->paid_amount;
+                        $fund_info->update($fund);
+
+                        $transaction = new Transaction();
+                        $transaction->bank_id = $fund_info->id;
+                        $transaction->source_type = 2;
+                        $transaction->type = 1;
+                        $transaction->payment_id = $payment->id;
+                        $transaction->amount = $request->paid_amount;
+                        $transaction->reason = 'Supplier Payment';
+                        $transaction->created_by = Auth::user()->id;
+
+                        $transaction->save();
+
+                    }
 
                 }
 
@@ -234,21 +353,6 @@ class SupplierController extends Controller
 
             }
 
-            if($request->payment_process == 'bank'){
-                $bank_info = Bank::where('id',1)->first();
-                $bank['current_balance'] = $bank_info->current_balance - $request->paid_amount;
-                $bank_info->update($bank);
-
-                $transaction = new BankTransaction();
-                $transaction->bank_id = $bank_info->id;
-                $transaction->type = 1;
-                $transaction->amount = $request->paid_amount;
-                $transaction->reason = 'Supplier Payment';
-                $transaction->created_by = Auth::user()->id;
-
-                $transaction->save();
-
-            }
             DB::commit();
             return ['status' => 200, 'message' => 'Successfully Payment Done'];
 

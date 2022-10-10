@@ -49,9 +49,14 @@
                                         {{ trans('global.view') }}
                                     </a>
                                 @endcan
-                                <a class="btn btn-xs btn-primary text-white" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
-                                   data-attr="{{ route('admin.fund.deposit', $fund->id) }}"> Deposit
-                                </a>
+                                @if($fund->id == 1)
+                                    <a class="btn btn-xs btn-primary text-white" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
+                                       data-attr="{{ route('admin.fund.deposit', $fund->id) }}"> Deposit
+                                    </a>
+                                    <a class="btn btn-xs btn-info" href="{{ route('admin.fund.deposit.list', $fund->id) }}">
+                                        Deposit List
+                                    </a>
+                                @endif
 
                                 @can('expense_edit')
                                     <a class="btn btn-xs btn-info" href="{{ route('admin.fund.edit', $fund->id) }}">

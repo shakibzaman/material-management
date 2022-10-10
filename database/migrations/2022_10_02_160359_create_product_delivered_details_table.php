@@ -6,24 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateProductDeliveredDetailsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('product_delivered_details', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+
+		$table->increments('id');
+		$table->integer('product_delivered_id');
+		$table->integer('product_id');
+		$table->integer('product_stock_id');
+		$table->integer('process_fee');
+		$table->integer('quantity');
+		$table->timestamps();
+
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('product_delivered_details');

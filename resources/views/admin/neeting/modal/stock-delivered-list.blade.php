@@ -16,7 +16,7 @@
                     <th>Discount</th>
                     <th>Paid</th>
                     <th>Due</th>
-                    <th>Action</th>
+{{--                    <th>Action</th>--}}
                 </tr>
             </thead>
             <tbody>
@@ -36,7 +36,7 @@
 {{--                        <a class="btn btn-success text-light btn-xs" data-toggle="modal" id="mediumButton" data-target="#mediumModal"--}}
 {{--                           data-attr="{{ route('admin.netting.company.delivered.list', 2) }}"> Delivered List--}}
 {{--                        </a>--}}
-                        <a href="" class="btn btn-primary">Delivered List</a>
+{{--                        <a href="" class="btn btn-primary">Delivered List</a>--}}
                     </td>
                 </tr>
             @endforeach

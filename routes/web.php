@@ -34,7 +34,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::resource('supplier', 'SupplierController');
     Route::get('supplier/payment/{id}', 'SupplierController@payment')->name('supplier.payment');
     Route::post('supplier/payment/store', 'SupplierController@paymentStore')->name('supplier.payment.store');
+    Route::get('supplier/payment/list/{id}', 'SupplierController@paymentList')->name('supplier.payment.list');
+    Route::get('supplier/payment/all/list/{id}', 'SupplierController@paymentAllList')->name('supplier.payment.all.list');
     Route::get('supplier/return/list/{id}', 'SupplierController@returnList')->name('supplier.return.list');
+    Route::get('supplier/payment/type/{id}', 'SupplierController@getPaymentType')->name('supplier.payment.type');
 
     // Customer
     Route::resource('customer', 'CustomerController');
@@ -47,6 +50,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('showroom/cart-test', 'CartController@cartTest')->name('showroom.cart.test');
     Route::post('showroom/cart/order', 'CartController@showroomCartOrder')->name('showroom.cart-order');
     Route::post('knitting/cart/order', 'CartController@KnittingCartOrder')->name('knitting.cart-order');
+    Route::get('knitting/order/invoice/{id}', 'CartController@orderInvoice')->name('knitting.order.invoice');
 
     Route::get('products', 'CartController@index')->name('products');
     Route::get('pos', 'CartController@pos')->name('showroom.pos');
@@ -89,6 +93,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('purchase/product/create', 'ProductController@purchaseCreate')->name('product.purchase.create');
     Route::get('purchase/product', 'ProductController@purchase')->name('product.purchase');
     Route::get('product/company/return-list/{id}', 'ProductController@returnList')->name('product.company.return');
+    Route::get('product/company/detail-list/{id}', 'ProductController@detailList')->name('product.company.detail');
     Route::post('return/material/stock', 'ProductController@returnStock')->name('return.materail.stock');
 
 
@@ -98,6 +103,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('neeting/index', 'NeetingController@index')->name('neeting.index');
     Route::get('neeting/company/transfer-list/{id}', 'NeetingController@transferList')->name('netting.company.transfer');
     Route::get('neeting/company/return-list/{id}', 'NeetingController@returnList')->name('netting.company.return');
+    Route::get('neeting/company/return/list/{id}', 'NeetingController@getReturnList')->name('netting.company.return.list'); // List of Return Product
     Route::get('neeting/company/delivered/{id}', 'NeetingController@stockDelivered')->name('netting.company.delivered');
     Route::get('neeting/company/delivered/list/{id}', 'NeetingController@stockDeliveredList')->name('netting.company.delivered.list');
     Route::post('knitting/delivered/stock/check', 'NeetingController@stockDeliveredCheck')->name('netting.company.delivered.stock.check');
@@ -143,6 +149,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('order/details/{id}', 'ShowroomController@orderDetails')->name('order.details');
     Route::get('order/payment/{id}', 'ShowroomController@orderPayment')->name('order.payment');
     Route::post('order/payment/store', 'ShowroomController@orderPaymentStore')->name('order.payment.store');
+    Route::get('order/payment/history/{id}', 'ShowroomController@orderPaymentHistory')->name('order.payment.history');
 
 
     // Stock Set
@@ -173,10 +180,14 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::resource('bank', 'BankController');
     Route::get('bank/deposit/{id}', 'BankController@deposit')->name('bank.deposit');
     Route::post('bank/deposit', 'BankController@depositStore')->name('bank.deposit.store');
+    Route::get('bank/deposit/list/{id}', 'BankController@depositList')->name('bank.deposit.list');
+
+
 
     // Fund
     Route::resource('fund', 'FundController');
     Route::get('fund/deposit/{id}', 'FundController@deposit')->name('fund.deposit');
+    Route::get('fund/deposit/list/{id}', 'FundController@depositList')->name('fund.deposit.list');
     Route::post('fund/deposit', 'FundController@depositStore')->name('fund.deposit.store');
 
 

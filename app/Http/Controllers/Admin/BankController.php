@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Bank;
-use App\BankTransaction;
+use App\Fund;
 use App\Http\Controllers\Controller;
+use App\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -103,16 +104,28 @@ class BankController extends Controller
         return view('admin.bank.deposit',compact('bank_id'));
 
     }
+
+    public function depositList($id){
+        $transactions = Transaction::with('fund','user')->where('bank_id',$id)->where('type',2)->get();
+        return view('admin.fund.deposit-list',compact('transactions'));
+
+    }
     public function depositStore(Request $request){
         DB::beginTransaction();
         try{
+            if(!is_null($request->fund_id)){
+                $fund_info = Fund::where('id',$request->fund_id)->first();
+                $fund['current_balance'] = $fund_info->current_balance - $request->deposit;
+                $fund_info->update($fund);
+            }
             $bank_info = Bank::where('id',$request->bank_id)->first();
             $bank['current_balance'] = $bank_info->current_balance + $request->deposit;
             $bank_info->update($bank);
 
-            $transaction = new BankTransaction();
+            $transaction = new Transaction();
             $transaction->bank_id = $bank_info->id;
             $transaction->type = 2;
+            $transaction->source_fund_id = $request->fund_id??0;
             $transaction->amount = $request->deposit;
             $transaction->reason = $request->reason;
             $transaction->created_by = Auth::user()->id;

@@ -6,26 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateDepartmentsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('departments', function (Blueprint $table) {
-            $table->id();
-            $table->string('name')->nullable();
-            $table->timestamps();
-            $table->softDeletes();
+
+		$table->bigIncrements('id');
+		$table->string('name')->nullable();
+		$table->timestamp('created_at')->nullable();
+		$table->timestamp('updated_at')->nullable();
+		$table->timestamp('deleted_at')->nullable();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('departments');

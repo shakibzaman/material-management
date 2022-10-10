@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Bank;
 use App\Customer;
 use App\Department;
 use App\Expense;
+use App\Fund;
 use App\Http\Controllers\Controller;
 use App\MaterialIn;
 use App\Order;
@@ -12,6 +14,7 @@ use App\OrderDetail;
 use App\Payment;
 use App\Product;
 use App\ProductTransfer;
+use App\Transaction;
 use App\UserAccount;
 //use Gloudemans\Shoppingcart\Cart;
 use Gloudemans\Shoppingcart\Facades\Cart;
@@ -285,7 +288,6 @@ class CartController extends Controller
                 // Stock deduct from product supply end
 
             }
-            logger("Order Details");
             // Order details create end
 
             // User account update start
@@ -307,6 +309,23 @@ class CartController extends Controller
                 $payment->created_by = Auth::user()->id;
                 $payment->save();
                 logger("Payment Updated");
+
+                if($request->payment_process == 'cash'){
+                   $fund_info = Fund::where('department_id',$department_id)->first();
+                    $fund['current_balance'] = $fund_info->current_balance + $request->paid;
+                    $fund_info->update($fund);
+
+                    $transaction = new Transaction();
+                    $transaction->bank_id = $fund_info->id;
+                    $transaction->source_type = 2; // 2 is account 1 is bank
+                    $transaction->type = 2;
+                    $transaction->payment_id = $payment->id;
+                    $transaction->amount = $request->paid;
+                    $transaction->reason = 'Order Payment';
+                    $transaction->created_by = Auth::user()->id;
+                    $transaction->save();
+
+                }
             }
 
             // User account update end
@@ -319,7 +338,13 @@ class CartController extends Controller
             return $e->getMessage();
         }
     }
+
+    public function orderInvoice($id){
+        $order = Order::with('customer','details')->where('id',$id)->first();
+        return view('admin.cart.include.invoice',compact('order'));
+    }
     public function KnittingCartOrder(Request $request){
+
         $department_id = $request->department_id;
         $validated = $request->validate([
             'invoice_id' => 'required|unique:orders|max:255',
@@ -434,10 +459,46 @@ class CartController extends Controller
                 $payment->payment_info    = $request->payment_info;
                 $payment->user_account_id = $user_account->id;
                 $payment->releted_id = $order->id;
+                $payment->releted_department_id = 6; // 6 is for knitting showroom
                 $payment->releted_id_type = 1;
                 $payment->created_by = Auth::user()->id;
                 $payment->save();
                 logger("Payment Updated");
+
+                if($request->payment_process == 'bank'){
+                    $bank_info = Bank::where('id',$request->payment_type)->first();
+                    $bank['current_balance'] = $bank_info->current_balance + $request->paid;
+                    $bank_info->update($bank);
+
+                    $transaction = new Transaction();
+                    $transaction->bank_id = $bank_info->id;
+                    $transaction->source_type = 1;
+                    $transaction->type = 2; // 1 is Widthrow 2 for deposit
+                    $transaction->payment_id = $payment->id;
+                    $transaction->amount = $request->paid;
+                    $transaction->reason = 'Order Payment for Order ID '.$order->id;
+                    $transaction->created_by = Auth::user()->id;
+
+                    $transaction->save();
+
+                }
+                if($request->payment_process == 'account'){
+                    $fund_info = Fund::where('id',$request->payment_type)->first();
+                    $fund['current_balance'] = $fund_info->current_balance + $request->paid;
+                    $fund_info->update($fund);
+
+                    $transaction = new Transaction();
+                    $transaction->bank_id = $fund_info->id;
+                    $transaction->source_type = 2;
+                    $transaction->type = 2;
+                    $transaction->payment_id = $payment->id;
+                    $transaction->amount = $request->paid;
+                    $transaction->reason = 'Order Payment for Order ID '.$order->id;
+                    $transaction->created_by = Auth::user()->id;
+
+                    $transaction->save();
+
+                }
             }
 
             // User account update end

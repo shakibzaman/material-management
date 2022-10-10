@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Bank;
 use App\Department;
 use App\Employee;
+use App\Fund;
 use App\Http\Controllers\Controller;
 use App\MaterialConfig;
 use App\MaterialIn;
@@ -11,6 +13,7 @@ use App\Payment;
 use App\ProductTransfer;
 use App\Supplier;
 use App\SupplierProduct;
+use App\Transaction;
 use App\Unit;
 use App\User;
 use App\UserAccount;
@@ -78,13 +81,51 @@ class MaterialInController extends Controller
             $request['material_in_id'] = $materialIn->id;
             $request['payment_process'] = $request->payment_process;
             $request['payment_info'] = $request->payment_info;
-            SupplierProduct::create($request->all());
+            $supplier_store = SupplierProduct::create($request->all());
 
 
             if($request->paid_amount>0){
                 $request['amount'] = $request->paid_amount;
                 $request['user_account_id'] = $user_account_detail->id;
-                Payment::create($request->all());
+                $request['releted_id'] = $supplier_store->id;
+                $request['releted_id_type'] = 2;
+                $request['releted_department_id'] = 5;
+                $payment = Payment::create($request->all());
+
+                if($request->payment_process == 'bank'){
+                    $bank_info = Bank::where('id',$request->payment_type)->first();
+                    $bank['current_balance'] = $bank_info->current_balance - $request->paid_amount;
+                    $bank_info->update($bank);
+
+                    $transaction = new Transaction();
+                    $transaction->bank_id = $bank_info->id;
+                    $transaction->source_type = 1; // 2 is account 1 is bank
+                    $transaction->type = 1; // 1 is Widthrow
+                    $transaction->payment_id = $payment->id;
+                    $transaction->amount = $request->paid_amount;
+                    $transaction->reason = 'Supplier Payment';
+                    $transaction->created_by = Auth::user()->id;
+
+                    $transaction->save();
+
+                }
+                if($request->payment_process == 'account'){
+                    $fund_info = Fund::where('id',$request->payment_type)->first();
+                    $fund['current_balance'] = $fund_info->current_balance - $request->paid_amount;
+                    $fund_info->update($fund);
+
+                    $transaction = new Transaction();
+                    $transaction->bank_id = $fund_info->id;
+                    $transaction->source_type = 2; // 2 is account 1 is bank
+                    $transaction->type = 1;
+                    $transaction->payment_id = $payment->id;
+                    $transaction->amount = $request->paid_amount;
+                    $transaction->reason = 'Supplier Payment';
+                    $transaction->created_by = Auth::user()->id;
+
+                    $transaction->save();
+
+                }
             }
 
 
@@ -117,7 +158,7 @@ class MaterialInController extends Controller
      */
     public function show($id)
     {
-        $materials = MaterialIn::with('user','employee','units')->where('material_id',$id)->get();
+        $materials = MaterialIn::with('user','employee','units','supplier')->where('material_id',$id)->get();
         return view('admin.material.show', compact('materials'));
 
     }

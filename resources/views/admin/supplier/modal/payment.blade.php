@@ -48,7 +48,7 @@
                     <select name="payment_process" id="payment_process" class="form-control" required>
                         <option value="">---</option>
                         <option value="bank">Bank</option>
-                        <option value="bkash">Bkash</option>
+                        <option value="account">Funds</option>
                         <option value="cash">Cash</option>
                     </select>
                     @if($errors->has('payment_process'))
@@ -59,6 +59,21 @@
                     <p class="helper-block">
                         {{ trans('cruds.expense.fields.entry_date_helper') }}
                     </p>
+            </div>
+
+            <div class="form-group {{ $errors->has('payment_type') ? 'has-error' : '' }}">
+                <label for="payment_type">Select Account *</label>
+                <select name="payment_type" id="payment_type" class="form-control select2 payment_type" >
+
+                </select>
+                @if($errors->has('payment_type'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('payment_type') }}
+                    </em>
+                @endif
+                <p class="helper-block">
+                    {{ trans('cruds.expense.fields.entry_date_helper') }}
+                </p>
             </div>
 
             <div class="form-group {{ $errors->has('payment_info') ? 'has-error' : '' }}">
@@ -141,6 +156,45 @@
                 }
             });
         }
+
+
+
+            $( "#payment_process" ).change(function() {
+
+                let payment_type = $(this).val();
+                //
+                $.ajax({
+                    url: '/admin/supplier/payment/type/'+payment_type,
+                    type: 'GET',
+                    cache: false,
+                    datatype: 'application/json',
+
+                    success:function(data){
+                        console.log(data);
+
+                        var op ='<option value="0" selected>--- Select Account ---</option>';
+                        for(var i=0;i<data.length;i++){
+
+                            op+='<option value="'+data[i].id+'">'+data[i].name+'</option>';
+                        }
+                        // set value to the Color
+                        $('.payment_type').html("");
+                        $('.payment_type').append(op);
+
+                    },
+                    error:function(data){
+                        // console.log(data);
+                        // sweet alert
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: "Unable to load data form server",
+                            footer: 'Contact with Your Admin'
+                        })
+                        // swal("Error", 'Unable to load data form server', "error");
+                    }
+                });
+            });
     });
 
     </script>

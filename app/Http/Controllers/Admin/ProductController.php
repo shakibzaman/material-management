@@ -2,6 +2,11 @@
 
 namespace App\Http\Controllers\admin;
 
+use App\Bank;
+use App\Fund;
+use App\Payment;
+use App\SupplierProduct;
+use App\Transaction;
 use DB;
 use Gate;
 use App\Unit;
@@ -99,6 +104,16 @@ class ProductController extends Controller
         $suppliers = Supplier::all()->pluck( 'name', 'id' )->prepend( trans( 'global.pleaseSelect' ), '' );
         return view( 'admin.productPurchase.create', compact( 'employees', 'materials', 'units', 'suppliers' ) );
 
+    }
+
+    public function detailList($id){
+        $material_purchase_info = SupplierProduct::where('material_in_id',$id)->first();
+        $payments = Payment::where('releted_id',$id)->where('releted_department_id',5)->get();
+        $payment_id = $payments->pluck('id');
+        $payment_transaction = Transaction::whereIn('payment_id',$payment_id)->where('type',1)->get();
+        $bank_info = Bank::get()->keyBy('id');
+        $fund_info = Fund::get()->keyBy('id');
+        return view('admin.productPurchase.modal.detail',compact('bank_info','fund_info','material_purchase_info','payment_transaction'));
     }
 
     public function purchase()

@@ -53,24 +53,24 @@
 
                     success:function(data) {
                         console.log(data);
-                        if (data.status == 104) {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Oops...',
-                                text: data.message,
-                                footer: 'Check your Stock'
-                            })
-                        }
-                        else{
-                            Swal.fire({
-                                position: 'top-end',
-                                icon: 'success',
-                                title: 'Data Transferred Successfully ',
-                                showConfirmButton: false,
-                                timer: 1500
-                            })
-                            window.location = '{{ route('admin.neeting.index') }}'
-                        }
+                        {{--if (data.status == 104) {--}}
+                        {{--    Swal.fire({--}}
+                        {{--        icon: 'error',--}}
+                        {{--        title: 'Oops...',--}}
+                        {{--        text: data.message,--}}
+                        {{--        footer: 'Check your Stock'--}}
+                        {{--    })--}}
+                        {{--}--}}
+                        {{--else{--}}
+                        {{--    Swal.fire({--}}
+                        {{--        position: 'top-end',--}}
+                        {{--        icon: 'success',--}}
+                        {{--        title: 'Data Transferred Successfully ',--}}
+                        {{--        showConfirmButton: false,--}}
+                        {{--        timer: 1500--}}
+                        {{--    })--}}
+                        {{--    window.location = '{{ route('admin.neeting.index') }}'--}}
+                        {{--}--}}
                     },
                     error:function(data){
                         console.log(data);

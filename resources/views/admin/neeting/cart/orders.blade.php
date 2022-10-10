@@ -35,6 +35,12 @@
                             Customer
                         </th>
                         <th>
+                            Sub Total
+                        </th>
+                        <th>
+                            Discount
+                        </th>
+                        <th>
                             Total
                         </th>
                         <th>
@@ -43,9 +49,7 @@
                         <th>
                             Due
                         </th>
-                        <th>
-                            Discount
-                        </th>
+
                         <th>
                             &nbsp;Action
                         </th>
@@ -55,13 +59,19 @@
                 @foreach($orders as $order)
                 <tr>
                     <td>
-
+                        {{$order->id}}
                     </td>
                     <td>
                         {{$order->invoice_id}}
                     </td>
                     <td>
                         {{$order->customer->name}}
+                    </td>
+                    <td>
+                        {{$order->sub_total}}
+                    </td>
+                    <td>
+                        {{$order->discount}}
                     </td>
                     <td>
                         {{$order->total}}
@@ -73,18 +83,21 @@
                         {{$order->due}}
                     </td>
                     <td>
-                        {{$order->discount}}
-                    </td>
-                    <td>
                         <a class="btn btn-success text-light btn-xs" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
                            data-attr="{{ route('admin.knitting.order.details',$order->id) }}" title="Return"> Details
                         </a>
-                        <a href="" class="btn btn-info btn-xs">Invoice</a>
+                        <a class="btn btn-success text-light btn-xs" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
+                           data-attr="{{ route('admin.knitting.order.invoice',$order->id) }}" title="Return"> Invoice
+                        </a>
                         @if($order->due >0)
                             <a class="btn btn-success btn-xs text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
                                data-attr="{{ route('admin.order.payment',$order->id) }}" title="Return"> Payment
                             </a>
                         @endif
+                        <a class="btn btn-info btn-xs text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
+                           data-attr="{{ route('admin.order.payment.history',$order->id) }}" title="Return"> Payment History
+                        </a>
+
                     </td>
                 </tr>
                 @endforeach

@@ -6,24 +6,19 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateStockSetMaterialsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('stock_set_materials', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+
+		$table->increments('id');
+		$table->integer('stock_set_id');
+		$table->integer('material_id');
+		$table->integer('material_quantity');
+		$table->timestamps();
+
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('stock_set_materials');

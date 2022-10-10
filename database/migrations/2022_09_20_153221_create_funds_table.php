@@ -6,24 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateFundsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('funds', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+
+		$table->increments('id');
+		$table->string('name');
+		$table->integer('current_balance');
+		$table->timestamps();
+
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('funds');

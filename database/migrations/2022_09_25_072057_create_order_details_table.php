@@ -6,24 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateOrderDetailsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('order_details', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+
+		$table->increments('id');
+		$table->integer('order_id');
+		$table->integer('product_id');
+		$table->integer('color_id')->nullable();
+		$table->integer('product_transfer_id');
+		$table->integer('selling_price');
+		$table->integer('qty');
+		$table->integer('line_total');
+		$table->timestamps();
+
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('order_details');

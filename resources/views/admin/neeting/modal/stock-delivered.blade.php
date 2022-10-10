@@ -86,26 +86,26 @@
         </table>
             <div class="row">
 
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <div class="form-group {{ $errors->has('discount') ? 'has-error' : '' }}">
                         <label for="name">Discount</label>
                         <input type="number" name="discount" id="discount" class="form-control">
                     </div>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <div class="form-group {{ $errors->has('paid') ? 'has-error' : '' }}">
                         <label for="name">Paid *</label>
                         <input type="number" name="paid" id="paid" class="form-control">
                     </div>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <div class="form-group {{ $errors->has('due') ? 'has-error' : '' }}">
                         <label for="name">Due *</label>
                         <input type="number" name="due" id="due" class="form-control" readonly>
                     </div>
                 </div>
 
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <div class="form-group {{ $errors->has('date') ? 'has-error' : '' }}">
                         <label for="name">Date *</label>
                         <input type="date" name="date" id="date" class="form-control" required>
@@ -117,13 +117,13 @@
                     </div>
                 </div>
 
-                <div class="col-md-2">
+                <div class="col-md-4">
                     <div class="form-group {{ $errors->has('payment_process') ? 'has-error' : '' }}">
                         <label for="payment_process">Payment Process *</label>
-                        <select name="payment_process" id="payment_process" class="form-control">
+                        <select name="payment_process" id="payment_process" class="form-control" required>
                             <option value="">---</option>
                             <option value="bank">Bank</option>
-                            <option value="bkash">Bkash</option>
+                            <option value="account">Funds</option>
                             <option value="cash">Cash</option>
                         </select>
                         @if($errors->has('payment_process'))
@@ -136,8 +136,25 @@
                         </p>
                     </div>
                 </div>
+                <div class="col-md-4">
+                    <div class="form-group {{ $errors->has('payment_type') ? 'has-error' : '' }}">
+                        <label for="payment_type">Select Account *</label>
+                        <select name="payment_type" id="payment_type" class="form-control select2 payment_type" >
 
-                <div class="col-md-2">
+                        </select>
+                        @if($errors->has('payment_type'))
+                            <em class="invalid-feedback">
+                                {{ $errors->first('payment_type') }}
+                            </em>
+                        @endif
+                        <p class="helper-block">
+                            {{ trans('cruds.expense.fields.entry_date_helper') }}
+                        </p>
+                    </div>
+                </div>
+
+
+                <div class="col-md-4">
                     <div class="form-group {{ $errors->has('payment_info') ? 'has-error' : '' }}">
                         <label for="payment_info">Payment Info </label>
                         <input type="text" id="payment_info" name="payment_info" class="form-control">
@@ -160,6 +177,42 @@
         </form>
     </div>
 <script>
+    $( "#payment_process" ).change(function() {
+
+        let payment_type = $(this).val();
+        //
+        $.ajax({
+            url: '/admin/supplier/payment/type/'+payment_type,
+            type: 'GET',
+            cache: false,
+            datatype: 'application/json',
+
+            success:function(data){
+                console.log(data);
+
+                var op ='<option value="0" selected>--- Select Account ---</option>';
+                for(var i=0;i<data.length;i++){
+
+                    op+='<option value="'+data[i].id+'">'+data[i].name+'</option>';
+                }
+                // set value to the Color
+                $('.payment_type').html("");
+                $('.payment_type').append(op);
+
+            },
+            error:function(data){
+                // console.log(data);
+                // sweet alert
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: "Unable to load data form server",
+                    footer: 'Contact with Your Admin'
+                })
+                // swal("Error", 'Unable to load data form server', "error");
+            }
+        });
+    });
     $("#transfer_stock").change(function (){
         console.log($(this).val());
 

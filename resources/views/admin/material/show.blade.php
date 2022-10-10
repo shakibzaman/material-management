@@ -23,18 +23,17 @@
                         <th>Invoice Number</th>
                         <th>Purchased By</th>
                         <th>Entry By</th>
-                        <th>Created at</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($materials as $material)
                     <tr>
-                        
+
                         <td>
                             {{ $material->id }}
                         </td>
-                    
+
                         <td>
                             {{ $material->material->name ?? '' }}
                         </td>
@@ -56,32 +55,31 @@
                         <td>
                             {{ $material->rest }}
                         </td>
-                    
+
                         <td>
-                            {{ $material->supplied_by }}
+                            {{ $material->supplier->name }}
                         </td>
-                
+
                         <td>
                             {{ $material->inv_number }}
                         </td>
-                    
+
                         <td>
                             {{$material->employee->name}}
                         </td>
-                    
+
                         <td>
                            {{$material->user->name}}
-                        </td>   
-                    
-                        <td>
-                            {{ $material->created_at }}
                         </td>
                         <td>
                             @if($material->rest>0)
                             <a class="btn btn-danger text-light btn-xs" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
                                                 data-attr="{{ route('admin.product.company.return', $material->id) }}" title="Return"> Return
                             </a>
-                            @endif 
+                            @endif
+                            <a class="btn btn-info text-light btn-xs" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
+                               data-attr="{{ route('admin.product.company.detail', $material->id) }}" title="Details"> Detail
+                            </a>
                         </td>
                     </tr>
                     @endforeach
@@ -95,7 +93,7 @@
 </div>
 <div class="modal fade" id="mediumModal" tabindex="-1" role="dialog" aria-labelledby="mediumModalLabel"
         aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">

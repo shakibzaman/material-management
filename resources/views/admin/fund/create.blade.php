@@ -12,6 +12,15 @@
                 <level>Current Balance</level>
                 <input type="number" class="form-control" name="current_balance" required>
             </div>
+            <div class="form-group">
+                <level>Connected Shop</level>
+                <select name="department_id" class="form-control">
+                    <option>----</option>
+                    <option value="3">Ngonj Showroom</option>
+                    <option value="4">Mirpur Showroom</option>
+                </select>
+            </div>
+
             <button type="submit" class="btn btn-primary">Save</button>
         </form>
     </div>

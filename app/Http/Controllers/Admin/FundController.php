@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Bank;
 use App\BankTransaction;
 use App\Fund;
-use App\FundTransaction;
 use App\Http\Controllers\Controller;
+use App\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -103,16 +103,30 @@ class FundController extends Controller
         return view('admin.fund.deposit',compact('fund_id'));
 
     }
+
+    public function depositList($id){
+        $transactions = Transaction::with('fund','user')->where('fund_id',$id)->where('type',2)->where('source_type',2)->get();
+        return view('admin.fund.deposit-list',compact('transactions'));
+
+    }
     public function depositStore(Request $request){
         DB::beginTransaction();
         try{
-            $fund_info = Fund::where('id',$request->fund_id)->first();
-            $fund['current_balance'] = $fund_info->current_balance + $request->deposit;
-            $fund_info->update($fund);
+            if(!is_null($request->fund_id)){
+                $fund_info = Fund::where('id',$request->fund_id)->first();
+                $fund['current_balance'] = $fund_info->current_balance - $request->deposit;
+                $fund_info->update($fund);
+            }
 
-            $transaction = new FundTransaction();
-            $transaction->fund_id = $fund_info->id;
+            $main_fund_info = Fund::where('id',1)->first();
+            $main_fund['current_balance'] = $main_fund_info->current_balance + $request->deposit;
+            $main_fund_info->update($main_fund);
+
+            $transaction = new Transaction();
+            $transaction->fund_id = 1;
+            $transaction->source_type = 2; // 2 is account 1 is bank
             $transaction->type = 2;
+            $transaction->source_fund_id = $request->fund_id??0;
             $transaction->amount = $request->deposit;
             $transaction->reason = $request->reason;
             $transaction->created_by = Auth::user()->id;

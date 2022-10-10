@@ -11,6 +11,15 @@
             </div>
             <div class="form-group">
                 <level>Source of Fund</level>
+                <select name="fund_id" class="form-control">
+                    <option value="">----</option>
+                    <option value="1">Main Account</option>
+                    <option value="2">Ngonj Account</option>
+                    <option value="3">Mirpur Account</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <level>Reason</level>
                 <input type="text" class="form-control" name="reason" required>
             </div>
             <button type="submit" class="btn btn-primary">Save</button>

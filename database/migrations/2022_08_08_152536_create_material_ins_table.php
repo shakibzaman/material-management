@@ -6,24 +6,29 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateMaterialInsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
-        Schema::create(' ', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+        Schema::create('material_ins', function (Blueprint $table) {
+
+		$table->increments('id');
+		$table->integer('material_id');
+		$table->integer('quantity')->nullable();
+		$table->integer('unit')->nullable();
+		$table->integer('type');
+		$table->date('buying_date')->nullable();
+		$table->integer('unit_price');
+		$table->integer('total_price');
+		$table->integer('rest');
+		$table->integer('supplier_id');
+		$table->string('inv_number');
+		$table->integer('purchased_by');
+		$table->integer('created_by');
+        $table->timestamps();
+
+
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('material_ins');

@@ -9,5 +9,10 @@ class Payment extends Model
 {
     use HasFactory;
     protected $table = 'payment';
-    protected $fillable = ['amount','payment_process','payment_info','user_account_id','created_by'];
+    protected $fillable = ['amount','payment_process','payment_info','user_account_id','created_by','releted_id','releted_id_type','releted_department_id'];
+
+    public function transaction(){
+        return $this->belongsTo(Transaction::class,'id','payment_id');
+}
+
 }

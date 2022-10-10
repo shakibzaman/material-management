@@ -67,6 +67,9 @@
                                 <a class="btn btn-xs btn-primary text-white" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
                                    data-attr="{{ route('admin.bank.deposit', $bank->id) }}"> Deposit
                                 </a>
+                                <a class="btn btn-xs btn-info" href="{{ route('admin.bank.deposit.list', $bank->id) }}">
+                                    Deposit List
+                                </a>
 
                                 @can('expense_edit')
                                     <a class="btn btn-xs btn-info" href="{{ route('admin.bank.edit', $bank->id) }}">
