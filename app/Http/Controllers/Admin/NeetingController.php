@@ -161,6 +161,8 @@ class NeetingController extends Controller
                         $transferProduct['product_stock_id'] = $stock->id;
                         $transferProduct['process_fee']      = $process_fee;
                         $transferProduct['created_by']       = Auth::user()->id;
+                        logger("Transfer Product => ".$pro_qty);
+
                         $storeTransfer                       = $productTransfer->create( $transferProduct );
 
                         if ( $storeTransfer ) {
@@ -172,14 +174,15 @@ class NeetingController extends Controller
 
                             $expense                      = new Expense();
                             $expense->entry_date          = date( "Y-m-d" );
-                            $expense->amount              = ( $pro_qty * $stock->unit_price );
-                            $expense->description         = "Product Process Costing for Netting";
+                            $expense->amount              = ( $pro_qty * $stock->process_fee );
+                            $expense->description         = "Product Process Costing for Netting Qty ".$pro_qty;
                             $expense->expense_category_id = 1;
                             $expense->department_id       = 1;
                             $expense->created_by_id       = Auth::user()->id;
                             $expense->material_id         = $stock->product_id;
                             $expense->transfer_id         = $transfer_id;
                             $expense->transfer_product_id = $storeTransfer->id;
+                            logger("Expense -> ".$expense);
                             $expense->save();
                         }
                     } else {
@@ -192,6 +195,7 @@ class NeetingController extends Controller
                         $transferProduct['product_stock_id'] = $stock->id;
                         $transferProduct['process_fee']      = $process_fee;
                         $transferProduct['created_by']       = Auth::user()->id;
+                        logger("Transfer Product => ".$pro_qty);
 
                         $storeTransfer = $productTransfer->create( $transferProduct );
                         if ( $storeTransfer ) {
@@ -203,14 +207,15 @@ class NeetingController extends Controller
 
                             $expense                      = new Expense();
                             $expense->entry_date          = date( "Y-m-d" );
-                            $expense->amount              = ( $pro_qty * $stock->unit_price );
-                            $expense->description         = "Product Process Costing for Netting";
+                            $expense->amount              = ( $pro_qty * $stock->process_fee );
+                            $expense->description         = "Product Process Costing for Netting Qty ".$pro_qty;
                             $expense->expense_category_id = 1;
                             $expense->department_id       = 1;
                             $expense->created_by_id       = Auth::user()->id;
                             $expense->material_id         = $stock->product_id;
                             $expense->transfer_id         = $transfer_id;
                             $expense->transfer_product_id = $storeTransfer->id;
+                            logger("Expense -> ".$expense);
                             $expense->save();
                         }
                     }
@@ -750,7 +755,6 @@ class NeetingController extends Controller
                         $transferProduct['process_fee']      = $process_fee;
                         $transferProduct['created_by']       = Auth::user()->id;
 
-                        logger( 'Product id store 1' . $transferProduct );
 
                         $storeTransfer = $productTransfer->create( $transferProduct );
 
@@ -783,6 +787,7 @@ class NeetingController extends Controller
                         $transferProduct['product_stock_id'] = $stock->id;
                         $transferProduct['process_fee']      = $process_fee;
                         $transferProduct['created_by']       = Auth::user()->id;
+
 
                         $storeTransfer = $productTransfer->create( $transferProduct );
                         if ( $storeTransfer ) {

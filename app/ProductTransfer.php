@@ -28,7 +28,11 @@ class ProductTransfer extends Model
         return $this->belongsTo(Transfer::class,'transfer_id');
     }
     public function expense(){
-        return $this->belongsTo(Expense::class,'transfer_product_id');
+        return $this->hasMany(Expense::class,'transfer_product_id','id');
+    }
+
+    public function material(){
+        return $this->hasMany(MaterialTransfer::class,'product_transfer_id','id');
     }
 
 }

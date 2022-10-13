@@ -237,6 +237,10 @@ class DyeingController extends Controller
                             $expense->transfer_product_id = $productTransfer->id;
                             $expense->save();
                             logger( 'Expense 1' . $expense );
+                           $material_used = $this->_materialUse($request,$transfer_id,$product_transfer_id = $productTransfer->id,$product_qty=$pro_qty);
+                            if($material_used){
+                                logger('Material  Used');
+                            }
                         }
                     } else {
                         $contentQty                          = 0;
@@ -272,106 +276,15 @@ class DyeingController extends Controller
                             $expense->transfer_product_id = $productTransfer->id;
                             $expense->save();
                             logger( 'Expense 2' . $expense );
-
+                            $material_used = $this->_materialUse($request,$transfer_id,$product_transfer_id = $productTransfer->id,$product_qty=$pro_qty);
+                            if($material_used){
+                                logger('Material Used');
+                            }
                         }
                     }
 
                     if ( $contentQty < 1 ) {
                         break;
-                    }
-
-                }
-            }
-
-            foreach ( $request->material_qty as $key => $material ) {
-                if ( $material != null ) {
-                    $materialRequest['product_id'] = $key;
-                    $materialRequest['quantity']   = $material;
-                    $material_name                 = MaterialConfig::find( $key );
-                    $checkMaterialQty              = $this->checkMaterialQuantity( $materialRequest );
-                    if ( !$checkMaterialQty ) {
-                        DB::rollback();
-                        return ['status' => 104, 'message' => "Sorry !!!  " . $material_name->name . " Low Stock"];
-                    }
-                    logger("1");
-                    $total_material_stocks = MaterialIn::where( 'material_id', $key )->where('rest','>',0)->get();
-
-                    $contentQty = $quantity;
-                    foreach ( $total_material_stocks as $stock ) {
-                    logger("2");
-
-                        $pro_qty = $material;
-                        if ( $stock->rest < $pro_qty ) {
-                            $pro_qty    = $stock->rest;
-                            $contentQty = $contentQty - $stock->rest;
-
-                            $materialStore                    = new MaterialTransfer();
-                            $materialStore->material_id       = $key;
-                            $materialStore->transfer_id       = $transfer_id;
-                            $materialStore->quantity          = $pro_qty;
-                            $materialStore->material_stock_id = $stock->id;
-                            $materialStore->created_by        = Auth::user()->id;
-                            $materialDataStore                = $materialStore->save();
-
-                            if ( $materialDataStore ) {
-                                // reduce stock quantity
-                                $material_data['rest'] = $stock->rest - $pro_qty;
-                                DB::table( 'material_ins' )->where( 'id', $stock->id )->update( $material_data );
-
-                                // Add expense
-
-                                $expense                      = new Expense();
-                                $expense->entry_date          = date( "Y-m-d" );
-                                $expense->amount              = ( $pro_qty * $stock->unit_price );
-                                $expense->description         = "Material Costing of Dyeing";
-                                $expense->expense_category_id = 2;
-                                $expense->department_id       = 2;
-                                $expense->transfer_id         = $transfer_id;
-                                $expense->created_by_id       = Auth::user()->id;
-                                $expense->material_id         = $stock->id;
-                                $expense->transfer_product_id = $productTransfer->id;
-                                $expense->save();
-                                logger( 'Expense 3' . $expense );
-
-                            }
-                        } else {
-
-                            $contentQty                       = 0;
-                            $materialStore                    = new MaterialTransfer();
-                            $materialStore->material_id       = $key;
-                            $materialStore->transfer_id       = $transfer_id;
-                            $materialStore->quantity          = $pro_qty;
-                            $materialStore->material_stock_id = $stock->id;
-                            $materialStore->created_by        = Auth::user()->id;
-                            $materialDataStore                = $materialStore->save();
-
-                            if ( $materialDataStore ) {
-
-                                // reduce stock quantity
-                                $material_data['rest'] = $stock->rest - $pro_qty;
-                                DB::table( 'material_ins' )->where( 'id', $stock->id )->update( $material_data );
-
-                                // Add expense
-
-                                $expense                      = new Expense();
-                                $expense->entry_date          = date( "Y-m-d" );
-                                $expense->amount              = ( $pro_qty * $stock->unit_price );
-                                $expense->description         = "Material Costing of Dyeing";
-                                $expense->expense_category_id = 2;
-                                $expense->department_id       = 2;
-                                $expense->transfer_id         = $transfer_id;
-                                $expense->created_by_id       = Auth::user()->id;
-                                $expense->material_id         = $stock->id;
-                                $expense->transfer_product_id = $productTransfer->id;
-                                $expense->save();
-
-                                logger( 'Expense 4' . $expense );
-
-                            }
-                        }
-                        if ( $contentQty < 1 ) {
-                            break;
-                        }
                     }
 
                 }
@@ -384,6 +297,115 @@ class DyeingController extends Controller
         }
     }
 
+
+    private function _materialUse($request,$transfer_id,$product_transfer_id,$product_qty){
+        DB::beginTransaction();
+        try {
+            foreach ($request->material_qty as $key => $material) {
+                if ($material != null) {
+                    $materialRequest['product_id'] = $key;
+                    $materialRequest['quantity'] = $material;
+                    $material_name = MaterialConfig::find($key);
+                    $checkMaterialQty = $this->checkMaterialQuantity($materialRequest);
+                    if (!$checkMaterialQty) {
+                        DB::rollback();
+                        return ['status' => 104, 'message' => "Sorry !!!  " . $material_name->name . " Low Stock"];
+                    }
+                    logger("100");
+                    $total_material_stocks = MaterialIn::where('material_id', $key)->where('rest', '>', 0)->get();
+
+                   $needed_material_for_product = ($product_qty * $material) / $request->quantity;
+                    $contentQty = $needed_material_for_product;
+                    foreach ($total_material_stocks as $stock) {
+                        logger("200");
+
+                        $pro_qty = $needed_material_for_product;
+                        if ($stock->rest < $pro_qty) {
+                            $pro_qty = $stock->rest;
+                            $contentQty = $contentQty - $stock->rest;
+
+                            $materialStore = new MaterialTransfer();
+                            $materialStore->material_id = $key;
+                            $materialStore->transfer_id = $transfer_id;
+                            $materialStore->quantity = $pro_qty;
+                            $materialStore->material_stock_id = $stock->id;
+                            $materialStore->product_transfer_id = $product_transfer_id;
+                            $materialStore->created_by = Auth::user()->id;
+                            $materialDataStore = $materialStore->save();
+                            logger("Material Pro qty is ".$pro_qty);
+
+                            if ($materialDataStore) {
+                                // reduce stock quantity
+                                $material_data['rest'] = $stock->rest - $pro_qty;
+                                DB::table('material_ins')->where('id', $stock->id)->update($material_data);
+
+                                // Add expense
+
+                                $expense = new Expense();
+                                $expense->entry_date = date("Y-m-d");
+                                $expense->amount = ($pro_qty * $stock->unit_price);
+                                $expense->description = "Material Costing of Dyeing for Qty ".$pro_qty . " Price is ".($pro_qty * $stock->unit_price);
+                                $expense->expense_category_id = 2;
+                                $expense->department_id = 2;
+                                $expense->transfer_id = $transfer_id;
+                                $expense->created_by_id = Auth::user()->id;
+                                $expense->material_id = $stock->id;
+                                $expense->transfer_product_id = $product_transfer_id;
+                                $expense->save();
+                                logger('Expense 300' . $expense);
+
+                            }
+                        } else {
+
+                            $contentQty = 0;
+                            $materialStore = new MaterialTransfer();
+                            $materialStore->material_id = $key;
+                            $materialStore->transfer_id = $transfer_id;
+                            $materialStore->quantity = $pro_qty;
+                            $materialStore->material_stock_id = $stock->id;
+                            $materialStore->product_transfer_id = $product_transfer_id;
+                            $materialStore->created_by = Auth::user()->id;
+                            $materialDataStore = $materialStore->save();
+                            logger("Material Pro qty is ".$pro_qty);
+
+                            if ($materialDataStore) {
+
+                                // reduce stock quantity
+                                $material_data['rest'] = $stock->rest - $pro_qty;
+                                DB::table('material_ins')->where('id', $stock->id)->update($material_data);
+
+                                // Add expense
+
+                                $expense = new Expense();
+                                $expense->entry_date = date("Y-m-d");
+                                $expense->amount = ($pro_qty * $stock->unit_price);
+                                $expense->description = "Material Costing of Dyeing for Qty ".$pro_qty . " Price is ".($pro_qty * $stock->unit_price);
+                                $expense->expense_category_id = 2;
+                                $expense->department_id = 2;
+                                $expense->transfer_id = $transfer_id;
+                                $expense->created_by_id = Auth::user()->id;
+                                $expense->material_id = $stock->id;
+                                $expense->transfer_product_id = $product_transfer_id;
+                                $expense->save();
+
+                                logger('Expense 400' . $expense);
+
+                            }
+                        }
+                        if ($contentQty < 1) {
+                            break;
+                        }
+                    }
+
+                }
+            }
+            DB::commit();
+        }catch ( \Exception $e ) {
+            DB::rollback();
+            return $e->getMessage();
+        }
+
+    }
     /**
      * Display the specified resource.
      *

@@ -33,6 +33,9 @@
                             Product Quantity
                         </th>
                         <th>
+                            Rest Quantity
+                        </th>
+                        <th>
                             &nbsp;Action
                         </th>
                     </tr>
@@ -42,6 +45,7 @@
                                             @php
                                                 if(isset($transfer_products[$nettingData->id])) {
                                                         $productTotalSum = $transfer_products[$nettingData->id]->sum('quantity');
+                                                        $productRestSum = $transfer_products[$nettingData->id]->sum('rest_quantity');
                                                         $product_name = $transfer_products[$nettingData->id][0]['product']['name'];
                                                     }
                                             @endphp
@@ -58,6 +62,9 @@
                                                 <td>{{$product_name}}</td>
                                                 <td>
                                                     {{$productTotalSum}}
+                                                </td>
+                                                <td>
+                                                    {{$productRestSum}}
                                                 </td>
                                                 <td>
                                                     @if($nettingData->company->type == 1)

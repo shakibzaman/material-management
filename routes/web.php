@@ -145,6 +145,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('showroom/index', 'ShowroomController@index')->name('showroom.index');
     Route::get('showroom/transfer/{id}', 'ShowroomController@show')->name('showroom.transfer');
     Route::get('showroom/stock/{id}', 'ShowroomController@stock')->name('showroom.stock');
+    Route::get('showroom/product/details/{company_id}/{product_id}/{color_id}', 'ShowroomController@productDetails')->name('showroom.product.details');
     Route::get('showroom/orders/{id}', 'ShowroomController@showroomOrders')->name('showroom.orders');
     Route::get('order/details/{id}', 'ShowroomController@orderDetails')->name('order.details');
     Route::get('order/payment/{id}', 'ShowroomController@orderPayment')->name('order.payment');

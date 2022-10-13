@@ -26,6 +26,9 @@
                             ID
                         </th>
                         <th>
+                            Date
+                        </th>
+                        <th>
                             Source
                         </th>
                         <th>
@@ -52,6 +55,7 @@
                     <tr>
                         <td></td>
                         <td>{{$transaction->id}}</td>
+                        <td>{{$transaction->created_at}}</td>
                         <td> {{$transaction->bank_id == 1?"Bank":"Main Account"}} </td>
                         <td> {{$source_type->name}} </td>
                         <td>{{$transaction->amount}}  </td>

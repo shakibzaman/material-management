@@ -2,16 +2,12 @@
 @section('content')
 @can('expense_create')
     <div style="margin-bottom: 10px;" class="row">
-        <div class="col-lg-12">
-            <!-- <a class="btn btn-success" href="{{ route("admin.neeting.stock.in") }}">
-                Stock In
-            </a> -->
-        </div>
+
     </div>
 @endcan
 <div class="card">
     <div class="card-header">
-        Dyeing Product List
+        <b>Showroom Product Stock List</b>
     </div>
 
     <div class="card-body">
@@ -19,62 +15,62 @@
             <table class=" table table-bordered table-striped table-hover datatable datatable-Expense">
                 <thead>
                     <tr>
-                        <th width="10">
+                        <th>
+                            Date
+                        </th>
+                        <th>
+                            Product Name
+                        </th>
+                        <th>
+                            Material & Quantity
+                        </th>
+                        <th>
+                            Costing
+                        </th>
 
-                        </th>
-                        <th>
-                            ID
-                        </th>
-                        <th>
-                            Company Name
-                        </th>
-                        <th>
-                            Product Quantity
-                        </th>
-                        <!-- <th>
-{{--                            material Quantity--}}
-                        </th> -->
-                        <th>
-                            &nbsp;Action
-                        </th>
                     </tr>
                 </thead>
                 <tbody>
-                @foreach($nettingsData as $key =>$nettingData)
-                    @php
-                        if(isset($transfer_products[$key])) {
-                                $productTotalSum = $transfer_products[$key]->sum('rest_quantity');
-                            }
-                        if(isset($transfer_materials[$key])) {
-                                $materialTotalSum = $transfer_materials[$key]->sum('quantity');
-                            }
+                @foreach($transfer_products as $key =>$product)
 
-                    @endphp
                 <tr>
                     <td>
+                        {{$product->created_at}}
                     </td>
                     <td>
-                        {{$companyList[$key]->id}}
+                        {{$product->product->name}} Qty ( {{$product->quantity}} )
                     </td>
                     <td>
-                        {{$companyList[$key]->name}}
-                    </td>
-                    <td>
-                        {{$productTotalSum}}
-                    </td>
-                    <!-- <td>
-{{--                        {{$materialTotalSum}}--}}
-                    </td> -->
-                    <td>
-                        <a class="btn btn-xs btn-primary" href="{{ route('admin.dyeing.company.transfer', $companyList[$key]->id) }}">
-                            {{ trans('global.view') }}
-                        </a>
-                        @if($companyList[$key]->id == 1)
-                            <a class="btn btn-xs btn-success" href="{{ route('admin.dyeing.process.company.product', $companyList[$key]->id) }}">
-                                Transfer to Showroom
-                            </a>
-                        @endif
+                        @foreach($product->material as $material)
+                            <ul>
+                                <li> Name {{$material->material->name}} -> Qty {{$material->quantity}}</li>
+                            </ul>
 
+                        @endforeach
+
+                    </td>
+                    <td>
+                        @foreach($product->expense as $expense)
+
+                           <table class="table table-bordered">
+                               <thead>
+                                    <tr>
+                                        <th>Amount</th>
+                                        <th>Name</th>
+                                        <th>Description</th>
+                                    </tr>
+                               </thead>
+                               <tbody>
+                                <tbody>
+                                    <tr>
+                                        <td>{{$expense->amount}}</td>
+                                        <td>{{$expense->material->name}}</td>
+                                        <td>{{$expense->description}}</td>
+                                    </tr>
+                               </tbody>
+                               </tbody>
+                           </table>
+                        @endforeach
                     </td>
                 </tr>
                 @endforeach

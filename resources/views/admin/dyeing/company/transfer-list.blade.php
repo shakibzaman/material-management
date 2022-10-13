@@ -1,17 +1,17 @@
 @extends('layouts.admin')
 @section('content')
     @can('expense_create')
-        <div style="margin-bottom: 10px;" class="row">
-            <div class="col-lg-12">
-                <a class="btn btn-success" href="{{ route("admin.expenses.create") }}">
-                    {{ trans('global.add') }} {{ trans('cruds.expense.title_singular') }}
-                </a>
-            </div>
-        </div>
+{{--        <div style="margin-bottom: 10px;" class="row">--}}
+{{--            <div class="col-lg-12">--}}
+{{--                <a class="btn btn-success" href="{{ route("admin.expenses.create") }}">--}}
+{{--                    {{ trans('global.add') }} {{ trans('cruds.expense.title_singular') }}--}}
+{{--                </a>--}}
+{{--            </div>--}}
+{{--        </div>--}}
     @endcan
     <div class="card">
         <div class="card-header">
-            {{ trans('cruds.expense.title_singular') }} {{ trans('global.list') }}
+            Dyeing Product List
         </div>
 
         <div class="card-body">
@@ -42,7 +42,7 @@
                     @foreach($nettingsData as $key =>$nettingData)
                                             @php
                                                 if(isset($transfer_products[$nettingData->id])) {
-                                                        $productTotalSum = $transfer_products[$nettingData->id]->sum('quantity');
+                                                        $productTotalSum = $transfer_products[$nettingData->id]->sum('rest_quantity');
                                                         $product_name = $transfer_products[$nettingData->id][0]['product']['name'];
                                                     }
 

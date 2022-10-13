@@ -48,7 +48,7 @@
                         if(isset($transfer_products[$product->id])) {
                                 $productTotal = $transfer_products[$product->id]->sum('rest_quantity');
                                 $product_detail = $transfer_products[$product->id]->groupBy('color.id');
-
+                                $test = $transfer_products[$product->id];
                                 }
                         else{
                             $productTotal = 0;
@@ -79,6 +79,7 @@
                                         <a class="btn btn-success text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
                                            data-attr="{{ route('admin.dyeing.use.material.detail',[$department_id,$product->id,$color_id]) }}" title="Return"> Material
                                         </a>
+                                        <a href="{{route('admin.showroom.product.details',[$department_id,$product->id,$color_id])}}">Details</a>
 
                                     </td>
                                 </tr>

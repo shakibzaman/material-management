@@ -17,4 +17,7 @@ class Transfer extends Model
     public function transfer(){
         return $this->hasMany(ProductTransfer::class,'transfer_id','id');
     }
+    public function material(){
+        return $this->hasMany(MaterialTransfer::class,'transfer_id','id');
+    }
 }

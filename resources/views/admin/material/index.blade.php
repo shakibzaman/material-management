@@ -33,7 +33,7 @@
                         @isset($materialsPurchased[$material->id])
 
                             @php
-                                $total_quantity = $materialsPurchased[$material->id]->sum('rest')
+                                $total_quantity = $materialsPurchased[$material->id]->sum('rest');
                             @endphp
 
                             <tr data-entry-id="{{ $material->id }}">
