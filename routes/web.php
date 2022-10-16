@@ -5,7 +5,7 @@ Route::redirect('/home', '/admin');
 Auth::routes();
 
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'middleware' => ['auth']], function () {
-    Route::redirect('/', '/admin/expenses');
+    Route::redirect('/', '/admin/dashboard');
     // Permissions
     Route::delete('permissions/destroy', 'PermissionsController@massDestroy')->name('permissions.massDestroy');
     Route::resource('permissions', 'PermissionsController');
@@ -29,6 +29,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     // Expenses
     Route::delete('expenses/destroy', 'ExpenseController@massDestroy')->name('expenses.massDestroy');
     Route::resource('expenses', 'ExpenseController');
+    Route::post('expense/search', 'ExpenseController@expenseSearch')->name('expense.search');
 
     // Supplier
     Route::resource('supplier', 'SupplierController');
@@ -149,6 +150,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('showroom/orders/{id}', 'ShowroomController@showroomOrders')->name('showroom.orders');
     Route::get('order/details/{id}', 'ShowroomController@orderDetails')->name('order.details');
     Route::get('order/payment/{id}', 'ShowroomController@orderPayment')->name('order.payment');
+    Route::get('order/payment/detail/{id}', 'ShowroomController@orderPaymentDetail')->name('order.payment.detail');
     Route::post('order/payment/store', 'ShowroomController@orderPaymentStore')->name('order.payment.store');
     Route::get('order/payment/history/{id}', 'ShowroomController@orderPaymentHistory')->name('order.payment.history');
 

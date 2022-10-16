@@ -28,7 +28,7 @@
                         {{$payment->amount}}
                     </td>
                     <td>
-                        {{$payment->transaction->reason}}
+                        {{$payment->transaction ?? ""?$payment->transaction->reason:''}}
                     </td>
 
                 </tr>

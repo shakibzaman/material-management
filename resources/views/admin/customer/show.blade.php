@@ -17,6 +17,9 @@
                             Invoice ID
                         </th>
                         <th>
+                            Showroom
+                        </th>
+                        <th>
                             Customer
                         </th>
                         <th>
@@ -45,6 +48,7 @@
                             <td>
                                 {{$order->invoice_id}}
                             </td>
+                            <td>{{$order->showroom->name}}  </td>
                             <td>
                                 {{$order->customer->name}}
                             </td>
@@ -64,7 +68,9 @@
                                 <a class="btn btn-success text-light btn-xs" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
                                    data-attr="{{ route('admin.order.details',$order->id) }}" title="Return"> Details
                                 </a>
-                                <a href="" class="btn btn-info btn-xs">Invoice</a>
+                                <a class="btn btn-info btn-xs text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
+                                   data-attr="{{ route('admin.knitting.order.invoice',$order->id) }}" title="Return"> Invoice
+                                </a>
                                 @if($order->due >0)
                                     <a class="btn btn-success btn-xs text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
                                        data-attr="{{ route('admin.order.payment',$order->id) }}" title="Return"> Payment

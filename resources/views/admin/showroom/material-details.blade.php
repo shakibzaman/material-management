@@ -2,7 +2,9 @@
 @section('content')
 @can('expense_create')
     <div style="margin-bottom: 10px;" class="row">
-
+        <a style="margin-top:20px;" class="btn btn-info" href="{{ url()->previous() }}">
+            {{ trans('global.back_to_list') }}
+        </a>
     </div>
 @endcan
 <div class="card">

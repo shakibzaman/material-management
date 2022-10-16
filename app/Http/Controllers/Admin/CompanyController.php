@@ -131,6 +131,7 @@ class CompanyController extends Controller
                     $transaction->bank_id = $fund_info->id;
                     $transaction->source_type = 2; // 2 is account 1 is bank
                     $transaction->type = 2;
+                    $transaction->date = now();;
                     $transaction->amount = $request->paid_amount;
                     $transaction->reason = 'Company Due Payment';
                     $transaction->created_by = Auth::user()->id;

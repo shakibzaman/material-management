@@ -18,10 +18,9 @@ class ExpenseController extends Controller
     public function index()
     {
         abort_if(Gate::denies('expense_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-
+        $expense_categories = ExpenseCategory::all()->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
         $expenses = Expense::all();
-
-        return view('admin.expenses.index', compact('expenses'));
+        return view('admin.expenses.index', compact('expense_categories','expenses'));
     }
 
     public function create()
@@ -32,6 +31,25 @@ class ExpenseController extends Controller
         $departments = Department::all()->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
 
         return view('admin.expenses.create', compact('expense_categories','departments'));
+    }
+
+    public function expenseSearch(Request $request){
+
+        $start_date = $request->start_date;
+        $end_date = $request->end_date;
+        $expense_category_id = $request->expense_category_id;
+        if(is_null($start_date) && is_null($end_date) && is_null($expense_category_id)){
+            $expenses = Expense::get();
+            return view('admin.expenses.list', compact('expenses'))->render();
+        }
+        else{
+            $expenses = Expense::where('expense_category_id',$expense_category_id)
+                ->where('entry_date','>=',$request->start_date)
+                ->where('entry_date','<=',$request->end_date)
+                ->get();
+            return view('admin.expenses.list', compact('expenses'))->render();
+        }
+
     }
 
     public function store(StoreExpenseRequest $request)

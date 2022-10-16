@@ -458,6 +458,7 @@ class NeetingController extends Controller
                     $transaction = new Transaction();
                     $transaction->bank_id = $bank_info->id;
                     $transaction->source_type = 1;
+                    $transaction->date = now();
                     $transaction->type = 2; // 1 is Widthrow
                     $transaction->payment_id = $payment->id;
                     $transaction->amount = ($stock->process_fee*$request->stock_value[$i]);
@@ -476,6 +477,7 @@ class NeetingController extends Controller
                     $transaction->bank_id = $fund_info->id;
                     $transaction->source_type = 2;
                     $transaction->type = 2;
+                    $transaction->date = now();
                     $transaction->payment_id = $payment->id;
                     $transaction->amount = ($stock->process_fee*$request->stock_value[$i]);
                     $transaction->reason = 'Supplier Payment';

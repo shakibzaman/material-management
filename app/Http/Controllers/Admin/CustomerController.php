@@ -87,7 +87,7 @@ class CustomerController extends Controller
     public function show($id)
     {
         $customerDetail = Customer::where( 'id', $id )->first();
-        $orders      = Order::where( 'customer_id', $id )->get();
+        $orders      = Order::with('showroom')->where( 'customer_id', $id )->get();
         return view( 'admin.customer.show', compact( 'customerDetail', 'orders' ) );
     }
 
@@ -219,6 +219,7 @@ class CustomerController extends Controller
                     $transaction->bank_id = $fund_info->id;
                     $transaction->source_type = 2; // 2 is account 1 is bank
                     $transaction->type = 2;
+                    $transaction->date = now();
                     $transaction->amount = $request->paid_amount;
                     $transaction->reason = 'Order Due Payment';
                     $transaction->created_by = Auth::user()->id;

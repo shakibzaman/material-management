@@ -126,6 +126,7 @@ class FundController extends Controller
             $transaction->fund_id = 1;
             $transaction->source_type = 2; // 2 is account 1 is bank
             $transaction->type = 2;
+            $transaction->date = now();
             $transaction->source_fund_id = $request->fund_id??0;
             $transaction->amount = $request->deposit;
             $transaction->reason = $request->reason;

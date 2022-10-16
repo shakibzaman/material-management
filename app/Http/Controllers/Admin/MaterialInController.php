@@ -99,6 +99,7 @@ class MaterialInController extends Controller
 
                     $transaction = new Transaction();
                     $transaction->bank_id = $bank_info->id;
+                    $transaction->date = now();
                     $transaction->source_type = 1; // 2 is account 1 is bank
                     $transaction->type = 1; // 1 is Widthrow
                     $transaction->payment_id = $payment->id;
@@ -118,6 +119,7 @@ class MaterialInController extends Controller
                     $transaction->bank_id = $fund_info->id;
                     $transaction->source_type = 2; // 2 is account 1 is bank
                     $transaction->type = 1;
+                    $transaction->date = now();
                     $transaction->payment_id = $payment->id;
                     $transaction->amount = $request->paid_amount;
                     $transaction->reason = 'Supplier Payment';

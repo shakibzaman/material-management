@@ -38,6 +38,9 @@
                             Total Due
                         </th>
                         <th>
+                            Showroom
+                        </th>
+                        <th>
                             Action
                         </th>
                     </tr>
@@ -58,7 +61,7 @@
                             </a>
                         @endcan
                             <a class="btn btn-xs btn-info" href="{{ route('admin.customer.show', $user->id) }}">
-                                Details
+                                Orders
                             </a>
                             <a class="btn btn-success btn-xs text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
                                                 data-attr="{{ route('admin.customer.payment',$user->id) }}" title="Return"> Payment

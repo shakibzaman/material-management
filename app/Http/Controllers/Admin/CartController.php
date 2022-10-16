@@ -304,13 +304,14 @@ class CartController extends Controller
                 $payment->payment_process = $request->payment_process;
                 $payment->payment_info    = $request->payment_info;
                 $payment->user_account_id = $user_account->id;
+                $payment->releted_department_id = $department_id;
                 $payment->releted_id = $order->id;
                 $payment->releted_id_type = 1;
                 $payment->created_by = Auth::user()->id;
                 $payment->save();
                 logger("Payment Updated");
 
-                if($request->payment_process == 'cash'){
+//                if($request->payment_process == 'cash'){
                    $fund_info = Fund::where('department_id',$department_id)->first();
                     $fund['current_balance'] = $fund_info->current_balance + $request->paid;
                     $fund_info->update($fund);
@@ -319,13 +320,15 @@ class CartController extends Controller
                     $transaction->bank_id = $fund_info->id;
                     $transaction->source_type = 2; // 2 is account 1 is bank
                     $transaction->type = 2;
+                    $transaction->date = now();
                     $transaction->payment_id = $payment->id;
+                    $transaction->source_fund_id = $order->id;
                     $transaction->amount = $request->paid;
-                    $transaction->reason = 'Order Payment';
+                    $transaction->reason = 'Order Payment for order id '.$order->id;
                     $transaction->created_by = Auth::user()->id;
                     $transaction->save();
 
-                }
+//                }
             }
 
             // User account update end
@@ -473,6 +476,7 @@ class CartController extends Controller
                     $transaction = new Transaction();
                     $transaction->bank_id = $bank_info->id;
                     $transaction->source_type = 1;
+                    $transaction->date = now();
                     $transaction->type = 2; // 1 is Widthrow 2 for deposit
                     $transaction->payment_id = $payment->id;
                     $transaction->amount = $request->paid;
@@ -491,6 +495,7 @@ class CartController extends Controller
                     $transaction->bank_id = $fund_info->id;
                     $transaction->source_type = 2;
                     $transaction->type = 2;
+                    $transaction->date = now();
                     $transaction->payment_id = $payment->id;
                     $transaction->amount = $request->paid;
                     $transaction->reason = 'Order Payment for Order ID '.$order->id;

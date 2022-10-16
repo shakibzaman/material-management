@@ -39,6 +39,11 @@ class ShowroomController extends Controller
         $orders = Order::with('customer')->where('department_id',$department_id)->get();
         return view('admin.showroom.orders',compact('orders','department_id'));
     }
+    public function orderPaymentDetail($id){
+        $payments = Payment::with('transaction')->where('releted_id',$id)->where('releted_id_type',1)
+            ->get();
+        return view('admin.showroom.modal.payment-history',compact('payments'));
+    }
     public function orderDetails($id){
         $orderDetails = OrderDetail::with('product','color')->where('order_id',$id)->get();
         return view('admin.showroom.orderDetails',compact('orderDetails'));
@@ -126,6 +131,7 @@ class ShowroomController extends Controller
                 $transaction->bank_id = $bank_info->id;
                 $transaction->source_type = 1;
                 $transaction->type = 2; // 1 is Widthrow
+                $transaction->date = now();
                 $transaction->payment_id = $payment->id;
                 $transaction->amount = $request->paid_amount;
                 $transaction->reason = 'Order Payment for Order ID '.$request->order_id;
@@ -143,6 +149,7 @@ class ShowroomController extends Controller
                 $transaction->bank_id = $fund_info->id;
                 $transaction->source_type = 2;
                 $transaction->type = 2;
+                $transaction->date = now();
                 $transaction->payment_id = $payment->id;
                 $transaction->amount = $request->paid_amount;
                 $transaction->reason = 'Order Payment for Order ID '.$request->order_id;

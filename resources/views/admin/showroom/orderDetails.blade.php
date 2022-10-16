@@ -15,8 +15,8 @@
         <tbody>
         @foreach($orderDetails as $detail)
             <tr>
-                <td>{{$detail->product->name}}</td>
-                <td>{{$detail->color->name}}</td>
+                <td>{{$detail->product?? '' ? $detail->product->name : ''}}</td>
+                <td>{{$detail->color ?? '' ? $detail->color->name : ''}}</td>
                 <td>{{$detail->selling_price}}</td>
                 <td>{{$detail->qty}}</td>
                 <td>{{$detail->line_total}}</td>

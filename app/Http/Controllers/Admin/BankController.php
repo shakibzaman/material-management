@@ -125,7 +125,11 @@ class BankController extends Controller
             $transaction = new Transaction();
             $transaction->bank_id = $bank_info->id;
             $transaction->type = 2;
+            $transaction->source_type = 2; // 2 is account 1 is bank
+            $transaction->date = now();
             $transaction->source_fund_id = $request->fund_id??0;
+            $transaction->destination_fund_id = $request->bank_id;
+            $transaction->destination_type = 1;
             $transaction->amount = $request->deposit;
             $transaction->reason = $request->reason;
             $transaction->created_by = Auth::user()->id;

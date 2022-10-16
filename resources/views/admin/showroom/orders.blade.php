@@ -79,12 +79,17 @@
                         <a class="btn btn-success text-light btn-xs" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
                            data-attr="{{ route('admin.order.details',$order->id) }}" title="Return"> Details
                         </a>
-                        <a href="" class="btn btn-info btn-xs">Invoice</a>
                         @if($order->due >0)
                             <a class="btn btn-success btn-xs text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
                                data-attr="{{ route('admin.order.payment',$order->id) }}" title="Return"> Payment
                             </a>
                         @endif
+                        <a class="btn btn-success btn-xs text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
+                           data-attr="{{ route('admin.order.payment.detail',$order->id) }}" title="Return"> Payment Details
+                        </a>
+                        <a class="btn btn-info btn-xs text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
+                           data-attr="{{ route('admin.knitting.order.invoice',$order->id) }}" title="Return"> Invoice
+                        </a>
                     </td>
                 </tr>
                 @endforeach
