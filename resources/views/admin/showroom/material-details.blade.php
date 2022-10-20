@@ -33,13 +33,13 @@
                             Process / Unit
                         </th>
                         <th>
-                            Dyeing / Unit
-                        </th>
-                        <th>
                             Dry / Unit
                         </th>
                         <th>
-                            Compact / Unit
+                            Compacting / Unit
+                        </th>
+                        <th>
+                            Dyeing / Unit
                         </th>
 
                     </tr>
@@ -52,7 +52,7 @@
                         {{$product->created_at}}
                     </td>
                     <td>
-                        {{$product->product->name}} Qty ( {{$product->quantity}} )
+                        {{$product->color->name}} <br> Qty ( {{$product->quantity}} )
                     </td>
                     <td>
                         @foreach($product->material as $material)

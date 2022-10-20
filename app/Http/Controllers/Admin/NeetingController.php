@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\admin;
 
 use App\Bank;
+use App\ExpenseCategory;
 use App\Fund;
 use App\Order;
 use App\OrderDetail;
@@ -657,9 +658,11 @@ class NeetingController extends Controller
 
     public function expenses()
     {
-        $expenses = Expense::where( 'department_id', 1 )->get();
+        $expense_categories = ExpenseCategory::all()->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
 
-        return view( 'admin.expenses.index', compact( 'expenses' ) );
+       $expenses = Expense::where( 'department_id', 1 )->get();
+
+        return view( 'admin.expenses.index', compact( 'expenses','expense_categories' ) );
     }
     public function incomes()
     {

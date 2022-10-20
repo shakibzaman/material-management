@@ -141,7 +141,18 @@
                         SHOWROOM NGONJ
                     </a>
                     <ul class="nav-dropdown-items">
+
                         @can('stock_set_access')
+                            <li class="nav-item">
+                                <a href="{{ route("admin.showroom.cart",3) }}" class="nav-link {{ request()->is('admin/showroom/stock') || request()->is('admin/showroom/stock') ? 'active' : '' }}">
+                                    <i class="fa-fw fas fa-list nav-icon">
+
+                                    </i>
+                                    Showroom POS
+                                </a>
+                            </li>
+                        @endcan
+                            @can('stock_set_access')
                             <li class="nav-item">
                                 <a href="{{ route("admin.showroom.stock",3) }}" class="nav-link {{ request()->is('admin/showroom/stock') || request()->is('admin/showroom/stock') ? 'active' : '' }}">
                                     <i class="fa-fw fas fa-list nav-icon">
@@ -171,6 +182,16 @@
                         SHOWROOM MIRPUR
                     </a>
                     <ul class="nav-dropdown-items">
+                        @can('stock_set_access')
+                            <li class="nav-item">
+                                <a href="{{ route("admin.showroom.cart",4) }}" class="nav-link {{ request()->is('admin/showroom/stock') || request()->is('admin/showroom/stock') ? 'active' : '' }}">
+                                    <i class="fa-fw fas fa-list nav-icon">
+
+                                    </i>
+                                    Showroom POS
+                                </a>
+                            </li>
+                        @endcan
                         @can('stock_set_access')
                             <li class="nav-item">
                                 <a href="{{ route("admin.showroom.stock",4) }}" class="nav-link {{ request()->is('admin/showroom/stock') || request()->is('admin/showroom/stock') ? 'active' : '' }}">
