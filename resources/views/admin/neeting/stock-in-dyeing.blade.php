@@ -60,22 +60,6 @@
                     </div>
                 </div>
                 <div class="col-md-2">
-                    <div class="form-group {{ $errors->has('process_fee') ? 'has-error' : '' }}">
-                        <label for="name"> Process Cost/KG *</label>
-                        <input type="number" id="process_fee" name="process_fee" class="form-control" required>
-                        <input type="hidden" id="type" name="type" value="2">
-                        <input type="hidden" id="company_id" name="company_id" value="{{$company_id}}">
-                            @if($errors->has('process_fee'))
-                                <em class="invalid-feedback">
-                                    {{ $errors->first('process_fee') }}
-                                </em>
-                            @endif
-                        <p class="helper-block">
-                            {{ trans('cruds.expense.fields.entry_date_helper') }}
-                        </p>
-                    </div>
-                </div>
-                <div class="col-md-2">
                     <label for=""></label>
                     <button id="teacher_list_search_btn" type="submit" class="btn btn-primary pull-right">Stock In</button>
                 </div>

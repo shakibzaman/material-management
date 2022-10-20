@@ -19,15 +19,27 @@
             <table class="table table-striped">
                 <tbody>
                 <tr>
-                    <th>Material Name</th>
-                    <td>{{$set->product->name}}</td>
-                </tr>
-                <tr>
                     <th>Start quantity</th>
                     <td>{{$set->start_quantity}}</td>
-                </tr><tr>
+                </tr>
+                <tr>
                     <th>End Quantity</th>
                     <td>{{$set->end_quantity}}</td>
+
+                </tr>
+                <tr>
+                    <th>Dyeing Charge</th>
+                    <td>{{$set->dyeing_charge}}</td>
+
+                </tr>
+                <tr>
+                    <th>Dry Charge</th>
+                    <td>{{$set->dry_charge}}</td>
+
+                </tr>
+                <tr>
+                    <th>Compacting Charge</th>
+                    <td>{{$set->compacting_charge}}</td>
 
                 </tr>
                 </tbody>

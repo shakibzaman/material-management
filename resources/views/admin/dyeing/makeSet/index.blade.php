@@ -26,9 +26,6 @@
                             ID
                         </th>
                         <th>
-                            Product
-                        </th>
-                        <th>
                             Color
                         </th>
                         <th>
@@ -49,9 +46,6 @@
                     </td>
                     <td>
                         {{$set->id}}
-                    </td>
-                    <td>
-                        {{$set->product->name}}
                     </td>
                     <td>
                         {{$set->color->name}}

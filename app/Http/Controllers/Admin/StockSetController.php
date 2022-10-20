@@ -18,7 +18,7 @@ class StockSetController extends Controller
      */
     public function index()
     {
-        $sets = StockSet::with('color','product')->get();
+        $sets = StockSet::with('color')->get();
         return view( 'admin.dyeing.makeSet.index',compact('sets') );
 
     }
@@ -81,7 +81,7 @@ class StockSetController extends Controller
      */
     public function show( $id )
     {
-        $set = StockSet::with('color','product')->where('id',$id)->first();
+        $set = StockSet::with('color')->where('id',$id)->first();
        $setMaterialDetails = StockSetMaterial::with('material')->where('stock_set_id',$id)->get();
        return view( 'admin.dyeing.makeSet.show', compact( 'setMaterialDetails','set' ) );
 

@@ -49,9 +49,9 @@ class ShowroomController extends Controller
         return view('admin.showroom.orderDetails',compact('orderDetails'));
     }
     public function stock($id){
-        $transfer_products = ProductTransfer::with('transfer','product','color')->whereHas('transfer', function (Builder $query) use ($id){
+        $transfer_products = ProductTransfer::with('transfer','color')->whereHas('transfer', function (Builder $query) use ($id){
             $query->where('department_id', $id);
-        })->get()->groupBy('product_id');
+        })->get()->groupBy('color_id');
 
        $products = MaterialConfig::where('type',2)->get();
        $colors = MaterialConfig::where('type',3)->get()->keyBy('id');
@@ -65,8 +65,8 @@ class ShowroomController extends Controller
 
         return view('admin.showroom.index',compact('transfer_products','products','colors','department_id'));
     }
-    public function productDetails($department,$product,$color){
-       $transfer_products = ProductTransfer::with('transfer','product','color','expense','material')->where('product_id',$product)->where('color_id',$color)
+    public function productDetails($department,$color){
+       $transfer_products = ProductTransfer::with('transfer','color','expense','material')->where('color_id',$color)
            ->whereHas('transfer', function (Builder $query) use ($department){
             $query->where('department_id', $department);
         })->get();

@@ -29,7 +29,7 @@
 
                         </th>
                         <th>
-                            Product Name
+                            Color Name
                         </th>
                         <th>
                             Color & Quantity
@@ -40,12 +40,12 @@
                     </tr>
                     </thead>
                     <tbody>
-                    @foreach($products as $key =>$product)
+                    @foreach($colors as $key =>$color)
                         @php
-                            if(isset($transfer_products[$product->id])) {
-                                    $productTotal = $transfer_products[$product->id]->sum('rest_quantity');
-                                    $product_detail = $transfer_products[$product->id]->groupBy('color.id');
-                                    $test = $transfer_products[$product->id];
+                            if(isset($transfer_products[$color->id])) {
+                                    $productTotal = $transfer_products[$color->id]->sum('rest_quantity');
+                                    $product_detail = $transfer_products[$color->id]->groupBy('color.id');
+                                    $test = $transfer_products[$color->id];
                                     }
                             else{
                                 $productTotal = 0;
@@ -58,35 +58,36 @@
 
                                 </td>
                                 <td>
-                                    {{$product->name}}
+                                    {{$color->name}}
                                 </td>
-                                <td>
-                                    @if($product_detail != null)
-                                        @foreach($product_detail as $color_id => $detail)
-                                            @php
-                                                $qty = $detail->sum('rest_quantity')
-                                            @endphp
+{{--                                <td>--}}
+{{--                                    @if($product_detail != null)--}}
+{{--                                        @foreach($product_detail as $color_id => $detail)--}}
+{{--                                            @php--}}
+{{--                                                $qty = $detail->sum('rest_quantity')--}}
+{{--                                            @endphp--}}
 
-                                            <table class="table table-hover">
-                                                <tbody>
-                                                <tr>
-                                                    <th>{{($color_id!=null)?$colors[$color_id]->name:'N/A'}}</th>
-                                                    <td>{{$qty}}</td>
-                                                    <td>
-                                                        <a class="btn btn-success text-light"
-                                                           href="{{route('admin.showroom.product.details',[$department_id,$product->id,$color_id])}}">Details</a>
+{{--                                            <table class="table table-hover">--}}
+{{--                                                <tbody>--}}
+{{--                                                <tr>--}}
+{{--                                                    <th>{{($color_id!=null)?$colors[$color_id]->name:'N/A'}}</th>--}}
+{{--                                                    <td>{{$qty}}</td>--}}
+{{--                                                    --}}
+{{--                                                </tr>--}}
+{{--                                                </tbody>--}}
+{{--                                            </table>--}}
 
-                                                    </td>
-                                                </tr>
-                                                </tbody>
-                                            </table>
+{{--                                        @endforeach--}}
+{{--                                    @endif--}}
 
-                                        @endforeach
-                                    @endif
-
-                                </td>
+{{--                                </td>--}}
                                 <td>
                                     {{$productTotal}}
+                                </td>
+                                <td>
+                                    <a class="btn btn-success text-light"
+                                       href="{{route('admin.showroom.product.details',[$department_id,$color->id])}}">Details</a>
+
                                 </td>
                             </tr>
                         @endif

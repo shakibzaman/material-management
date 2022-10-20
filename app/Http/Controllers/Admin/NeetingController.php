@@ -122,6 +122,7 @@ class NeetingController extends Controller
     private function _dyeingTransferStore( $request )
     {
         $product_id         = $request->product_id;
+        $fabrics_id = env("FABRICS_ID",65);
         $quantity           = $request->quantity;
         $company_id         = $request->company_id;
         $process_fee        = $request->process_fee;
@@ -154,12 +155,12 @@ class NeetingController extends Controller
                         $contentQty = $contentQty - $stock->rest;
 
                         $productTransfer                     = new ProductTransfer();
-                        $transferProduct['product_id']       = $product_id;
+                        $transferProduct['product_id']       = $fabrics_id;
                         $transferProduct['quantity']         = $pro_qty;
                         $transferProduct['rest_quantity']    = $pro_qty;
                         $transferProduct['transfer_id']      = $transfer_id;
                         $transferProduct['product_stock_id'] = $stock->id;
-                        $transferProduct['process_fee']      = $process_fee;
+//                        $transferProduct['process_fee']      = $process_fee;
                         $transferProduct['created_by']       = Auth::user()->id;
                         logger("Transfer Product => ".$pro_qty);
 
@@ -188,12 +189,12 @@ class NeetingController extends Controller
                     } else {
                         $contentQty                          = 0;
                         $productTransfer                     = new ProductTransfer();
-                        $transferProduct['product_id']       = $product_id;
+                        $transferProduct['product_id']       = $fabrics_id;
                         $transferProduct['quantity']         = $pro_qty;
                         $transferProduct['rest_quantity']    = $pro_qty;
                         $transferProduct['transfer_id']      = $transfer_id;
                         $transferProduct['product_stock_id'] = $stock->id;
-                        $transferProduct['process_fee']      = $process_fee;
+//                        $transferProduct['process_fee']      = $process_fee;
                         $transferProduct['created_by']       = Auth::user()->id;
                         logger("Transfer Product => ".$pro_qty);
 
@@ -847,7 +848,7 @@ class NeetingController extends Controller
     private function checkProductQuantity( $request )
     {
         $total_stock_qty = MaterialIn::where( 'material_id', $request->product_id )->sum( 'rest' );
-        if ( $total_stock_qty > $request->quantity ) {
+        if ( $total_stock_qty >= $request->quantity ) {
             return true;
         } else {
             return false;

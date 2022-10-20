@@ -9,22 +9,7 @@
         <h4>Add Set</h4>
         <form id = "material_stock_in">
             <input type="hidden" name="_token" value="{{csrf_token()}}">
-            <div class="row">
-                <div class="col-md-2">
-                    <div class="form-group {{ $errors->has('material_id') ? 'has-error' : '' }}">
-                        <label for="name">Product Name *</label>
-                        <select name="product_id" class="form-control select2" required>
-                            @foreach($products as $key => $product)
-                                <option value="{{ $key }}" >{{ $product }}</option>
-                            @endforeach
-                        </select>
-                        @if($errors->has('product_id'))
-                            <em class="invalid-feedback">
-                                {{ $errors->first('product_id') }}
-                            </em>
-                        @endif
-                    </div>
-                </div>
+            <div class="row bg-info">
                 <div class="col-md-2">
                     <div class="form-group {{ $errors->has('color_id') ? 'has-error' : '' }}">
                         <label for="name">Color Name *</label>
@@ -68,11 +53,53 @@
                         </p>
                     </div>
                 </div>
+                <div class="col-md-2">
+                    <div class="form-group {{ $errors->has('quantity') ? 'has-error' : '' }}">
+                        <label for="name">Dyeing Costing / Unit *</label>
+                        <input type="number" id="quantity" name="dyeing_charge" class="form-control" required>
+                        @if($errors->has('quantity'))
+                            <em class="invalid-feedback">
+                                {{ $errors->first('quantity') }}
+                            </em>
+                        @endif
+                        <p class="helper-block">
+                            {{ trans('cruds.expense.fields.entry_date_helper') }}
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group {{ $errors->has('quantity') ? 'has-error' : '' }}">
+                        <label for="name">Dry Cost / Unit *</label>
+                        <input type="number" id="quantity" name="dry_charge" class="form-control" required>
+                        @if($errors->has('quantity'))
+                            <em class="invalid-feedback">
+                                {{ $errors->first('quantity') }}
+                            </em>
+                        @endif
+                        <p class="helper-block">
+                            {{ trans('cruds.expense.fields.entry_date_helper') }}
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group {{ $errors->has('quantity') ? 'has-error' : '' }}">
+                        <label for="name">Compacting Cost / Unit *</label>
+                        <input type="number" id="quantity" name="compacting_charge" class="form-control" required>
+                        @if($errors->has('quantity'))
+                            <em class="invalid-feedback">
+                                {{ $errors->first('quantity') }}
+                            </em>
+                        @endif
+                        <p class="helper-block">
+                            {{ trans('cruds.expense.fields.entry_date_helper') }}
+                        </p>
+                    </div>
+                </div>
             </div>
             @foreach($materials as $id=> $material)
             <div class="form-group {{ $errors->has('quantity') ? 'has-error' : '' }}">
                 <label for="">{{$material->name}}</label>
-                <input type="number" name="material_qty[{{$material->id}}]" class="form-control">
+                <input type="number" name="material_qty[{{$material->id}}]" class="form-control" step=".01">
             </div>
             @endforeach
             <div>

@@ -27,7 +27,19 @@
                             Material & Quantity
                         </th>
                         <th>
-                            Costing
+                            Material Costing
+                        </th>
+                        <th>
+                            Process / Unit
+                        </th>
+                        <th>
+                            Dyeing / Unit
+                        </th>
+                        <th>
+                            Dry / Unit
+                        </th>
+                        <th>
+                            Compact / Unit
                         </th>
 
                     </tr>
@@ -73,6 +85,19 @@
                                </tbody>
                            </table>
                         @endforeach
+                    </td>
+                    <td>
+                        {{$product->process_fee}}
+
+                    </td>
+                    <td>
+                        {{$product->dry_charge}}
+                    </td>
+                    <td>
+                        {{$product->compacting_charge}}
+                    </td>
+                    <td>
+                        {{$product->dyeing_charge}}
                     </td>
                 </tr>
                 @endforeach
