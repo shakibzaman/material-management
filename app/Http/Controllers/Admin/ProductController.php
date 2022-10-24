@@ -5,8 +5,10 @@ namespace App\Http\Controllers\admin;
 use App\Bank;
 use App\Fund;
 use App\Payment;
+use App\Product;
 use App\SupplierProduct;
 use App\Transaction;
+use App\UserAccount;
 use DB;
 use Gate;
 use App\Unit;
@@ -54,6 +56,122 @@ class ProductController extends Controller
         $materialStock = MaterialIn::where( 'id', $id )->first();
 
         return view( 'admin.productPurchase.modal.return', compact( 'materialStock' ) );
+    }
+
+    public function finishPurchaseProductCreate($id){
+
+        abort_if( Gate::denies( 'material_create' ), Response::HTTP_FORBIDDEN, '403 Forbidden' );
+        $showroom_id = $id;
+        $materials = MaterialConfig::where( 'type', 3 )->pluck( 'name', 'id' )->prepend( trans( 'global.pleaseSelect' ), '' );
+        $units     = Unit::all()->pluck( 'name', 'id' )->prepend( trans( 'global.pleaseSelect' ), '' );
+        $employees = Employee::all()->pluck( 'name', 'id' )->prepend( trans( 'global.pleaseSelect' ), '' );
+        $suppliers = Supplier::all()->pluck( 'name', 'id' )->prepend( trans( 'global.pleaseSelect' ), '' );
+        return view( 'admin.product.finish_product_create', compact( 'employees', 'materials', 'units', 'suppliers','showroom_id' ) );
+    }
+
+    public function finishPurchaseProductStore(Request $request){
+
+
+        //  Product Store
+        DB::beginTransaction();
+        try {
+        $user_account_detail = UserAccount::where('user_id',$request->supplier_id)->first();
+        if(!$user_account_detail){
+            return ['status'=>105,'message'=>'Sorry your Supplier not founded'];
+        }
+
+        // Product In history start
+        $request['created_by'] = Auth::user()->id;
+        $request['rest'] = 0;
+        $materialIn = MaterialIn::create($request->all());
+        // Product In history end
+
+        if($materialIn){
+            // Supplier Bill start
+            $request['material_in_id'] = $materialIn->id;
+            $request['payment_process'] = $request->payment_process;
+            $request['payment_info'] = $request->payment_info;
+            $supplier_store = SupplierProduct::create($request->all());
+
+            // Product insert Start
+
+            $product = new Product();
+            $product->color_id = $request->material_id;
+            $product->product_transfer_id = $materialIn->id;
+            $product->showroom_id = $request->showroom_id;
+            $product->process_costing = $request->unit_price;
+            $product->type = 2; // 2 = Finish Product
+            $product->quantity = $request->quantity;
+            $product->save();
+
+
+            if($request->paid_amount>0){
+                $request['amount'] = $request->paid_amount;
+                $request['user_account_id'] = $user_account_detail->id;
+                $request['releted_id'] = $supplier_store->id;
+                $request['releted_id_type'] = 2;
+                $request['releted_department_id'] = 5;
+                $payment = Payment::create($request->all());
+
+                if($request->payment_process == 'bank'){
+                    $bank_info = Bank::where('id',$request->payment_type)->first();
+                    $bank['current_balance'] = $bank_info->current_balance - $request->paid_amount;
+                    $bank_info->update($bank);
+
+                    $transaction = new Transaction();
+                    $transaction->bank_id = $bank_info->id;
+                    $transaction->date = now();
+                    $transaction->source_type = 1; // 2 is account 1 is bank
+                    $transaction->type = 1; // 1 is Widthrow
+                    $transaction->payment_id = $payment->id;
+                    $transaction->amount = $request->paid_amount;
+                    $transaction->reason = 'Supplier Payment for finish Product';
+                    $transaction->created_by = Auth::user()->id;
+
+                    $transaction->save();
+
+                }
+                if($request->payment_process == 'account'){
+                    $fund_info = Fund::where('id',$request->payment_type)->first();
+                    $fund['current_balance'] = $fund_info->current_balance - $request->paid_amount;
+                    $fund_info->update($fund);
+
+                    $transaction = new Transaction();
+                    $transaction->bank_id = $fund_info->id;
+                    $transaction->source_type = 2; // 2 is account 1 is bank
+                    $transaction->type = 1;
+                    $transaction->date = now();
+                    $transaction->payment_id = $payment->id;
+                    $transaction->amount = $request->paid_amount;
+                    $transaction->reason = 'Supplier Payment for finish Product';
+                    $transaction->created_by = Auth::user()->id;
+
+                    $transaction->save();
+
+                }
+            }
+
+
+            $user_account['total_due'] = $user_account_detail->total_due + ($request->total_price - $request->paid_amount);
+            $user_account['total_paid'] = $user_account_detail->total_paid + $request->paid_amount;
+            $user_account_detail->update($user_account);
+
+        }
+
+        DB::commit();
+            if($request->showroom_id == 3)
+            {
+                return redirect()->route('admin.showroom.stock',3);
+            }
+            if($request->showroom_id == 4)
+            {
+                return redirect()->route('admin.showroom.stock',4);
+            }
+        } catch (\Exception $e) {
+
+        DB::rollback();
+            return $e->getMessage();
+        }
     }
 
     /**

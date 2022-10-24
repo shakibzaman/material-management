@@ -249,13 +249,15 @@ class DyeingController extends Controller
                         $material_details = MaterialIn::where('id', $releted_knitting_stock->product_stock_id)->first();
                         $product_costing = $material_details->unit_price;
                         $knitting_charge = $releted_knitting_stock->process_fee;
-                        $product_final_costing = $product_costing + $knitting_charge + $process_fee_calculation + $material_costing;
+                        $product_final_costing = $product_costing + $knitting_charge + $process_fee_calculation + ($material_costing/$pro_qty) ;
 
                         $product = new Product();
                         $product->color_id = $color_id;
                         $product->product_transfer_id = $productTransfer->id;
                         $product->process_costing = $product_final_costing;
+                        $product->showroom_id = $request->showroom_id;
                         $product->quantity = $pro_qty;
+                        $product->type = 1; // 1 = Process Product
                         $product->save();
 
                         $product_costing_history = new ProductCosting();
@@ -333,13 +335,15 @@ class DyeingController extends Controller
                         $material_details = MaterialIn::where('id', $releted_knitting_stock->product_stock_id)->first();
                         $product_costing = $material_details->unit_price;
                         $knitting_charge = $releted_knitting_stock->process_fee;
-                        $product_final_costing = $product_costing + $knitting_charge + $process_fee_calculation + $material_costing;
+                        $product_final_costing = $product_costing + $knitting_charge + $process_fee_calculation + ($material_costing/$pro_qty) ;
 
                         $product = new Product();
                         $product->color_id = $color_id;
                         $product->product_transfer_id = $productTransfer->id;
+                        $product->showroom_id = $request->showroom_id;
                         $product->process_costing = $product_final_costing;
                         $product->quantity = $pro_qty;
+                        $product->type = 1; // 1 = Process Product
                         $product->save();
 
                         $product_costing_history = new ProductCosting();

@@ -1,29 +1,63 @@
 @extends('layouts.admin')
 @section('content')
 <div class="card container-fluid">
+    <div class="card-title bg-primary text-center">
+        <div class="container">
+            <h2>{{$department->name}} POS</h2>
+        </div>
+    </div>
     <form id="showroom-pos">
+        <input type="hidden" name="department_id" id="department_id" value="{{$department->id}}">
+
         @csrf
-    <div class="row">
-        <div class="col-md-6">
-            <div class="form-group {{ $errors->has('material_id') ? 'has-error' : '' }}">
-                <label for="name">Product Name *</label>
-                <select name="product_id" id="product_id" class="form-control select2" required>
-                    @foreach($materials as $id => $material)
-                        <option value="{{ $id }}" >{{ $material }}</option>
-                    @endforeach
-                </select>
-                @if($errors->has('product_id'))
+    <div class="row bg-info">
+        <div class="col-md-4">
+            <div class="form-group {{ $errors->has('invoice_id') ? 'has-error' : '' }}">
+                <label for="name">Invoice No*</label>
+                <input type="text" name="invoice_id" id="invoice_id" class="form-control" required>
+                @if($errors->has('invoice_id'))
                     <em class="invalid-feedback">
-                        {{ $errors->first('product_id') }}
+                        {{ $errors->first('invoice_id') }}
                     </em>
                 @endif
             </div>
         </div>
+        <div class="col-md-4">
+            <div class="form-group {{ $errors->has('date') ? 'has-error' : '' }}">
+                <label for="name">Date *</label>
+                <input type="date" name="date" id="date" class="form-control" value="<?php echo date('Y-m-d'); ?>" required>
+                @if($errors->has('date'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('date') }}
+                    </em>
+                @endif
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="form-group {{ $errors->has('customer_id') ? 'has-error' : '' }}">
+                <label for="name">Customer *</label>
+                <select name="customer_id" id="customer_id" class="form-control select2" required>
+                    @foreach($customers as $id => $customer)
+                        <option value="{{ $id }}" >{{ $customer }}</option>
+                    @endforeach
+                </select>
+                @if($errors->has('customer_id'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('customer_id') }}
+                    </em>
+                @endif
+            </div>
+        </div>
+    </div>
+        <div class="row">
         <div class="col-md-6">
             <div class="form-group {{ $errors->has('material_id') ? 'has-error' : '' }}">
                 <label for="name">Color Name *</label>
                 <select name="product_color_id" id="product_color_id" class="form-control select2 product_color_id" required>
-
+                    @foreach($materials as $key => $id)
+                        <option value="{{$id }}" >{{ $key }}</option>
+                    @endforeach
                 </select>
                 @if($errors->has('product_id'))
                     <em class="invalid-feedback">
@@ -40,9 +74,8 @@
                     <thead>
                     <tr>
                         <th>Name</th>
-                        <th>Color</th>
-                        <th>Price</th>
                         <th>Quantity</th>
+                        <th>Price</th>
                         <th>Line Total</th>
                     </tr>
                     </thead>
@@ -52,44 +85,6 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="col-md-12">
-                <input type="hidden" name="department_id" value="3">
-                <div class="form-group {{ $errors->has('customer_id') ? 'has-error' : '' }}">
-                    <label for="name">Customer *</label>
-                    <select name="customer_id" id="customer_id" class="form-control select2" required>
-                        @foreach($customers as $id => $customer)
-                            <option value="{{ $id }}" >{{ $customer }}</option>
-                        @endforeach
-                    </select>
-                    @if($errors->has('customer_id'))
-                        <em class="invalid-feedback">
-                            {{ $errors->first('customer_id') }}
-                        </em>
-                    @endif
-                </div>
-            </div>
-            <div class="col-md-12">
-                <div class="form-group {{ $errors->has('invoice_id') ? 'has-error' : '' }}">
-                    <label for="name">Invoice No*</label>
-                    <input type="text" name="invoice_id" id="invoice_id" class="form-control" required>
-                    @if($errors->has('invoice_id'))
-                        <em class="invalid-feedback">
-                            {{ $errors->first('invoice_id') }}
-                        </em>
-                    @endif
-                </div>
-            </div>
-            <div class="col-md-12">
-                <div class="form-group {{ $errors->has('date') ? 'has-error' : '' }}">
-                    <label for="name">Date *</label>
-                    <input type="date" name="date" id="date" class="form-control" required>
-                    @if($errors->has('date'))
-                        <em class="invalid-feedback">
-                            {{ $errors->first('date') }}
-                        </em>
-                    @endif
-                </div>
-            </div>
             <div class="col-md-12">
                 <div class="form-group {{ $errors->has('payment_process') ? 'has-error' : '' }}">
                     <label for="payment_process">Payment Process *</label>
@@ -128,12 +123,13 @@
 
     </div>
         <div class="row">
-            <div class="col-md-2">
-                <div class="form-group {{ $errors->has('total') ? 'has-error' : '' }}">
-                    <label for="name">Total</label>
-                    <input type="number" name="total" class="form-control"  >
+            <div class="col-md-2 bg-success">
+                <div class="form-group {{ $errors->has('sub_total') ? 'has-error' : '' }}">
+                    <label for="name">Sub Total *</label>
+                    <input type="number" name="sub_total" id="sub_total" class="form-control" >
                 </div>
             </div>
+
             <div class="col-md-2">
                 <div class="form-group {{ $errors->has('discount') ? 'has-error' : '' }}">
                     <label for="name">Discount</label>
@@ -142,11 +138,12 @@
             </div>
 
             <div class="col-md-2">
-                <div class="form-group {{ $errors->has('sub_total') ? 'has-error' : '' }}">
-                    <label for="name">Sub Total *</label>
-                    <input type="number" name="sub_total" id="sub_total" class="form-control" >
+                <div class="form-group {{ $errors->has('total') ? 'has-error' : '' }}">
+                    <label for="name">Total</label>
+                    <input type="number" id="total" name="total" class="form-control"  >
                 </div>
             </div>
+
             <div class="col-md-2">
                 <div class="form-group {{ $errors->has('paid') ? 'has-error' : '' }}">
                     <label for="name">Paid *</label>
@@ -169,46 +166,66 @@
 @parent
 @section('scripts')
 <script>
+    function calculateTotal(){
+        let total = $("#sub_total").val() - $("#discount").val();
+        $("#total").val(total);
+        let due = total - $("#paid").val()
+        $("#due").val(due);
+    }
+    $("#discount").keyup(function (){
+        calculateTotal();
+    })
+    $("#paid").keyup(function (){
+        calculateTotal();
+    })
+
     $(document).ready(function(){
 
-        $( "#product_id" ).change(function() {
-
-            let product_id_number = $("#product_id").val();
-
-
-            $.ajax({
-                url: '/admin/material/search/'+product_id_number,
-                type: 'GET',
-                cache: false,
-                datatype: 'application/json',
-
-                success:function(data){
-                    // console.log(data);
-                    // console.log(data.color);
-                    var op ='<option value="0" selected>--- Select Color ---</option>';
-                    for(var i=0;i<data.color.length;i++){
-                        op+='<option value="'+data.color[i].id+'">'+data.color[i].name+'</option>';
-                    }
-                    // set value to the Color
-                    $('.product_color_id').html("");
-                    $('.product_color_id').append(op);
-                    // renderList(data.material);
+        $(document).on('change', '.quantity', function() {
+            var ele = $(this);
+            let quantity = ele.parents("tr").find(".quantity").val();
+            let price = ele.parents("tr").find(".price").val();
+            let total = quantity * price;
+            let line_total = ele.parents("tr").find(".line_total").val(total);
 
 
-                },
-                error:function(data){
-                    // console.log(data);
-                    // sweet alert
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: "Unable to load data form server",
-                        footer: 'Contact with Your Admin'
-                    })
-                    // swal("Error", 'Unable to load data form server', "error");
-                }
-            });
+            let sum = 0;
+            let line_total_sum = document.querySelectorAll('.line_total');
+            for(total_sum of line_total_sum) {
+                sum += (parseFloat(total_sum.value));
+            }
+            document.getElementById('sub_total').value = sum;
+
         });
+
+        $(document).on('change', '.price', function() {
+            var ele = $(this);
+            let quantity = ele.parents("tr").find(".quantity").val();
+            let price = ele.parents("tr").find(".price").val();
+            let total = quantity * price;
+            let line_total = ele.parents("tr").find(".line_total").val(total);
+
+            let sum = 0;
+            let line_total_sum = document.querySelectorAll('.line_total');
+            for(total_sum of line_total_sum) {
+                sum += (parseFloat(total_sum.value));
+            }
+            document.getElementById('sub_total').value = sum;
+
+
+
+        });
+        $(document).on('click', '.remove-from-cart', function() {
+            var ele = $(this);
+            var row_id = ele.parents("tr").remove();
+        });
+
+        function calculateTotal(){
+            let total = $("#sub-total").val() - $("#discount").val();
+            $("#total").val(total);
+            let due = total - $("#paid").val()
+            $("#due").val(due);
+        }
 
         $( "#product_color_id" ).change(function() {
 
@@ -217,15 +234,15 @@
 
 
             $.ajax({
-                url: '/admin/add-to-cart-test/'+product_id_number+'/'+product_color_id,
+                url: '/admin/add-to-cart-product/'+3+'/'+product_color_id,
                 type: 'GET',
                 cache: false,
                 datatype: 'application/json',
 
                 success:function(data){
-                    console.log(data);
+                    // console.log(data);
                     // renderList(data);
-                    // $('#myTable > tbody:last-child').append(data);
+                    $('#myTable > tbody:last-child').append(data.html);
 
 
                 },
@@ -242,12 +259,6 @@
                 }
             });
         });
-
-
-        // $(".quantity").keydown(function() {
-        //     alert("Hi");
-        //     console.log("ok");
-        // });
 
         $("#showroom-pos").on('submit',function (e){
             e.preventDefault();

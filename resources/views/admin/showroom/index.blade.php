@@ -11,7 +11,11 @@
                     <a class="btn btn-success" href="{{ route("admin.showroom.cart",$department_id) }}">
                         Cart
                     </a>
+                    <a class="btn btn-info" href="{{ route("admin.finish.product.purchase.create",$department_id) }}">
+                        Finish Product Purchase
+                    </a>
                 @endif
+
             </div>
         </div>
     @endcan

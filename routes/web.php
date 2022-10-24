@@ -56,9 +56,11 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('products', 'CartController@index')->name('products');
     Route::get('pos', 'CartController@pos')->name('showroom.pos');
     Route::get('add-to-cart/{id}', 'CartController@addToCart')->name('add.to.cart');
-    Route::get('add-to-cart-test/{dept}/{id}/{color}', 'CartController@addToCartTest')->name('add.to.cart.test');
+    Route::get('add-to-cart-test/{dept}/{color}', 'CartController@addToCartTest')->name('add.to.cart.test');
+    Route::get('add-to-cart-product/{dept}/{color}', 'CartController@addToCartProduct')->name('add.to.cart.product');
     Route::get('add-to-cart-knitting/{dept}/{id}', 'CartController@addToCartKnitting')->name('add.to.cart.knitting');
     Route::patch('update-cart', 'CartController@update')->name('update.cart');
+    Route::patch('update-cart-price', 'CartController@updatePrice')->name('update.price.cart');
     Route::delete('remove-from-cart', 'CartController@remove')->name('remove.from.cart');
 
 
@@ -96,6 +98,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('product/company/return-list/{id}', 'ProductController@returnList')->name('product.company.return');
     Route::get('product/company/detail-list/{id}', 'ProductController@detailList')->name('product.company.detail');
     Route::post('return/material/stock', 'ProductController@returnStock')->name('return.materail.stock');
+
+//    Product Purchase
+    Route::get('purchase/finish/product/create/{id}', 'ProductController@finishPurchaseProductCreate')->name('finish.product.purchase.create');
+    Route::post('purchase/finish/product/store', 'ProductController@finishPurchaseProductStore')->name('finish.product.purchase.store');
 
 
 
@@ -147,6 +153,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('showroom/transfer/{id}', 'ShowroomController@show')->name('showroom.transfer');
     Route::get('showroom/stock/{id}', 'ShowroomController@stock')->name('showroom.stock');
     Route::get('showroom/product/details/{company_id}/{color_id}', 'ShowroomController@productDetails')->name('showroom.product.details');
+    Route::get('showroom/finish/product/details/{company_id}/{color_id}', 'ShowroomController@finishProductDetails')->name('showroom.finish.product.details');
+    Route::get('showroom/product/{id}', 'ShowroomController@productList')->name('showroom.product.list');
+    Route::get('showroom/product/details/{id}', 'ShowroomController@productList')->name('showroom.product.list');
     Route::get('showroom/orders/{id}', 'ShowroomController@showroomOrders')->name('showroom.orders');
     Route::get('order/details/{id}', 'ShowroomController@orderDetails')->name('order.details');
     Route::get('order/payment/{id}', 'ShowroomController@orderPayment')->name('order.payment');

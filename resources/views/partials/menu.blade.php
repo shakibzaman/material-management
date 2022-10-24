@@ -151,6 +151,14 @@
                                     Showroom POS
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a href="{{ route("admin.showroom.product.list",3) }}" class="nav-link {{ request()->is('admin/showroom/stock') || request()->is('admin/showroom/stock') ? 'active' : '' }}">
+                                    <i class="fa-fw fas fa-list nav-icon">
+
+                                    </i>
+                                    Showroom Product
+                                </a>
+                            </li>
                         @endcan
                             @can('stock_set_access')
                             <li class="nav-item">

@@ -13,6 +13,7 @@ use App\MaterialTransfer;
 use App\Order;
 use App\OrderDetail;
 use App\Payment;
+use App\Product;
 use App\ProductTransfer;
 use App\Transaction;
 use App\Transfer;
@@ -72,6 +73,21 @@ class ShowroomController extends Controller
         })->get();
 
         return view('admin.showroom.material-details',compact('transfer_products'));
+
+    }
+    public function finishProductDetails($department,$color){
+
+        $transfer_products = Product::with('color')->where(['showroom_id'=>$department,'color_id'=>$color,'type'=>2])->get();
+
+        return view('admin.showroom.finish-material-details',compact('transfer_products'));
+
+    }
+    public function productList($department){
+        $colors = MaterialConfig::where('type',3)->get()->keyBy('id');
+
+        $transfer_products = Product::with('color')->where('showroom_id',$department)->get()->groupBy('color_id');
+
+        return view('admin.showroom.product-list',compact('transfer_products','colors','department'));
 
     }
     public function orderPayment($id){

@@ -96,7 +96,6 @@
                                             </td>
                                             <td data-th="Price">
                                                 <input type="number" class="form-control price update-price" name="selling_price[]" value="{{ $cart->price }}">
-{{--                                                ${{ $cart->price }}--}}
                                             </td>
                                             <td data-th="Quantity">
                                                 <input type="number" value="{{ $cart->qty }}" name="quantity[]" class="form-control quantity update-cart" />
@@ -225,13 +224,14 @@
 
 
                 $.ajax({
-                    url: '/admin/add-to-cart-test/'+department_id+'/'+product_color_id,
+                    url: '/admin/add-to-cart-product/'+department_id+'/'+product_color_id,
                     type: 'GET',
                     cache: false,
                     datatype: 'application/json',
 
                     success:function(data){
                         console.log(data);
+                        $('#myTable > tbody:last-child').append(data);
                         Swal.fire({
                             position: 'top-end',
                             icon: 'success',
@@ -240,12 +240,12 @@
                         })
                         // $( "#cart-box" ).load(window.location.href + " #cart-box" );
                         // $( "#filter-box" ).load(window.location.href + " #filter-box" );
-                        window.location.reload();
-
-                        let total = $("#sub-total").val() - $("#discount").val();
-                        $("#total").val(total);
-                        let due = total - $("#paid").val()
-                        $("#due").val(due);
+                        // window.location.reload();
+                        //
+                        // let total = $("#sub-total").val() - $("#discount").val();
+                        // $("#total").val(total);
+                        // let due = total - $("#paid").val()
+                        // $("#due").val(due);
 
                     },
                     error:function(data){
