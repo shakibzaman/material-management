@@ -70,7 +70,7 @@
         @endphp
         <label for="">{{$material->name}}  {{$material_quantity==0?"(No Stock)":''}}</label>
         <input type="number" name="material_qty[{{$material->id}}]" class="form-control material_id"
-               {{$disabled}} value="@isset($value){{ is_array($value)?$value['material_quantity']:''}}@endisset">
+               {{$disabled}} value="@isset($value){{ is_array($value)?$value['material_quantity']:''}}@endisset" step=".01">
     @endforeach
     <input type="hidden" name="color_id" value="{{$color_id}}">
     <input type="hidden" name="quantity" value="{{$quantity}}">
