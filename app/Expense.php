@@ -40,7 +40,7 @@ class Expense extends Model
     }
     public function material()
     {
-        return $this->belongsTo(MaterialConfig::class,'material_id');
+        return $this->belongsTo(MaterialConfig::class,'material_id','id','material_id');
     }
 
     public function getEntryDateAttribute($value)

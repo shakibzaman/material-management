@@ -448,7 +448,7 @@ class DyeingController extends Controller
                                 $expense->department_id = 2;
                                 $expense->transfer_id = $transfer_id;
                                 $expense->created_by_id = Auth::user()->id;
-                                $expense->material_id = $stock->id;
+                                $expense->material_id = $stock->material_id;
                                 $expense->transfer_product_id = $product_transfer_id;
                                 $expense->save();
                                 logger('Expense 300' . $expense);
@@ -483,7 +483,7 @@ class DyeingController extends Controller
                                 $expense->department_id = 2;
                                 $expense->transfer_id = $transfer_id;
                                 $expense->created_by_id = Auth::user()->id;
-                                $expense->material_id = $stock->id;
+                                $expense->material_id = $stock->material_id;
                                 $expense->transfer_product_id = $product_transfer_id;
                                 $expense->save();
 
