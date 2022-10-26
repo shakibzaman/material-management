@@ -5,7 +5,6 @@
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th>Product</th>
                 <th>Color</th>
                 <th>Selling Price</th>
                 <th>Qty</th>
@@ -15,7 +14,6 @@
         <tbody>
         @foreach($orderDetails as $detail)
             <tr>
-                <td>{{$detail->product?? '' ? $detail->product->name : ''}}</td>
                 <td>{{$detail->color ?? '' ? $detail->color->name : ''}}</td>
                 <td>{{$detail->selling_price}}</td>
                 <td>{{$detail->qty}}</td>

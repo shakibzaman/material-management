@@ -3,30 +3,26 @@
 @can('expense_create')
     <div style="margin-bottom: 10px;" class="row">
         <div class="col-lg-12">
-            @if($department_id == 1)
-                <a class="btn btn-primary" href="{{ route("admin.knitting.cart",$department_id) }}">
+            <a class="btn btn-success" href="{{ route("admin.showroom.cart",$department_id) }}">
                     Cart
                 </a>
-            @else
-                <a class="btn btn-success" href="{{ route("admin.showroom.cart",$department_id) }}">
-                    Cart
-                </a>
-            @endif
         </div>
     </div>
 @endcan
 <div class="card">
     <div class="card-header">
-        <b>Order List</b>
+        {{ trans('cruds.expense.title_singular') }} {{ trans('global.list') }}
     </div>
-
-    <div class="card-body">
+    <div class="card-body" id="card-table">
         <div class="table-responsive">
             <table class=" table table-bordered table-striped table-hover datatable datatable-Expense">
-                <thead>
+            <thead>
                     <tr>
                         <th width="10">
 
+                        </th>
+                        <th>
+                            Date
                         </th>
                         <th>
                             Invoice ID
@@ -51,11 +47,14 @@
                         </th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="table-body">
                 @foreach($orders as $order)
                 <tr>
                     <td>
 
+                    </td>
+                    <td>
+                        {{$order->date}}
                     </td>
                     <td>
                         {{$order->invoice_id}}
@@ -96,11 +95,8 @@
                 </tbody>
             </table>
         </div>
-
-
     </div>
-</div>
-<div class="modal fade" id="mediumModal" tabindex="-1" role="dialog" aria-labelledby="mediumModalLabel"
+    <div class="modal fade" id="mediumModal" tabindex="-1" role="dialog" aria-labelledby="mediumModalLabel"
      aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
@@ -117,9 +113,11 @@
         </div>
     </div>
 </div>
+</div>
 @endsection
 @section('scripts')
 @parent
+
 <script>
     $(document).on('click', '#mediumButton', function(event) {
         event.preventDefault();
@@ -145,5 +143,112 @@
             timeout: 8000
         })
     });
+    jQuery(document).ready(function () {
+        $('form#search-filter').on('submit', function (e) {
+            e.preventDefault();
+            searchStockSet();
+        });
+
+        function searchStockSet(){
+            $.ajax({
+                url: '/admin/expense/search',
+                type: 'POST',
+                cache: false,
+                data: $('form#search-filter').serialize(),
+                datatype: 'html',
+                // datatype: 'application/json',
+
+                beforeSend: function() {
+                    // show waiting dialog
+                    // waitingDialog.show('Loading...');
+                },
+
+                success:function(data){
+                    console.log(data);
+                    $("#card-table").html('');
+                    $("#card-table").append(data);
+                    // $('.academicLevel').append(op);
+                    // if(data) {
+                    //     if(data.status == 103){
+                    //         Swal.fire({
+                    //             icon: 'error',
+                    //             title: 'Oops...',
+                    //             text: data.message,
+                    //             footer: 'Check your Stock'
+                    //         })
+                    //     }
+                    //     else{
+                    //         Swal.fire({
+                    //             position: 'top-end',
+                    //             icon: 'success',
+                    //             title: 'Product Successfully Return',
+                    //             showConfirmButton: false,
+                    //             timer: 1500
+                    //         })
+                    //         $('#mediumModal').modal('hide');
+                    //         window.location.reload();
+                    //
+                    //     }
+                    // }
+                },
+                error:function(data){
+                    console.log(data);
+                    // sweet alert
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: "Unable to load data form server",
+                        footer: 'Contact with Your Admin'
+                    })
+                    // swal("Error", 'Unable to load data form server', "error");
+                }
+            });
+        }
+    })
+</script>
+<script>
+    $(function () {
+  let dtButtons = $.extend(true, [], $.fn.dataTable.defaults.buttons)
+@can('expense_delete')
+  let deleteButtonTrans = '{{ trans('global.datatables.delete') }}'
+  let deleteButton = {
+    text: deleteButtonTrans,
+    url: "{{ route('admin.expenses.massDestroy') }}",
+    className: 'btn-danger',
+    action: function (e, dt, node, config) {
+      var ids = $.map(dt.rows({ selected: true }).nodes(), function (entry) {
+          return $(entry).data('entry-id')
+      });
+
+      if (ids.length === 0) {
+        alert('{{ trans('global.datatables.zero_selected') }}')
+
+        return
+      }
+
+      if (confirm('{{ trans('global.areYouSure') }}')) {
+        $.ajax({
+          headers: {'x-csrf-token': _token},
+          method: 'POST',
+          url: config.url,
+          data: { ids: ids, _method: 'DELETE' }})
+          .done(function () { location.reload() })
+      }
+    }
+  }
+  dtButtons.push(deleteButton)
+@endcan
+
+  $.extend(true, $.fn.dataTable.defaults, {
+    order: [[ 1, 'desc' ]],
+    pageLength: 100,
+  });
+  $('.datatable-Expense:not(.ajaxTable)').DataTable({ buttons: dtButtons })
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
+        $($.fn.dataTable.tables(true)).DataTable()
+            .columns.adjust();
+    });
+})
+
 </script>
 @endsection

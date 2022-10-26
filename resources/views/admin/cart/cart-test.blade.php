@@ -195,6 +195,8 @@
                 sum += (parseFloat(total_sum.value));
             }
             document.getElementById('sub_total').value = sum;
+            document.getElementById('total').value = sum;
+            document.getElementById('due').value = sum;
 
         });
 
@@ -211,6 +213,8 @@
                 sum += (parseFloat(total_sum.value));
             }
             document.getElementById('sub_total').value = sum;
+            document.getElementById('total').value = sum;
+            document.getElementById('due').value = sum;
 
 
 
@@ -231,10 +235,11 @@
 
             let product_id_number = $("#product_id").val();
             let product_color_id = $("#product_color_id").val();
+            let department_id = $("#department_id").val();
 
 
             $.ajax({
-                url: '/admin/add-to-cart-product/'+3+'/'+product_color_id,
+                url: '/admin/add-to-cart-product/'+department_id+'/'+product_color_id,
                 type: 'GET',
                 cache: false,
                 datatype: 'application/json',
@@ -272,14 +277,29 @@
                 data:$("form#showroom-pos").serialize(),
 
                 success(data){
-                    console.log("succ");
-                    console.log(data);
-                },
-                error:function(data){
-                    if(data.status ==422 ){
+                    if(data.status == 200){
+                        Swal.fire({
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'Order Done successfully',
+                            timer: 1500
+                        })
+
+                        window.location.reload();
+                    }
+                    if(data.status == 104){
                         Swal.fire({
                             icon: 'error',
-                            title: data.responseText,
+                            title: data.message,
+                            footer: 'Please Recheck your stock',
+                        })
+                    }
+                },
+                error:function(data){
+                    if(data.status == 422 ){
+                        Swal.fire({
+                            icon: 'error',
+                            title: "Invoice number already used",
                             text: "Unable to load data form server",
                             footer: 'Please Recheck your details'
                         })

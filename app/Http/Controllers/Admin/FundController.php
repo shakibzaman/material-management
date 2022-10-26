@@ -105,8 +105,9 @@ class FundController extends Controller
     }
 
     public function depositList($id){
-        $transactions = Transaction::with('fund','user')->where('fund_id',$id)->where('type',2)->where('source_type',2)->get();
-        return view('admin.fund.deposit-list',compact('transactions'));
+        $transactions = Transaction::with('fund','user')->where('bank_id',$id)->where('type',2)->where('source_type',2)->get();
+        $title = 'Deposit List';
+        return view('admin.fund.deposit-list',compact('transactions','title'));
 
     }
     public function depositStore(Request $request){

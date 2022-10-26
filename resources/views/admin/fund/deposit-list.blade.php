@@ -10,7 +10,7 @@
 @endcan
 <div class="card">
     <div class="card-header">
-        Deposit List
+        {{$title}}
     </div>
 
     <div class="card-body">

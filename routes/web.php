@@ -193,6 +193,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('bank/deposit/{id}', 'BankController@deposit')->name('bank.deposit');
     Route::post('bank/deposit', 'BankController@depositStore')->name('bank.deposit.store');
     Route::get('bank/deposit/list/{id}', 'BankController@depositList')->name('bank.deposit.list');
+    Route::get('bank/widthrow/list/{id}', 'BankController@widthrowList')->name('bank.widthrow.list');
 
 
 

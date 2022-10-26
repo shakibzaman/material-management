@@ -247,26 +247,32 @@ class CartController extends Controller
 
             // Order details create start
             for($i=0;$i<count($request->color_id);$i++){
-                $getAllStock = ProductTransfer::with('transfer')
-                    ->where('color_id',$request->color_id[$i])
-                    ->where('rest_quantity','>',0)
-                    ->whereHas('transfer', function (Builder $query) use ($department_id){
-                        $query->where('department_id',$department_id );
-                    })->get();
-//                logger("get all stock");
+
+                $getAllStock = Product::where('color_id',$request->color_id[$i])
+                    ->where('quantity', '>', 0)->get();
+
                 // Stock deduct from product supply start
                $quantity = $request->quantity[$i];
                 $contentQty = $quantity;
                 foreach ( $getAllStock as $stock ) {
                     $pro_qty = $contentQty;
-                    if ( $stock->rest_quantity < $contentQty ) {
-                        $pro_qty    = $stock->rest_quantity;
-                        $contentQty = $contentQty - $stock->rest_quantity;
+                    if ( $stock->quantity < $contentQty ) {
+                        $pro_qty    = $stock->quantity;
+                        $contentQty = $contentQty - $stock->quantity;
 
                         // reduce stock quantity
-                        $data['rest_quantity'] = $stock->rest_quantity - $pro_qty;
-//                        DB::table( 'product_transfer' )->where( 'id', $stock->id )->update( $data );
+                        $data['quantity'] = $stock->quantity - $pro_qty;
+                        DB::table( 'products' )->where( 'id', $stock->id )->update( $data );
 //                        logger( ' Updated rest qty 1' . $data['rest_quantity'] );
+
+
+                        // Deduct product from transfer
+                        if($stock->type == 1){
+                            $product_transfer = ProductTransfer::where('id',$stock->product_transfer_id)->first();
+                            $transfer_data['rest_quantity'] = $product_transfer->rest_quantity - $pro_qty;
+                            DB::table( 'product_transfer' )->where( 'id', $stock->product_transfer_id )->update( $transfer_data );
+                            logger('Product Transfer deduct');
+                        }
 
                         $cart = new OrderDetail();
                         $cart->order_id = $order->id;
@@ -283,10 +289,19 @@ class CartController extends Controller
                         $contentQty                          = 0;
 
                         // reduce stock quantity
-                        $data['rest_quantity'] = $stock->rest_quantity - $pro_qty;
-                        DB::table( 'product_transfer' )->where( 'id', $stock->id )->update( $data );
+                        $data['quantity'] = $stock->quantity - $pro_qty;
+                        DB::table( 'products' )->where( 'id', $stock->id )->update( $data );
 //                        logger( ' Updated rest qty 2 ' . $data['rest_quantity'] );
 //                        logger("Order details".$order->id."Material -id: ".$request->material_id[$i]."Color - ".$request->color_id[$i]."Stock ".$stock->id);
+
+                        // Deduct product from transfer
+                        if($stock->type == 1){
+                            $product_transfer = ProductTransfer::where('id',$stock->product_transfer_id)->first();
+                            $transfer_data['rest_quantity'] = $product_transfer->rest_quantity - $pro_qty;
+                            DB::table( 'product_transfer' )->where( 'id', $stock->product_transfer_id )->update( $transfer_data );
+                            logger('Product Transfer deduct');
+                        }
+
                         $cart = new OrderDetail();
                         $cart->order_id = $order->id;
                         $cart->product_id =  6;
@@ -345,14 +360,11 @@ class CartController extends Controller
                     $transaction->reason = 'Order Payment for order id '.$order->id;
                     $transaction->created_by = Auth::user()->id;
                     $transaction->save();
-
 //                }
             }
-
             // User account update end
 
             DB::commit();
-            session()->forget('cart');
             return ['status'=>200,'message'=>"Order Created Successful"];
         }catch (\Exception $e){
             DB::rollBack();

@@ -65,7 +65,7 @@
                             @foreach($order->details as $item)
                             <tr>
                                 <td class="text-center">1</td>
-                                <td>{{$item->product->name}}</td>
+                                <td>{{$item->color->name}}</td>
                                 <td class="text-right">{{$item->qty}}</td>
                                 <td class="text-right"><b><strong>৳</strong></b> {{$item->selling_price}}</td>
                                 <td class="text-right"><b><strong>৳</strong></b> {{$item->line_total}}0</td>

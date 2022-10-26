@@ -65,11 +65,11 @@
                                        href="{{ route('admin.material-in.show', $material->id) }}">
                                         Return
                                     </a>
-                                    <a class="btn btn-xs btn-success text-light" data-toggle="modal" id="mediumButton"
-                                       data-target="#mediumModal"
-                                       data-attr="{{ route('admin.material-in.price',$material->id) }}" title="Price">
-                                        Add Price
-                                    </a>
+{{--                                    <a class="btn btn-xs btn-success text-light" data-toggle="modal" id="mediumButton"--}}
+{{--                                       data-target="#mediumModal"--}}
+{{--                                       data-attr="{{ route('admin.material-in.price',$material->id) }}" title="Price">--}}
+{{--                                        Add Price--}}
+{{--                                    </a>--}}
 
                                     {{--                                    @can('material_transfer')--}}
                                     {{--                                    <a class="btn btn-success text-light btn-xs" data-toggle="modal" id="mediumButton" data-target="#mediumModal"--}}

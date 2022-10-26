@@ -35,6 +35,15 @@ class BankController extends Controller
 
     }
 
+    public function widthrowList($id){
+        $transactions = Transaction::where('bank_id',$id)
+        ->where('source_type',1)->where('type',1)->get();
+        $title = 'Widthrow List';
+
+        return view('admin.fund.deposit-list',compact('transactions','title'));
+
+    }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -107,7 +116,8 @@ class BankController extends Controller
 
     public function depositList($id){
         $transactions = Transaction::with('fund','user')->where('bank_id',$id)->where('type',2)->get();
-        return view('admin.fund.deposit-list',compact('transactions'));
+        $title = 'Deposit List';
+        return view('admin.fund.deposit-list',compact('transactions','title'));
 
     }
     public function depositStore(Request $request){

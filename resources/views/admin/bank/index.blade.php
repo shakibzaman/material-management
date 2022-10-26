@@ -71,6 +71,10 @@
                                     Deposit List
                                 </a>
 
+                                <a class="btn btn-xs btn-success" href="{{ route('admin.bank.widthrow.list', $bank->id) }}">
+                                    Widthrow List
+                                </a>
+
                                 @can('expense_edit')
                                     <a class="btn btn-xs btn-info" href="{{ route('admin.bank.edit', $bank->id) }}">
                                         {{ trans('global.edit') }}
