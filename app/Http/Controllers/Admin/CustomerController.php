@@ -172,9 +172,35 @@ class CustomerController extends Controller
                         $payment->payment_process = $request->payment_process;
                         $payment->payment_info    = $request->payment_info;
                         $payment->user_account_id = $users_account->id;
+                        $payment->releted_id = $due->id; // Order Id
+                        $payment->releted_id_type = 1; // Order Id
+                        $payment->releted_department_id = $customer_order->department_id; // Order Showroom Id
                         $payment->created_by = Auth::user()->id;
                         $payment->save();
                         // Payment data store end
+
+                        if($request->paid_amount>0){
+                            $fund_info = Fund::where('department_id',$customer_order->department_id)->first();
+                            $fund['current_balance'] = $fund_info->current_balance + $request->paid_amount;
+                            $fund_info->update($fund);
+
+
+
+                            // Transaction Store
+                            $transaction = new Transaction();
+                            $transaction->bank_id = $fund_info->id;
+                            $transaction->source_type = 2; // 2 is account 1 is bank
+                            $transaction->type = 2;
+                            $transaction->date = now();
+                            $transaction->payment_id = $payment->id;
+                            $transaction->source_fund_id =  $due->id; // Order Id
+                            $transaction->destination_type =  2; // Fund
+                            $transaction->amount = $request->paid_amount;
+                            $transaction->reason = 'Order Due Payment';
+                            $transaction->created_by = Auth::user()->id;
+                            $transaction->save();
+
+                        }
 
                     } else {
                         $contentQty = 0;
@@ -198,9 +224,35 @@ class CustomerController extends Controller
                         $payment->payment_process = $request->payment_process;
                         $payment->payment_info    = $request->payment_info;
                         $payment->user_account_id = $users_account->id;
+                        $payment->releted_id = $due->id; // Order Id
+                        $payment->releted_id_type = 1; // Order Id
+                        $payment->releted_department_id = $customer_order->department_id; // Order Showroom Id
                         $payment->created_by = Auth::user()->id;
                         $payment->save();
                         // Payment data store end
+
+                        if($request->paid_amount>0){
+                            $fund_info = Fund::where('department_id',$customer_order->department_id)->first();
+                            $fund['current_balance'] = $fund_info->current_balance + $request->paid_amount;
+                            $fund_info->update($fund);
+
+
+
+                            // Transaction Store
+                            $transaction = new Transaction();
+                            $transaction->bank_id = $fund_info->id;
+                            $transaction->source_type = 2; // 2 is account 1 is bank
+                            $transaction->type = 2;
+                            $transaction->date = now();
+                            $transaction->payment_id = $payment->id;
+                            $transaction->source_fund_id =  $due->id; // Order Id
+                            $transaction->destination_type =  2; // Fund
+                            $transaction->amount = $request->paid_amount;
+                            $transaction->reason = 'Order Due Payment';
+                            $transaction->created_by = Auth::user()->id;
+                            $transaction->save();
+
+                        }
 
                     }
 
@@ -210,22 +262,6 @@ class CustomerController extends Controller
 
                 }
 
-                if($request->payment_process == 'cash'){
-                    $fund_info = Fund::where('id',1)->first();
-                    $bank['current_balance'] = $fund_info->current_balance - $request->paid_amount;
-                    $fund_info->update($bank);
-
-                    $transaction = new Transaction();
-                    $transaction->bank_id = $fund_info->id;
-                    $transaction->source_type = 2; // 2 is account 1 is bank
-                    $transaction->type = 2;
-                    $transaction->date = now();
-                    $transaction->amount = $request->paid_amount;
-                    $transaction->reason = 'Order Due Payment';
-                    $transaction->created_by = Auth::user()->id;
-                    $transaction->save();
-
-                }
                 DB::commit();
                 return ['status' => 200, 'message' => 'Successfully Payment Done for Customer'];
 

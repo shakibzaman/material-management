@@ -43,7 +43,7 @@
                     @foreach($orders as $order)
                         <tr>
                             <td>
-
+                                {{$order->id}}
                             </td>
                             <td>
                                 {{$order->invoice_id}}
@@ -71,9 +71,14 @@
                                 <a class="btn btn-info btn-xs text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
                                    data-attr="{{ route('admin.knitting.order.invoice',$order->id) }}" title="Return"> Invoice
                                 </a>
-                                @if($order->due >0)
+                                @if($order->due > 0)
                                     <a class="btn btn-success btn-xs text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
                                        data-attr="{{ route('admin.order.payment',$order->id) }}" title="Return"> Payment
+                                    </a>
+                                @endif
+                                @if($order->paid >0)
+                                    <a class="btn btn-info btn-xs text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
+                                       data-attr="{{ route('admin.order.payment.history',$order->id) }}" title="Return"> Payment History
                                     </a>
                                 @endif
                             </td>

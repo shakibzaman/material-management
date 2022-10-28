@@ -11,7 +11,7 @@
 @endcan
 <div class="card">
     <div class="card-header">
-        {{ trans('cruds.expense.title_singular') }} {{ trans('global.list') }}
+        Order List
     </div>
     <div class="card-body" id="card-table">
         <div class="table-responsive">
@@ -83,9 +83,11 @@
                                data-attr="{{ route('admin.order.payment',$order->id) }}" title="Return"> Payment
                             </a>
                         @endif
-                        <a class="btn btn-success btn-xs text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
-                           data-attr="{{ route('admin.order.payment.detail',$order->id) }}" title="Return"> Payment Details
-                        </a>
+                        @if($order->paid >0)
+                            <a class="btn btn-success btn-xs text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
+                               data-attr="{{ route('admin.order.payment.detail',$order->id) }}" title="Return"> Payment Details
+                            </a>
+                        @endif
                         <a class="btn btn-info btn-xs text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
                            data-attr="{{ route('admin.knitting.order.invoice',$order->id) }}" title="Return"> Invoice
                         </a>

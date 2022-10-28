@@ -104,7 +104,8 @@ class ShowroomController extends Controller
         return view('admin.showroom.modal.payment',compact('order'));
     }
     public function orderPaymentHistory($id){
-        $payments = Payment::with('transaction')->where('releted_id',$id)->where('releted_id_type',1)->where('releted_department_id',6)->get();
+        $payments = Payment::with('transaction')->where('releted_id',$id)->where('releted_id_type',1)
+            ->get();
         return view('admin.showroom.modal.payment-history',compact('payments'));
     }
     public function orderPaymentStore(Request $request){
@@ -137,52 +138,34 @@ class ShowroomController extends Controller
             // Payment data store start
             $payment                  = new Payment();
             $payment->amount          = $request->paid_amount;
-            $payment->payment_process = $request->payment_process;
-            $payment->payment_info    = $request->payment_info;
+            $payment->payment_process = 'Cash';
+            $payment->payment_info    = 'Cash';
             $payment->user_account_id = $user_account->id;
             $payment->releted_id = $request->order_id;
-            $payment->releted_department_id = 6; // 6 is for knitting showroom
-            $payment->releted_id_type = 1;
+            $payment->releted_department_id = $order->department_id; // 6 is for knitting showroom
+            $payment->releted_id_type = 1;  // 1 is order
             $payment->created_by = Auth::user()->id;
             $payment->save();
             // Payment data store end
 
-            if($request->payment_process == 'bank'){
-                $bank_info = Bank::where('id',$request->payment_type)->first();
-                $bank['current_balance'] = $bank_info->current_balance + $request->paid_amount;
-                $bank_info->update($bank);
 
-                $transaction = new Transaction();
-                $transaction->bank_id = $bank_info->id;
-                $transaction->source_type = 1;
-                $transaction->type = 2; // 1 is Widthrow
-                $transaction->date = now();
-                $transaction->payment_id = $payment->id;
-                $transaction->amount = $request->paid_amount;
-                $transaction->reason = 'Order Payment for Order ID '.$request->order_id;
-                $transaction->created_by = Auth::user()->id;
+            // Transaction Store
+            $fund_info = Fund::where('department_id',$order->department_id)->first();
+            $fund['current_balance'] = $fund_info->current_balance + $request->paid_amount;
+            $fund_info->update($fund);
 
-                $transaction->save();
-
-            }
-            if($request->payment_process == 'account'){
-                $fund_info = Fund::where('id',$request->payment_type)->first();
-                $fund['current_balance'] = $fund_info->current_balance + $request->paid_amount;
-                $fund_info->update($fund);
-
-                $transaction = new Transaction();
-                $transaction->bank_id = $fund_info->id;
-                $transaction->source_type = 2;
-                $transaction->type = 2;
-                $transaction->date = now();
-                $transaction->payment_id = $payment->id;
-                $transaction->amount = $request->paid_amount;
-                $transaction->reason = 'Order Payment for Order ID '.$request->order_id;
-                $transaction->created_by = Auth::user()->id;
-
-                $transaction->save();
-
-            }
+            $transaction = new Transaction();
+            $transaction->bank_id = $fund_info->id;
+            $transaction->source_type = 2; // 2 is account 1 is bank
+            $transaction->type = 2;
+            $transaction->date = now();
+            $transaction->payment_id = $payment->id;
+            $transaction->source_fund_id =  $request->order_id; // Order Id
+            $transaction->destination_type =  2; // Fund
+            $transaction->amount = $request->paid_amount;
+            $transaction->reason = 'Order Payment for Order ID '.$request->order_id;
+            $transaction->created_by = Auth::user()->id;
+            $transaction->save();
 
             DB::commit();
             return ['status'=>200,'message'=>'Payment Successfully Done'];
@@ -191,6 +174,7 @@ class ShowroomController extends Controller
             return $e->getMessage();
         }
     }
+
     public function store(Request $request){
 
         $product_id  = $request->product_id;

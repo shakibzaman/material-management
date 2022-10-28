@@ -81,12 +81,12 @@
                                     </a>
                                 </li>
                         @endcan
-                            <a href="{{ route("admin.knitting.orders",1) }}" class="nav-link {{ request()->is('admin/knitting/orders') || request()->is('admin/knitting/orders') ? 'active' : '' }}">
-                                <i class="fa-fw fas fa-list nav-icon">
+{{--                            <a href="{{ route("admin.knitting.orders",1) }}" class="nav-link {{ request()->is('admin/knitting/orders') || request()->is('admin/knitting/orders') ? 'active' : '' }}">--}}
+{{--                                <i class="fa-fw fas fa-list nav-icon">--}}
 
-                                </i>
-                                Knitting Orders
-                            </a>
+{{--                                </i>--}}
+{{--                                Knitting Orders--}}
+{{--                            </a>--}}
                     </ul>
                 </li>
             @endcan
