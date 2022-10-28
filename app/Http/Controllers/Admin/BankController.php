@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Bank;
+use App\Expense;
 use App\Fund;
 use App\Http\Controllers\Controller;
 use App\Transaction;
@@ -41,6 +42,49 @@ class BankController extends Controller
         $title = 'Widthrow List';
 
         return view('admin.fund.deposit-list',compact('transactions','title'));
+
+    }
+
+    public function addBankCharge($id){
+        $bank_info = Bank::where('id',$id)->first();
+        return view('admin.bank.charge',compact('bank_info'));
+
+    }
+
+    public function storeBankCharge(Request $request){
+        DB::beginTransaction();
+        try{
+            $expenseData = new Expense();
+            $expenseData->entry_date = date("Y-m-d");;
+            $expenseData->amount = $request->charge;
+            $expenseData->description = $request->reason;
+            $expenseData->expense_category_id  = 16; // Bank expense id 16
+            $expenseData->created_by_id   = Auth::user()->id;
+            $expenseData->save();
+
+            $transaction = new Transaction();
+            $transaction->bank_id = $request->bank_id;
+            $transaction->source_type = 2;
+            $transaction->type = 1;
+            $transaction->destination_type = 1;
+            $transaction->amount = $request->charge;
+            $transaction->reason = $request->reason;
+            $transaction->date = now();
+            $transaction->created_by = Auth::user()->id;
+            $transaction->save();
+
+            $bank_info = Bank::where('id',$request->bank_id)->first();
+            $data['current_balance'] = $bank_info->current_balance -  $request->charge ;
+            DB::table('banks')->where('id',$request->bank_id)->update($data);
+
+            DB::commit();
+            return Redirect::back()->with('success', 'Bank Service Charge added');
+        } catch (\Exception $e){
+            DB::rollBack();
+            return $e->getMessage();
+            }
+
+
 
     }
 

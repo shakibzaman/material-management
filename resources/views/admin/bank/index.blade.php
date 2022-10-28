@@ -75,6 +75,10 @@
                                     Widthrow List
                                 </a>
 
+                                <a class="btn btn-xs btn-primary text-white" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
+                                   data-attr="{{ route('admin.bank.add.charge', $bank->id) }}"> Service Charge
+                                </a>
+
                                 @can('expense_edit')
                                     <a class="btn btn-xs btn-info" href="{{ route('admin.bank.edit', $bank->id) }}">
                                         {{ trans('global.edit') }}
