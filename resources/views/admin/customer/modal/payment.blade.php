@@ -105,28 +105,28 @@
 
                 success:function(data){
                     console.log(data);
-                    // if(data) {
-                    //     if(data.status == 103){
-                    //         Swal.fire({
-                    //             icon: 'error',
-                    //             title: 'Oops...',
-                    //             text: data.message,
-                    //             footer: 'Check your Stock'
-                    //         })
-                    //     }
-                    //     else{
-                    //         Swal.fire({
-                    //             position: 'top-end',
-                    //             icon: 'success',
-                    //             title: 'Payment Successfully Done',
-                    //             showConfirmButton: false,
-                    //             timer: 1500
-                    //         })
-                    //         $('#mediumModal').modal('hide');
-                    //         window.location.reload();
-                    //
-                    //     }
-                    // }
+                    if(data) {
+                        if(data.status == 103){
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: data.message,
+                                footer: 'Check your Stock'
+                            })
+                        }
+                        else{
+                            Swal.fire({
+                                position: 'top-end',
+                                icon: 'success',
+                                title: 'Payment Successfully Done',
+                                showConfirmButton: false,
+                                timer: 1500
+                            })
+                            $('#mediumModal').modal('hide');
+                            window.location.reload();
+
+                        }
+                    }
                 },
                 error:function(data){
                     console.log(data);

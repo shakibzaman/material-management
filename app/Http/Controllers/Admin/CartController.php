@@ -237,8 +237,9 @@ class CartController extends Controller
 
         DB::beginTransaction();
         try{
-            $request['paid'] = $request->paid ?? 0;
-            $request['due'] = $request->due ?? 0;
+            $customer_info = Customer::where('id',$request->customer_id)->first();
+            $request['paid'] = (strtolower($customer_info->name)=='cash') ? $request->total : ($request->paid ?? 0);
+            $request['due'] =  (strtolower($customer_info->name)=='cash') ? 0 : ( $request->due ?? 0 );
             $request['discount'] = $request->discount ?? 0;
             $request['created_by'] = Auth::user()->id;
             $request['department_id'] = $department_id;
