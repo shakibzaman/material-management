@@ -237,6 +237,9 @@ class CartController extends Controller
 
         DB::beginTransaction();
         try{
+            $request['paid'] = $request->paid ?? 0;
+            $request['due'] = $request->due ?? 0;
+            $request['discount'] = $request->discount ?? 0;
             $request['created_by'] = Auth::user()->id;
             $request['department_id'] = $department_id;
             $order = Order::create($request->all());
