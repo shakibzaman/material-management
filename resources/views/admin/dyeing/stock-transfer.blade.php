@@ -69,21 +69,20 @@
                         </p>
                     </div>
                 </div>
-{{--                <div class="col-md-2">--}}
-{{--                    <div class="form-group {{ $errors->has('process_fee') ? 'has-error' : '' }}">--}}
-{{--                        <label for="name"> Process Cost/KG *</label>--}}
-{{--                        <input type="number" id="process_fee" name="process_fee" class="form-control" required>--}}
-{{--                        <input type="hidden" id="type" name="type" value="2">--}}
-{{--                            @if($errors->has('process_fee'))--}}
-{{--                                <em class="invalid-feedback">--}}
-{{--                                    {{ $errors->first('process_fee') }}--}}
-{{--                                </em>--}}
-{{--                            @endif--}}
-{{--                        <p class="helper-block">--}}
-{{--                            {{ trans('cruds.expense.fields.entry_date_helper') }}--}}
-{{--                        </p>--}}
-{{--                    </div>--}}
-{{--                </div>--}}
+                <div class="col-md-2">
+                    <div class="form-group {{ $errors->has('process_loss') ? 'has-error' : '' }}">
+                        <label for="name"> Process Loss </label>
+                        <input type="number" id="process_loss" name="process_loss" class="form-control">
+                            @if($errors->has('process_loss'))
+                                <em class="invalid-feedback">
+                                    {{ $errors->first('process_loss') }}
+                                </em>
+                            @endif
+                        <p class="helper-block">
+                            {{ trans('cruds.expense.fields.entry_date_helper') }}
+                        </p>
+                    </div>
+                </div>
                 <div class="col-md-1">
                     <label for=""></label>
                     <button id="teacher_list_search_btn" type="submit" class="btn btn-primary pull-right">Search</button>

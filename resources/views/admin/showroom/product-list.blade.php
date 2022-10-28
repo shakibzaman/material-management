@@ -26,7 +26,9 @@
                         <td>
                             <a class="btn btn-success text-light"
                                href="{{route('admin.showroom.product.details',[$department,$key])}}">Self Product Details</a>
-                            <a class="btn btn-success text-light"
+                            <a class="btn btn-danger text-light"
+                               href="{{route('admin.showroom.product.loss.details',[$department,$key])}}">Self Process Loss Details</a>
+                            <a class="btn btn-info text-light"
                                href="{{route('admin.showroom.finish.product.details',[$department,$key])}}">Finish Product Details</a>
                         </td>
                     </tr>

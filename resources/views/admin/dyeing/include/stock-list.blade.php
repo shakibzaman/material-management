@@ -75,7 +75,7 @@
     <input type="hidden" name="color_id" value="{{$color_id}}">
     <input type="hidden" name="quantity" value="{{$quantity}}">
     <input type="hidden" name="company_id" value="{{$company_id}}">
-    <input type="hidden" name="process_fee" value="{{$process_fee}}">
+    <input type="hidden" name="process_loss" value="{{$process_loss}}">
     <input type="hidden" name="showroom_id" value="{{$showroom_id}}">
 
     <button type="submit" class="btn btn-primary submit" data-btn-name="generate">Stock Transfer</button>

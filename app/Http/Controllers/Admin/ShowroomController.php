@@ -67,10 +67,19 @@ class ShowroomController extends Controller
         return view('admin.showroom.index',compact('transfer_products','products','colors','department_id'));
     }
     public function productDetails($department,$color){
-       $transfer_products = ProductTransfer::with('transfer','color','expense','material')->where('color_id',$color)
+       $transfer_products = ProductTransfer::with('transfer','color','expense','material')->where('color_id',$color)->where('process_type',1)
            ->whereHas('transfer', function (Builder $query) use ($department){
             $query->where('department_id', $department);
         })->get();
+
+        return view('admin.showroom.material-details',compact('transfer_products'));
+
+    }
+    public function productLossDetails($department,$color){
+        $transfer_products = ProductTransfer::with('transfer','color','expense','material')->where('color_id',$color)->where('process_type',2)
+            ->whereHas('transfer', function (Builder $query) use ($department){
+                $query->where('department_id', $department);
+            })->get();
 
         return view('admin.showroom.material-details',compact('transfer_products'));
 

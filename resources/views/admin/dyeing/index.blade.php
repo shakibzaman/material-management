@@ -3,9 +3,6 @@
 @can('expense_create')
     <div style="margin-bottom: 10px;" class="row">
         <div class="col-lg-12">
-            <!-- <a class="btn btn-success" href="{{ route("admin.neeting.stock.in") }}">
-                Stock In
-            </a> -->
         </div>
     </div>
 @endcan
@@ -31,9 +28,6 @@
                         <th>
                             Product Quantity
                         </th>
-                        <!-- <th>
-{{--                            material Quantity--}}
-                        </th> -->
                         <th>
                             &nbsp;Action
                         </th>
@@ -62,9 +56,6 @@
                     <td>
                         {{$productTotalSum}}
                     </td>
-                    <!-- <td>
-{{--                        {{$materialTotalSum}}--}}
-                    </td> -->
                     <td>
                         <a class="btn btn-xs btn-primary" href="{{ route('admin.dyeing.company.transfer', $companyList[$key]->id) }}">
                             {{ trans('global.view') }}

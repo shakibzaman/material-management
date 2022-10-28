@@ -153,7 +153,7 @@ class DyeingController extends Controller
         $company_id  = $request->company_id;
         $materials   = MaterialConfig::where( 'type', 1 )->get();
         $color_id    = $request->color_id;
-        $process_fee = $request->process_fee;
+        $process_loss = $request->process_loss;
         $showroom_id = $request->showroom_id;
 
         $check_quantity = $this->checkKneetingProductQuantity( $request );
@@ -165,7 +165,7 @@ class DyeingController extends Controller
         if ( !$sets ) {
             $sets = [];
         }
-        return view( 'admin.dyeing.include.stock-list', compact( 'showroom_id', 'sets', 'materials', 'quantity', 'company_id', 'color_id', 'process_fee' ) );
+        return view( 'admin.dyeing.include.stock-list', compact( 'showroom_id', 'sets', 'materials', 'quantity', 'company_id', 'color_id', 'process_loss' ) );
     }
 
     /**
@@ -174,7 +174,7 @@ class DyeingController extends Controller
      * @param  \Illuminate\Http\Request    $request
      * @return \Illuminate\Http\Response
      */
-    public function store( Request $request )
+    public function store(Request $request)
     {
         DB::beginTransaction();
         try {
@@ -185,6 +185,8 @@ class DyeingController extends Controller
             $dyeing_charge = $request->dyeing_charge;
             $dry_charge = $request->dry_charge;
             $compacting_charge = $request->compacting_charge;
+            $process_loss = !is_null($request->process_loss) ? $request->process_loss : 0;
+            $processed = $quantity - $request->process_loss;
 
             $check_company_type = Company::where( 'id', $company_id )->first();
 
@@ -206,187 +208,355 @@ class DyeingController extends Controller
                     } )->get();
 
                 $process_fee_calculation = $dyeing_charge+$dry_charge+$compacting_charge;
-                $contentQty = $quantity;
-                foreach ( $getAllStock as $stock ) {
 
-                    $pro_qty = $contentQty;
-                    if ($stock->rest_quantity < $contentQty) {
-                        $pro_qty = $stock->rest_quantity;
-                        $contentQty = $contentQty - $stock->rest_quantity;
+                // Processed Product start
+                if($processed>0){
+                    $contentQty = $processed;
+                    foreach ( $getAllStock as $stock ) {
 
-                        $productTransfer = new ProductTransfer();
-                        $productTransfer->product_id = $product_id;
-                        $productTransfer->quantity = $pro_qty;
-                        $productTransfer->rest_quantity = $pro_qty;
-                        $productTransfer->transfer_id = $transfer_id;
-                        $productTransfer->product_stock_id = $stock->id;
-                        $productTransfer->color_id = $color_id;
-                        $productTransfer->dyeing_charge = $dyeing_charge;
-                        $productTransfer->dry_charge = $dry_charge;
-                        $productTransfer->compacting_charge = $compacting_charge;
-                        $productTransfer->process_fee = $process_fee_calculation;
-                        $productTransfer->created_by = Auth::user()->id;
-                        $productTransferStore = $productTransfer->save();
+                        $pro_qty = $contentQty;
+                        if ($stock->rest_quantity < $contentQty) {
+                            $pro_qty = $stock->rest_quantity;
+                            $contentQty = $contentQty - $stock->rest_quantity;
 
-                        $product_transfer_id = $productTransfer->id;
+                            $productTransfer = new ProductTransfer();
+                            $productTransfer->product_id = $product_id;
+                            $productTransfer->quantity = $pro_qty;
+                            $productTransfer->rest_quantity = $pro_qty;
+                            $productTransfer->transfer_id = $transfer_id;
+                            $productTransfer->product_stock_id = $stock->id;
+                            $productTransfer->color_id = $color_id;
+                            $productTransfer->dyeing_charge = $dyeing_charge;
+                            $productTransfer->dry_charge = $dry_charge;
+                            $productTransfer->compacting_charge = $compacting_charge;
+                            $productTransfer->process_fee = $process_fee_calculation;
+                            $productTransfer->created_by = Auth::user()->id;
+                            $productTransfer->process_type = 1;
+                            $productTransferStore = $productTransfer->save();
 
-                        $material_used = $this->_materialUse($request, $transfer_id, $product_transfer_id = $productTransfer->id, $product_qty = $pro_qty);
-                        if ($material_used) {
-                            logger('Material  Used');
-                        }
-                        // Add Product
-                        $material_transfer = MaterialTransfer::where('product_transfer_id', $product_transfer_id)->get();
-                        $material_costing = 0;
-                        if (count($material_transfer) > 0) {
-                            foreach ($material_transfer as $material) {
-                                $materialIn = MaterialIn::where('id', $material->material_stock_id)->first();
-                                $material_line_total = $material->quantity * $materialIn->unit_price;
-                                $material_costing += $material_line_total;
+                            $product_transfer_id = $productTransfer->id;
+
+                            $material_used = $this->_materialUse($request, $transfer_id, $product_transfer_id = $productTransfer->id, $product_qty = $pro_qty);
+                            if ($material_used) {
+                                logger('Material  Used');
+                            }
+                            // Add Product
+                            $material_transfer = MaterialTransfer::where('product_transfer_id', $product_transfer_id)->get();
+                            $material_costing = 0;
+                            if (count($material_transfer) > 0) {
+                                foreach ($material_transfer as $material) {
+                                    $materialIn = MaterialIn::where('id', $material->material_stock_id)->first();
+                                    $material_line_total = $material->quantity * $materialIn->unit_price;
+                                    $material_costing += $material_line_total;
+                                }
+                            }
+
+                            $releted_knitting_stock = ProductTransfer::where('id', $stock->product_stock_id)->first();
+                            $material_details = MaterialIn::where('id', $releted_knitting_stock->product_stock_id)->first();
+                            $product_costing = $material_details->unit_price;
+                            $knitting_charge = $releted_knitting_stock->process_fee;
+                            $product_final_costing = $product_costing + $knitting_charge + $process_fee_calculation + ($material_costing/$pro_qty) ;
+
+                            $product = new Product();
+                            $product->color_id = $color_id;
+                            $product->product_transfer_id = $productTransfer->id;
+                            $product->process_costing = $product_final_costing;
+                            $product->showroom_id = $request->showroom_id;
+                            $product->quantity = $pro_qty;
+                            $product->type = 1; // 1 = Process Product
+                            $product->save();
+
+                            $product_costing_history = new ProductCosting();
+                            $product_costing_history->product_row_id = $product->id;
+                            $product_costing_history->product_costing = $product_costing;
+                            $product_costing_history->knitting_charge = $knitting_charge;
+                            $product_costing_history->dyeing_charge = $dyeing_charge;
+                            $product_costing_history->dry_charge = $dry_charge;
+                            $product_costing_history->compacting_charge = $compacting_charge;
+                            $product_costing_history->material_costing = $material_costing;
+                            $product_costing_history->created_by = Auth::user()->id;
+                            $product_costing_history->save();
+                            logger("Product Costing History");
+
+                            if ($productTransferStore) {
+                                // reduce stock quantity
+                                $data_processed['rest_quantity'] = $stock->rest_quantity - $pro_qty;
+                                logger('Processed qty is '.$pro_qty);
+                                $processed_data_update = DB::table('product_transfer')->where('id', $stock->id)->update($data_processed);
+                                if($processed_data_update){
+                                    logger(' Updated rest qty 2 for processed' . $data_processed['rest_quantity']);
+                                }
+
+                                // Add expense
+
+                                $expense = new Expense();
+                                $expense->entry_date = date("Y-m-d");
+                                $expense->amount = ($product_costing * $pro_qty);
+                                $expense->description = "Product Process Costing of Dyeing";
+                                $expense->expense_category_id = 1;
+                                $expense->department_id = 2;
+                                $expense->transfer_id = $transfer_id;
+                                $expense->created_by_id = Auth::user()->id;
+                                $expense->material_id = $stock->product_id;
+                                $expense->transfer_product_id = $productTransfer->id;
+                                $expense->save();
+                                logger('Expense 1' . $expense);
+                                logger('Product Process Costing of Dyeing');
+
+
+                            }
+
+                        } else {
+                            $contentQty = 0;
+                            $productTransfer = new ProductTransfer();
+                            $productTransfer->product_id = $product_id;
+                            $productTransfer->quantity = $pro_qty;
+                            $productTransfer->rest_quantity = $pro_qty;
+                            $productTransfer->transfer_id = $transfer_id;
+                            $productTransfer->product_stock_id = $stock->id;
+                            $productTransfer->color_id = $color_id;
+                            $productTransfer->dyeing_charge = $dyeing_charge;
+                            $productTransfer->dry_charge = $dry_charge;
+                            $productTransfer->compacting_charge = $compacting_charge;
+                            $productTransfer->process_fee = $process_fee_calculation;
+                            $productTransfer->created_by = Auth::user()->id;
+                            $productTransfer->process_type = 1;
+                            $productTransferStore = $productTransfer->save();
+
+
+                            $product_transfer_id = $productTransfer->id;
+
+                            $material_used = $this->_materialUse($request, $transfer_id, $product_transfer_id = $productTransfer->id, $product_qty = $pro_qty);
+                            if ($material_used) {
+                                logger('Material  Used');
+                            }
+                            // Add Product
+                            $material_transfer = MaterialTransfer::where('product_transfer_id', $product_transfer_id)->get();
+                            $material_costing = 0;
+                            if (count($material_transfer) > 0) {
+                                foreach ($material_transfer as $material) {
+                                    $materialIn = MaterialIn::where('id', $material->material_stock_id)->first();
+                                    $material_line_total = $material->quantity * $materialIn->unit_price;
+                                    $material_costing += $material_line_total;
+                                }
+                            }
+
+                            $releted_knitting_stock = ProductTransfer::where('id', $stock->product_stock_id)->first();
+                            $material_details = MaterialIn::where('id', $releted_knitting_stock->product_stock_id)->first();
+                            $product_costing = $material_details->unit_price;
+                            $knitting_charge = $releted_knitting_stock->process_fee;
+                            $product_final_costing = $product_costing + $knitting_charge + $process_fee_calculation + ($material_costing/$pro_qty) ;
+
+                            $product = new Product();
+                            $product->color_id = $color_id;
+                            $product->product_transfer_id = $productTransfer->id;
+                            $product->showroom_id = $request->showroom_id;
+                            $product->process_costing = $product_final_costing;
+                            $product->quantity = $pro_qty;
+                            $product->type = 1; // 1 = Process Product
+                            $product->save();
+
+                            $product_costing_history = new ProductCosting();
+                            $product_costing_history->product_row_id = $product->id;
+                            $product_costing_history->product_costing = $product_costing;
+                            $product_costing_history->knitting_charge = $knitting_charge;
+                            $product_costing_history->dyeing_charge = $dyeing_charge;
+                            $product_costing_history->dry_charge = $dry_charge;
+                            $product_costing_history->compacting_charge = $compacting_charge;
+                            $product_costing_history->material_costing = $material_costing;
+                            $product_costing_history->created_by = Auth::user()->id;
+                            $product_costing_history->save();
+                            logger("Product Costing History");
+
+                            if ($productTransferStore) {
+                                // reduce stock quantity
+                                $data_processed['rest_quantity'] = $stock->rest_quantity - $pro_qty;
+                                logger('Processed qty is 2 '.$pro_qty);
+                                $processed_data_update = DB::table('product_transfer')->where('id', $stock->id)->update($data_processed);
+                                if($processed_data_update){
+                                    logger(' Updated rest qty 2 for processed' . $data_processed['rest_quantity']);
+                                }
+
+                                // Add expense
+
+                                $expense = new Expense();
+                                $expense->entry_date = date("Y-m-d");
+                                $expense->amount = $product_costing * $pro_qty;
+                                $expense->description = "Product Process Costing of Dyeing";
+                                $expense->expense_category_id = 1;
+                                $expense->department_id = 2;
+                                $expense->transfer_id = $transfer_id;
+                                $expense->created_by_id = Auth::user()->id;
+                                $expense->material_id = $stock->product_id;
+                                $expense->transfer_product_id = $productTransfer->id;
+                                $expense->save();
+                                logger('Expense 2' . $expense);
+                                logger('Product Process Costing of Dyeing');
                             }
                         }
 
-                        $releted_knitting_stock = ProductTransfer::where('id', $stock->product_stock_id)->first();
-                        $material_details = MaterialIn::where('id', $releted_knitting_stock->product_stock_id)->first();
-                        $product_costing = $material_details->unit_price;
-                        $knitting_charge = $releted_knitting_stock->process_fee;
-                        $product_final_costing = $product_costing + $knitting_charge + $process_fee_calculation + ($material_costing/$pro_qty) ;
-
-                        $product = new Product();
-                        $product->color_id = $color_id;
-                        $product->product_transfer_id = $productTransfer->id;
-                        $product->process_costing = $product_final_costing;
-                        $product->showroom_id = $request->showroom_id;
-                        $product->quantity = $pro_qty;
-                        $product->type = 1; // 1 = Process Product
-                        $product->save();
-
-                        $product_costing_history = new ProductCosting();
-                        $product_costing_history->product_row_id = $product->id;
-                        $product_costing_history->product_costing = $product_costing;
-                        $product_costing_history->knitting_charge = $knitting_charge;
-                        $product_costing_history->dyeing_charge = $dyeing_charge;
-                        $product_costing_history->dry_charge = $dry_charge;
-                        $product_costing_history->compacting_charge = $compacting_charge;
-                        $product_costing_history->material_costing = $material_costing;
-                        $product_costing_history->created_by = Auth::user()->id;
-                        $product_costing_history->save();
-                        logger("Product Costing History");
-
-                        if ($productTransferStore) {
-                            // reduce stock quantity
-                            $data['rest_quantity'] = $stock->rest_quantity - $pro_qty;
-                            DB::table('product_transfer')->where('id', $stock->id)->update($data);
-                            logger(' Updated rest qty 1' . $data['rest_quantity']);
-
-                            // Add expense
-
-                            $expense = new Expense();
-                            $expense->entry_date = date("Y-m-d");
-                            $expense->amount = ($product_costing * $pro_qty);
-                            $expense->description = "Product Process Costing of Dyeing";
-                            $expense->expense_category_id = 1;
-                            $expense->department_id = 2;
-                            $expense->transfer_id = $transfer_id;
-                            $expense->created_by_id = Auth::user()->id;
-                            $expense->material_id = $stock->product_id;
-                            $expense->transfer_product_id = $productTransfer->id;
-                            $expense->save();
-                            logger('Expense 1' . $expense);
-                            logger('Product Process Costing of Dyeing');
-
-
+                        if ( $contentQty < 1 ) {
+                            break;
                         }
 
-                    } else {
-                        $contentQty = 0;
-                        $productTransfer = new ProductTransfer();
-                        $productTransfer->product_id = $product_id;
-                        $productTransfer->quantity = $pro_qty;
-                        $productTransfer->rest_quantity = $pro_qty;
-                        $productTransfer->transfer_id = $transfer_id;
-                        $productTransfer->product_stock_id = $stock->id;
-                        $productTransfer->color_id = $color_id;
-                        $productTransfer->dyeing_charge = $dyeing_charge;
-                        $productTransfer->dry_charge = $dry_charge;
-                        $productTransfer->compacting_charge = $compacting_charge;
-                        $productTransfer->process_fee = $process_fee_calculation;
-                        $productTransfer->created_by = Auth::user()->id;
-                        $productTransferStore = $productTransfer->save();
+                    }
+                }
+
+                // Process Loss start
+                if($process_loss>0){
+                    $contentQty = $process_loss;
+                    foreach ( $getAllStock as $stock ) {
+
+                        $pro_qty = $contentQty;
+                        if ($stock->rest_quantity < $contentQty) {
+                            $pro_qty = $stock->rest_quantity;
+                            $contentQty = $contentQty - $stock->rest_quantity;
+
+                            $productTransfer = new ProductTransfer();
+                            $productTransfer->product_id = $product_id;
+                            $productTransfer->quantity = $pro_qty;
+                            $productTransfer->rest_quantity = $pro_qty;
+                            $productTransfer->transfer_id = $transfer_id;
+                            $productTransfer->product_stock_id = $stock->id;
+                            $productTransfer->color_id = $color_id;
+                            $productTransfer->dyeing_charge = $dyeing_charge;
+                            $productTransfer->dry_charge = $dry_charge;
+                            $productTransfer->compacting_charge = $compacting_charge;
+                            $productTransfer->process_fee = $process_fee_calculation;
+                            $productTransfer->created_by = Auth::user()->id;
+                            $productTransfer->process_type = 2;
+                            $productTransferStore = $productTransfer->save();
+
+                            $product_transfer_id = $productTransfer->id;
+
+                            $material_used = $this->_materialUse($request, $transfer_id, $product_transfer_id = $productTransfer->id, $product_qty = $pro_qty);
+                            if ($material_used) {
+                                logger('Material  Used');
+                            }
+                            // Add Product
+                            $material_transfer = MaterialTransfer::where('product_transfer_id', $product_transfer_id)->get();
+                            $material_costing = 0;
+                            if (count($material_transfer) > 0) {
+                                foreach ($material_transfer as $material) {
+                                    $materialIn = MaterialIn::where('id', $material->material_stock_id)->first();
+                                    $material_line_total = $material->quantity * $materialIn->unit_price;
+                                    $material_costing += $material_line_total;
+                                }
+                            }
+
+                            $releted_knitting_stock = ProductTransfer::where('id', $stock->product_stock_id)->first();
+                            $material_details = MaterialIn::where('id', $releted_knitting_stock->product_stock_id)->first();
+                            $product_costing = $material_details->unit_price;
+                            $knitting_charge = $releted_knitting_stock->process_fee;
+                            $product_final_costing = $product_costing + $knitting_charge + $process_fee_calculation + ($material_costing/$pro_qty) ;
+
+                            if ($productTransferStore) {
+                                // reduce stock quantity
+
+                                $rest_stock = DB::table('product_transfer')->where('id', $stock->id)->first();
+                                $data['rest_quantity'] = $rest_stock->rest_quantity - $pro_qty;
+                                logger('Processed loss qty is 2 '.$pro_qty);
+
+                                DB::table('product_transfer')->where('id', $stock->id)->update($data);
+                                logger(' Updated rest qty 1 for processe loss' . $data['rest_quantity']);
 
 
-                        $product_transfer_id = $productTransfer->id;
 
-                        $material_used = $this->_materialUse($request, $transfer_id, $product_transfer_id = $productTransfer->id, $product_qty = $pro_qty);
-                        if ($material_used) {
-                            logger('Material  Used');
-                        }
-                        // Add Product
-                        $material_transfer = MaterialTransfer::where('product_transfer_id', $product_transfer_id)->get();
-                        $material_costing = 0;
-                        if (count($material_transfer) > 0) {
-                            foreach ($material_transfer as $material) {
-                                $materialIn = MaterialIn::where('id', $material->material_stock_id)->first();
-                                $material_line_total = $material->quantity * $materialIn->unit_price;
-                                $material_costing += $material_line_total;
+                                // Add expense
+
+                                $expense = new Expense();
+                                $expense->entry_date = date("Y-m-d");
+                                $expense->amount = ($product_costing * $pro_qty);
+                                $expense->description = "Product Process Costing of Dyeing";
+                                $expense->expense_category_id = 1;
+                                $expense->department_id = 2;
+                                $expense->transfer_id = $transfer_id;
+                                $expense->created_by_id = Auth::user()->id;
+                                $expense->material_id = $stock->product_id;
+                                $expense->transfer_product_id = $productTransfer->id;
+                                $expense->save();
+                                logger('Expense 1' . $expense);
+                                logger('Product Process Costing of Dyeing');
+
+
+                            }
+
+                        } else {
+                            $contentQty = 0;
+                            $productTransfer = new ProductTransfer();
+                            $productTransfer->product_id = $product_id;
+                            $productTransfer->quantity = $pro_qty;
+                            $productTransfer->rest_quantity = $pro_qty;
+                            $productTransfer->transfer_id = $transfer_id;
+                            $productTransfer->product_stock_id = $stock->id;
+                            $productTransfer->color_id = $color_id;
+                            $productTransfer->dyeing_charge = $dyeing_charge;
+                            $productTransfer->dry_charge = $dry_charge;
+                            $productTransfer->compacting_charge = $compacting_charge;
+                            $productTransfer->process_fee = $process_fee_calculation;
+                            $productTransfer->created_by = Auth::user()->id;
+                            $productTransfer->process_type = 2;
+                            $productTransferStore = $productTransfer->save();
+
+
+                            $product_transfer_id = $productTransfer->id;
+
+                            $material_used = $this->_materialUse($request, $transfer_id, $product_transfer_id = $productTransfer->id, $product_qty = $pro_qty);
+                            if ($material_used) {
+                                logger('Material  Used');
+                            }
+                            // Add Product
+                            $material_transfer = MaterialTransfer::where('product_transfer_id', $product_transfer_id)->get();
+                            $material_costing = 0;
+                            if (count($material_transfer) > 0) {
+                                foreach ($material_transfer as $material) {
+                                    $materialIn = MaterialIn::where('id', $material->material_stock_id)->first();
+                                    $material_line_total = $material->quantity * $materialIn->unit_price;
+                                    $material_costing += $material_line_total;
+                                }
+                            }
+
+                            $releted_knitting_stock = ProductTransfer::where('id', $stock->product_stock_id)->first();
+                            $material_details = MaterialIn::where('id', $releted_knitting_stock->product_stock_id)->first();
+                            $product_costing = $material_details->unit_price;
+                            $knitting_charge = $releted_knitting_stock->process_fee;
+                            $product_final_costing = $product_costing + $knitting_charge + $process_fee_calculation + ($material_costing/$pro_qty) ;
+
+                            if ($productTransferStore) {
+                                // reduce stock quantity
+                                $rest_stock = DB::table('product_transfer')->where('id', $stock->id)->first();
+                                $data['rest_quantity'] = $rest_stock->rest_quantity - $pro_qty;
+                                logger('Processed loss qty is 2 '.$pro_qty);
+
+                                DB::table('product_transfer')->where('id', $stock->id)->update($data);
+                                logger(' Updated rest qty 2 for processe loss' . $data['rest_quantity']);
+
+
+                                // Add expense
+
+                                $expense = new Expense();
+                                $expense->entry_date = date("Y-m-d");
+                                $expense->amount = $product_costing * $pro_qty;
+                                $expense->description = "Product Process Costing of Dyeing";
+                                $expense->expense_category_id = 1;
+                                $expense->department_id = 2;
+                                $expense->transfer_id = $transfer_id;
+                                $expense->created_by_id = Auth::user()->id;
+                                $expense->material_id = $stock->product_id;
+                                $expense->transfer_product_id = $productTransfer->id;
+                                $expense->save();
+                                logger('Expense 2' . $expense);
+                                logger('Product Process Costing of Dyeing');
                             }
                         }
 
-                        $releted_knitting_stock = ProductTransfer::where('id', $stock->product_stock_id)->first();
-                        $material_details = MaterialIn::where('id', $releted_knitting_stock->product_stock_id)->first();
-                        $product_costing = $material_details->unit_price;
-                        $knitting_charge = $releted_knitting_stock->process_fee;
-                        $product_final_costing = $product_costing + $knitting_charge + $process_fee_calculation + ($material_costing/$pro_qty) ;
+                        if ( $contentQty < 1 ) {
+                            break;
+                        }
 
-                        $product = new Product();
-                        $product->color_id = $color_id;
-                        $product->product_transfer_id = $productTransfer->id;
-                        $product->showroom_id = $request->showroom_id;
-                        $product->process_costing = $product_final_costing;
-                        $product->quantity = $pro_qty;
-                        $product->type = 1; // 1 = Process Product
-                        $product->save();
-
-                        $product_costing_history = new ProductCosting();
-                        $product_costing_history->product_row_id = $product->id;
-                        $product_costing_history->product_costing = $product_costing;
-                        $product_costing_history->knitting_charge = $knitting_charge;
-                        $product_costing_history->dyeing_charge = $dyeing_charge;
-                        $product_costing_history->dry_charge = $dry_charge;
-                        $product_costing_history->compacting_charge = $compacting_charge;
-                        $product_costing_history->material_costing = $material_costing;
-                        $product_costing_history->created_by = Auth::user()->id;
-                        $product_costing_history->save();
-                        logger("Product Costing History");
-
-                    if ($productTransferStore) {
-                        // reduce stock quantity
-                        $data['rest_quantity'] = $stock->rest_quantity - $pro_qty;
-                        DB::table('product_transfer')->where('id', $stock->id)->update($data);
-                        logger(' Updated rest qty 2' . $data['rest_quantity']);
-
-                        // Add expense
-
-                        $expense = new Expense();
-                        $expense->entry_date = date("Y-m-d");
-                        $expense->amount = $product_costing * $pro_qty;
-                        $expense->description = "Product Process Costing of Dyeing";
-                        $expense->expense_category_id = 1;
-                        $expense->department_id = 2;
-                        $expense->transfer_id = $transfer_id;
-                        $expense->created_by_id = Auth::user()->id;
-                        $expense->material_id = $stock->product_id;
-                        $expense->transfer_product_id = $productTransfer->id;
-                        $expense->save();
-                        logger('Expense 2' . $expense);
-                        logger('Product Process Costing of Dyeing');
                     }
                 }
 
-                    if ( $contentQty < 1 ) {
-                        break;
-                    }
-
-                }
             }
             DB::commit();
             return ['status' => 200, 'message' => 'Successfully Transfer to showroom'];

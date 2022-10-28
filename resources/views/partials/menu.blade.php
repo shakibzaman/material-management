@@ -160,16 +160,16 @@
                                 </a>
                             </li>
                         @endcan
-                            @can('stock_set_access')
-                            <li class="nav-item">
-                                <a href="{{ route("admin.showroom.stock",3) }}" class="nav-link {{ request()->is('admin/showroom/stock') || request()->is('admin/showroom/stock') ? 'active' : '' }}">
-                                    <i class="fa-fw fas fa-list nav-icon">
+{{--                            @can('stock_set_access')--}}
+{{--                            <li class="nav-item">--}}
+{{--                                <a href="{{ route("admin.showroom.stock",3) }}" class="nav-link {{ request()->is('admin/showroom/stock') || request()->is('admin/showroom/stock') ? 'active' : '' }}">--}}
+{{--                                    <i class="fa-fw fas fa-list nav-icon">--}}
 
-                                    </i>
-                                    Showroom Stock
-                                </a>
-                            </li>
-                        @endcan
+{{--                                    </i>--}}
+{{--                                    Showroom Stock--}}
+{{--                                </a>--}}
+{{--                            </li>--}}
+{{--                        @endcan--}}
                             <li class="nav-item">
                                 <a href="{{ route("admin.showroom.orders",3) }}" class="nav-link {{ request()->is('admin/showroom/stock') || request()->is('admin/showroom/stock') ? 'active' : '' }}">
                                     <i class="fa-fw fas fa-list nav-icon">
@@ -209,14 +209,14 @@
                                     Showroom Product
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a href="{{ route("admin.showroom.stock",4) }}" class="nav-link {{ request()->is('admin/showroom/stock') || request()->is('admin/showroom/stock') ? 'active' : '' }}">
-                                    <i class="fa-fw fas fa-list nav-icon">
+{{--                            <li class="nav-item">--}}
+{{--                                <a href="{{ route("admin.showroom.stock",4) }}" class="nav-link {{ request()->is('admin/showroom/stock') || request()->is('admin/showroom/stock') ? 'active' : '' }}">--}}
+{{--                                    <i class="fa-fw fas fa-list nav-icon">--}}
 
-                                    </i>
-                                    Showroom Stock
-                                </a>
-                            </li>
+{{--                                    </i>--}}
+{{--                                    Showroom Stock--}}
+{{--                                </a>--}}
+{{--                            </li>--}}
                         @endcan
                             <li class="nav-item">
                                 <a href="{{ route("admin.showroom.orders",4) }}" class="nav-link {{ request()->is('admin/showroom/stock') || request()->is('admin/showroom/stock') ? 'active' : '' }}">

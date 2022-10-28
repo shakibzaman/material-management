@@ -215,9 +215,7 @@ class CartController extends Controller
         $department_id = $request->department_id;
         $validated = $request->validate([
             'invoice_id' => 'required|unique:orders|max:255',
-            'customer_id' => 'required',
-            'payment_process' => 'required',
-            'payment_info' => 'required',
+            'customer_id' => 'required'
         ]);
 
         $low_stock = [];
