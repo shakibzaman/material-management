@@ -96,7 +96,7 @@ class MaterialInController extends Controller
         try {
             for($i=0;$i<count($request->material_id);$i++) {
                 logger('i is ' .$i.'and material is '.$request->material_id[$i]);
-                $user_account_detail = UserAccount::where('user_id', $request->supplier_id)->first();
+                $user_account_detail = UserAccount::where('user_id', $request->supplier_id)->where('type',1)->first();
                 if (!$user_account_detail) {
                     return ['status' => 105, 'message' => 'Sorry your Supplier not founded'];
                 }
