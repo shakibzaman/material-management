@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use App\MaterialConfig;
 use App\MaterialIn;
 use App\Payment;
+use App\Product;
 use App\ProductTransfer;
 use App\Supplier;
 use App\SupplierProduct;
@@ -38,8 +39,32 @@ class MaterialInController extends Controller
 
        $materialsPurchased = MaterialIn::with('material','units')->where('type',1)->get()->groupBy('material_id');
        $materials = MaterialConfig::all();
+//       $materials = MaterialConfig::all()->pluck('name','id')->prepend( 'Please Select', '' );;
 
         return view('admin.material.index', compact('materials','materialsPurchased'));
+    }
+
+    public function addToPurchase($id){
+        $material_config = MaterialConfig::where('id',$id)->first();
+        $html = '<tr>
+    <td>
+        <input type="text" class="form-control" value="'.$material_config->name.'" name="material_name[]">
+        <input type="hidden" class="form-control material_id" value="'.$material_config->id.'" name="material_id[]">
+    </td>
+    <td>
+        <input type="text" class="form-control quantity" value="" name="quantity[]">
+    </td>
+    <td>
+        <input type="text" class="form-control price" value="" name="price[]">
+    </td>
+    <td>
+        <input type="text" class="form-control line_total" value="" name="line_total[]">
+    </td>
+    <td class="actions" data-th="">
+        <button class="btn btn-danger btn-sm remove-from-cart"><i class="fa fa-trash-o"></i></button>
+    </td>
+</tr>';
+        return response()->json(['html'=>$html]);
     }
 
     /**
@@ -69,74 +94,103 @@ class MaterialInController extends Controller
     {
         DB::beginTransaction();
         try {
-        $user_account_detail = UserAccount::where('user_id',$request->supplier_id)->first();
-        if(!$user_account_detail){
-            return ['status'=>105,'message'=>'Sorry your Supplier not founded'];
-        }
-        $request['created_by'] = Auth::user()->id;
-        $request['rest'] = $request->quantity;
-        $materialIn = MaterialIn::create($request->all());
-
-        if($materialIn){
-            $request['material_in_id'] = $materialIn->id;
-            $request['payment_process'] = $request->payment_process;
-            $request['payment_info'] = $request->payment_info;
-            $supplier_store = SupplierProduct::create($request->all());
-
-
-            if($request->paid_amount>0){
-                $request['amount'] = $request->paid_amount;
-                $request['user_account_id'] = $user_account_detail->id;
-                $request['releted_id'] = $supplier_store->id;
-                $request['releted_id_type'] = 2;
-                $request['releted_department_id'] = 5;
-                $payment = Payment::create($request->all());
-
-                if($request->payment_process == 'bank'){
-                    $bank_info = Bank::where('id',$request->payment_type)->first();
-                    $bank['current_balance'] = $bank_info->current_balance - $request->paid_amount;
-                    $bank_info->update($bank);
-
-                    $transaction = new Transaction();
-                    $transaction->bank_id = $bank_info->id;
-                    $transaction->date = now();
-                    $transaction->source_type = 1; // 2 is account 1 is bank
-                    $transaction->type = 1; // 1 is Widthrow
-                    $transaction->payment_id = $payment->id;
-                    $transaction->amount = $request->paid_amount;
-                    $transaction->reason = 'Supplier Payment';
-                    $transaction->created_by = Auth::user()->id;
-
-                    $transaction->save();
-
+            for($i=0;$i<count($request->material_id);$i++) {
+                logger('i is ' .$i.'and material is '.$request->material_id[$i]);
+                $user_account_detail = UserAccount::where('user_id', $request->supplier_id)->first();
+                if (!$user_account_detail) {
+                    return ['status' => 105, 'message' => 'Sorry your Supplier not founded'];
                 }
-                if($request->payment_process == 'account'){
-                    $fund_info = Fund::where('id',$request->payment_type)->first();
-                    $fund['current_balance'] = $fund_info->current_balance - $request->paid_amount;
-                    $fund_info->update($fund);
 
-                    $transaction = new Transaction();
-                    $transaction->bank_id = $fund_info->id;
-                    $transaction->source_type = 2; // 2 is account 1 is bank
-                    $transaction->type = 1;
-                    $transaction->date = now();
-                    $transaction->payment_id = $payment->id;
-                    $transaction->amount = $request->paid_amount;
-                    $transaction->reason = 'Supplier Payment';
-                    $transaction->created_by = Auth::user()->id;
+                logger(' Material In start');
+                $material = new MaterialIn();
+                $material->material_id = $request->material_id[$i];
+                $material->quantity = $request->quantity[$i];
+                $material->unit_price = $request->price[$i];
+                $material->total_price = $request->line_total[$i];
+                $material->unit = 1;
+                $material->type = $request->type;
+                $material->supplier_id = $request->supplier_id;
+                $material->created_by = Auth::user()->id;
+                $material->rest = $request->quantity[$i];
+                $material->purchased_by = Auth::user()->id;
+                $material->inv_number = $request->inv_number;
+                $material->save();
+                $materialIn = $material->id;
+                logger('Material Store');
 
-                    $transaction->save();
+                if ($materialIn) {
+                    $supplier_product_store = new SupplierProduct();
+                    $supplier_product_store->material_in_id = $material->id;
+                    $supplier_product_store->material_id = $request->material_id[$i];
+                    $supplier_product_store->quantity = $request->quantity[$i];
+                    $supplier_product_store->supplier_id = $request->supplier_id;
+                    $supplier_product_store->paid_amount = $request->paid_amount ?? 0;
+                    $supplier_product_store->due_amount = $request->due_amount ?? 0;
+                    $supplier_product_store->payment_process = $request->payment_process;
+                    $supplier_product_store->payment_info = $request->payment_info;
+                    $supplier_product_store->save();
 
+                    logger('$supplier_store');
+
+
+                    if ($request->paid_amount > 0) {
+                        $request['amount'] = $request->paid_amount;
+                        $request['user_account_id'] = $user_account_detail->id;
+                        $request['releted_id'] = $supplier_product_store->id;
+                        $request['releted_id_type'] = 2;
+                        $request['releted_department_id'] = 5;
+                        $request['created_by'] = Auth::user()->id;
+                        $payment = Payment::create($request->all());
+
+                        if($request->payment_process !=null){
+                            if ($request->payment_process == 'bank') {
+                                $bank_info = Bank::where('id', $request->payment_type)->first();
+                                $bank['current_balance'] = $bank_info->current_balance - $request->paid_amount;
+                                $bank_info->update($bank);
+
+                                $transaction = new Transaction();
+                                $transaction->bank_id = $bank_info->id;
+                                $transaction->date = now();
+                                $transaction->source_type = 1; // 2 is account 1 is bank
+                                $transaction->type = 1; // 1 is Widthrow
+                                $transaction->payment_id = $payment->id;
+                                $transaction->amount = $request->paid_amount;
+                                $transaction->reason = 'Supplier Payment';
+                                $transaction->created_by = Auth::user()->id;
+
+                                $transaction->save();
+
+                            }
+                            if ($request->payment_process == 'account') {
+                                $fund_info = Fund::where('id', $request->payment_type)->first();
+                                $fund['current_balance'] = $fund_info->current_balance - $request->paid_amount;
+                                $fund_info->update($fund);
+
+                                $transaction = new Transaction();
+                                $transaction->bank_id = $fund_info->id;
+                                $transaction->source_type = 2; // 2 is account 1 is bank
+                                $transaction->type = 1;
+                                $transaction->date = now();
+                                $transaction->payment_id = $payment->id;
+                                $transaction->amount = $request->paid_amount;
+                                $transaction->reason = 'Supplier Payment';
+                                $transaction->created_by = Auth::user()->id;
+
+                                $transaction->save();
+
+                            }
+                        }
+
+                    }
+                    logger('Account amount added');
+                    $user_account['total_due'] = $user_account_detail->total_due + ($request->total_price - $request->paid_amount);
+                    $user_account['total_paid'] = $user_account_detail->total_paid + $request->paid_amount;
+                    $user_account_detail->update($user_account);
+                    logger('Account amount added done');
                 }
-            }
-
-
-            $user_account['total_due'] = $user_account_detail->total_due + ($request->total_price - $request->paid_amount);
-            $user_account['total_paid'] = $user_account_detail->total_paid + $request->paid_amount;
-            $user_account_detail->update($user_account);
-
             }
             DB::commit();
+            logger('Commit done');
         } catch (\Exception $e) {
 
             DB::rollback();

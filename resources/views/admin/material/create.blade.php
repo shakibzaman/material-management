@@ -10,12 +10,13 @@
             <form action="{{ route("admin.material-in.store") }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="row bg-info">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="col-md-12">
                             <div class="form-group {{ $errors->has('buying_date') ? 'has-error' : '' }}">
                                 <label for="buying_date">Buying Date *</label>
                                 <input type="text" id="buying_date" name="buying_date" class="form-control date"
                                        required>
+                                <input type="hidden" name="type" value="1">
                                 @if($errors->has('buying_date'))
                                     <em class="invalid-feedback">
                                         {{ $errors->first('buying_date') }}
@@ -26,6 +27,8 @@
                                 </p>
                             </div>
                         </div>
+                    </div>
+                    <div class="col-md-4">
                         <div class="col-md-12">
                             <div class="form-group {{ $errors->has('unit') ? 'has-error' : '' }}">
                                 <label for="supplied_by">Supplier *</label>
@@ -41,10 +44,8 @@
                                 @endif
                             </div>
                         </div>
-
-
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="col-md-12">
                             <div class="form-group {{ $errors->has('inv_number') ? 'has-error' : '' }}">
                                 <label for="inv_number">INV number *</label>
@@ -64,167 +65,119 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group {{ $errors->has('material_id') ? 'has-error' : '' }}">
-                            <label for="name">Material Name</label>
-                            <select name="material_id" id="material_id" class="form-control select2" required>
-                                @foreach($materials as $id => $material)
-                                    <option value="{{ $id }}">{{ $material }}</option>
+                            <label for="name">Material Name *</label>
+                            <select name="product_id" id="product_id" class="form-control select2 product_id" required>
+                                @foreach($materials as $key => $material)
+                                    <option value={{$key }} >{{ $material }}</option>
                                 @endforeach
                             </select>
-                            @if($errors->has('material_id'))
+                            @if($errors->has('product_id'))
                                 <em class="invalid-feedback">
-                                    {{ $errors->first('material_id') }}
-                                </em>
-                            @endif
-                        </div>
-
-                        <div class="form-group {{ $errors->has('quantity') ? 'has-error' : '' }}">
-                            <label for="name"> Quantity *</label>
-                            <input type="text" id="quantity" name="quantity" class="form-control" required>
-                            <input type="hidden" id="type" name="type" value="1">
-                            @if($errors->has('quantity'))
-                                <em class="invalid-feedback">
-                                    {{ $errors->first('quantity') }}
-                                </em>
-                            @endif
-                            <p class="helper-block">
-                                {{ trans('cruds.expense.fields.entry_date_helper') }}
-                            </p>
-                        </div>
-
-                        <div class="form-group {{ $errors->has('unit_price') ? 'has-error' : '' }}">
-                            <label for="unit_price">Unit Price *</label>
-                            <input type="text" id="unit_price" name="unit_price" class="form-control" required>
-                            @if($errors->has('unit_price'))
-                                <em class="invalid-feedback">
-                                    {{ $errors->first('unit_price') }}
-                                </em>
-                            @endif
-                            <p class="helper-block">
-                                {{ trans('cruds.expense.fields.entry_date_helper') }}
-                            </p>
-                        </div>
-
-                        <div class="form-group {{ $errors->has('total_price') ? 'has-error' : '' }}">
-                            <label for="total_price">Total Price *</label>
-                            <input type="text" id="total_price" name="total_price" class="form-control" required>
-                            @if($errors->has('total_price'))
-                                <em class="invalid-feedback">
-                                    {{ $errors->first('total_price') }}
-                                </em>
-                            @endif
-                            <p class="helper-block">
-                                {{ trans('cruds.expense.fields.entry_date_helper') }}
-                            </p>
-                        </div>
-
-                        <div class="form-group {{ $errors->has('paid_amount') ? 'has-error' : '' }}">
-                            <label for="paid_amount">Paid Amount *</label>
-                            <input type="number" id="paid_amount" name="paid_amount" class="form-control" required>
-                            @if($errors->has('paid_amount'))
-                                <em class="invalid-feedback">
-                                    {{ $errors->first('paid_amount') }}
-                                </em>
-                            @endif
-                            <p class="helper-block">
-                                {{ trans('cruds.expense.fields.entry_date_helper') }}
-                            </p>
-                        </div>
-
-                        <div class="form-group {{ $errors->has('due_amount') ? 'has-error' : '' }}">
-                            <label for="due_amount">Due amount *</label>
-                            <input type="number" id="due_amount" name="due_amount" class="form-control" required>
-                            @if($errors->has('due_amount'))
-                                <em class="invalid-feedback">
-                                    {{ $errors->first('due_amount') }}
-                                </em>
-                            @endif
-                            <p class="helper-block">
-                                {{ trans('cruds.expense.fields.entry_date_helper') }}
-                            </p>
-                        </div>
-
-                        <div class="form-group {{ $errors->has('payment_process') ? 'has-error' : '' }}">
-                            <label for="payment_process">Payment Process *</label>
-                            <select name="payment_process" id="payment_process" class="form-control" required>
-                                <option value="">---</option>
-                                <option value="bank">Bank</option>
-                                <option value="account">Funds</option>
-                                <option value="cash">Cash</option>
-                            </select>
-                            @if($errors->has('payment_process'))
-                                <em class="invalid-feedback">
-                                    {{ $errors->first('payment_process') }}
-                                </em>
-                            @endif
-                            <p class="helper-block">
-                                {{ trans('cruds.expense.fields.entry_date_helper') }}
-                            </p>
-                        </div>
-                        <div class="form-group {{ $errors->has('payment_type') ? 'has-error' : '' }}">
-                            <label for="payment_type">Select Account *</label>
-                            <select name="payment_type" id="payment_type" class="form-control select2 payment_type">
-
-                            </select>
-                            @if($errors->has('payment_type'))
-                                <em class="invalid-feedback">
-                                    {{ $errors->first('payment_type') }}
-                                </em>
-                            @endif
-                            <p class="helper-block">
-                                {{ trans('cruds.expense.fields.entry_date_helper') }}
-                            </p>
-                        </div>
-
-                        <div class="form-group {{ $errors->has('payment_info') ? 'has-error' : '' }}">
-                            <label for="due_amount">Payment Info </label>
-                            <input type="text" id="payment_info" name="payment_info" class="form-control">
-                            @if($errors->has('payment_info'))
-                                <em class="invalid-feedback">
-                                    {{ $errors->first('payment_info') }}
-                                </em>
-                            @endif
-                            <p class="helper-block">
-                                {{ trans('cruds.expense.fields.entry_date_helper') }}
-                            </p>
-                        </div>
-
-                    </div>
-                    <div class="col-md-6">
-
-
-                        <div class="form-group {{ $errors->has('unit') ? 'has-error' : '' }}">
-                            <label for="unit_id">Unit *</label>
-                            <select name="unit" id="unit" class="form-control select2" required>
-                                @foreach($units as $id=>$unit)
-                                    <option value="{{$id}}">{{$unit}}</option>
-                                @endforeach
-                            </select>
-                            @if($errors->has('unit'))
-                                <em class="invalid-feedback">
-                                    {{ $errors->first('unit') }}
-                                </em>
-                            @endif
-                        </div>
-
-                        <div class="form-group {{ $errors->has('supplied_by') ? 'has-error' : '' }}">
-                            <label for="purchased_by">Buying By</label>
-                            <select name="purchased_by" id="purchased_by" class="form-control select2" required>
-                                @foreach($employees as $id => $employee)
-                                    <option value="{{ $id }}">{{ $employee }}</option>
-                                @endforeach
-                            </select>
-                            @if($errors->has('purchased_by'))
-                                <em class="invalid-feedback">
-                                    {{ $errors->first('purchased_by') }}
+                                    {{ $errors->first('product_id') }}
                                 </em>
                             @endif
                         </div>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="cart-body" style="background: #ffe8e8">
+                            <table class="table table-bordered" id="myTable">
+                                <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Line Total</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="row bg-dark">
+                        <div class="col-md-2">
+                            <div class="form-group {{ $errors->has('total_price') ? 'has-error' : '' }}">
+                                <label for="total_price">Total Price *</label>
+                                <input type="text" id="total_price" name="total_price" class="form-control" required>
+                                @if($errors->has('total_price'))
+                                    <em class="invalid-feedback">
+                                        {{ $errors->first('total_price') }}
+                                    </em>
+                                @endif
+                                <p class="helper-block">
+                                    {{ trans('cruds.expense.fields.entry_date_helper') }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group {{ $errors->has('paid_amount') ? 'has-error' : '' }}">
+                                <label for="paid_amount">Paid Amount *</label>
+                                <input type="number" id="paid_amount" name="paid_amount" class="form-control" >
+                                @if($errors->has('paid_amount'))
+                                    <em class="invalid-feedback">
+                                        {{ $errors->first('paid_amount') }}
+                                    </em>
+                                @endif
+                                <p class="helper-block">
+                                    {{ trans('cruds.expense.fields.entry_date_helper') }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group {{ $errors->has('due_amount') ? 'has-error' : '' }}">
+                                <label for="due_amount">Due amount *</label>
+                                <input type="number" id="due_amount" name="due_amount" class="form-control">
+                                @if($errors->has('due_amount'))
+                                    <em class="invalid-feedback">
+                                        {{ $errors->first('due_amount') }}
+                                    </em>
+                                @endif
+                                <p class="helper-block">
+                                    {{ trans('cruds.expense.fields.entry_date_helper') }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group {{ $errors->has('payment_process') ? 'has-error' : '' }}">
+                                <label for="payment_process">Payment Process *</label>
+                                <select name="payment_process" id="payment_process" class="form-control">
+                                    <option value="">---</option>
+                                    <option value="bank">Bank</option>
+                                    <option value="account">Funds</option>
+                                    <option value="cash">Cash</option>
+                                </select>
+                                @if($errors->has('payment_process'))
+                                    <em class="invalid-feedback">
+                                        {{ $errors->first('payment_process') }}
+                                    </em>
+                                @endif
+                                <p class="helper-block">
+                                    {{ trans('cruds.expense.fields.entry_date_helper') }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group {{ $errors->has('payment_type') ? 'has-error' : '' }}">
+                                <label for="payment_type">Select Account *</label>
+                                <select name="payment_type" id="payment_type" class="form-control select2 payment_type">
 
-
+                                </select>
+                                @if($errors->has('payment_type'))
+                                    <em class="invalid-feedback">
+                                        {{ $errors->first('payment_type') }}
+                                    </em>
+                                @endif
+                                <p class="helper-block">
+                                    {{ trans('cruds.expense.fields.entry_date_helper') }}
+                                </p>
+                            </div>
+                        </div>
+                </div>
                 <div>
-                    <input class="btn btn-danger" type="submit" value="{{ trans('global.save') }}">
+                    <input class="btn btn-danger mt-2" type="submit" value="Purchase">
                 </div>
             </form>
 
@@ -245,19 +198,78 @@
             $("#due_amount").val(due_amount);
         })
 
-        $('#quantity').on('change', function (e) {
-            let quantity = $(this).val();
-            let unit_price = $("#unit_price").val();
-            let total_amount = quantity * unit_price;
-            $("#total_price").val(total_amount);
-        })
 
-        $('#unit_price').on('change', function (e) {
-            let unit_price = $(this).val();
-            let quantity = $("#quantity").val();
-            let total_amount = quantity * unit_price;
-            $("#total_price").val(total_amount);
-        })
+        $(document).on('change', '.quantity', function() {
+            var ele = $(this);
+            let quantity = ele.parents("tr").find(".quantity").val();
+            let price = ele.parents("tr").find(".price").val();
+            let total = quantity * price;
+            let line_total = ele.parents("tr").find(".line_total").val(total);
+
+
+            let sum = 0;
+            let line_total_sum = document.querySelectorAll('.line_total');
+            for(total_sum of line_total_sum) {
+                sum += (parseFloat(total_sum.value));
+            }
+            // document.getElementById('sub_total').value = sum;
+            document.getElementById('total_price').value = sum;
+            document.getElementById('due_amount').value = sum;
+
+        });
+
+        $(document).on('change', '.price', function() {
+            var ele = $(this);
+            let quantity = ele.parents("tr").find(".quantity").val();
+            let price = ele.parents("tr").find(".price").val();
+            let total = quantity * price;
+            let line_total = ele.parents("tr").find(".line_total").val(total);
+
+            let sum = 0;
+            let line_total_sum = document.querySelectorAll('.line_total');
+            for(total_sum of line_total_sum) {
+                sum += (parseFloat(total_sum.value));
+            }
+            document.getElementById('total_price').value = sum;
+            document.getElementById('due_amount').value = sum;
+
+        });
+        $(document).on('click', '.remove-from-cart', function() {
+            var ele = $(this);
+            var row_id = ele.parents("tr").remove();
+        });
+
+        $( "#product_id" ).change(function() {
+
+            let material_id = $("#product_id").val();
+
+
+            $.ajax({
+                url: '/admin/add-to-purchase-product/'+material_id,
+                type: 'GET',
+                cache: false,
+                datatype: 'application/json',
+
+                success:function(data){
+                    // console.log(data);
+                    // renderList(data);
+                    $('#myTable > tbody:last-child').append(data.html);
+
+
+                },
+                error:function(data){
+                    // console.log(data);
+                    // sweet alert
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: "Unable to load data form server",
+                        footer: 'Contact with Your Admin'
+                    })
+                    // swal("Error", 'Unable to load data form server', "error");
+                }
+            });
+        });
 
 
         $("#payment_process").change(function () {

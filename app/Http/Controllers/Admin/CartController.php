@@ -27,11 +27,17 @@ class CartController extends Controller
 {
     public function cart($id){
         $department = Department::where('id',$id)->first();
-
         $materials = Product::with('color')->where('showroom_id',$id)->get()
             ->pluck('color_id','color.name')->prepend( 'Please Select', '' );
         $customers = Customer::get()->pluck('name','id')->prepend( trans( 'global.pleaseSelect' ), '' );
-        return view('admin.cart.cart-test',compact('materials','customers','department'));
+
+        $id = Order::orderBy('id', 'DESC')->limit(1)->first();
+        if ($id) {
+            $invoice_id = $id->invoice_id + 1;
+        } else {
+            $invoice_id = 33726;
+        }
+        return view('admin.cart.cart-test',compact('materials','customers','department','invoice_id'));
 
     }
 
@@ -66,12 +72,17 @@ class CartController extends Controller
 
     public function addToCartProduct($department_id,$color){
         $department_id = $department_id;
-        $material = Product::with('color')->where(['color_id'=>$color,'showroom_id'=>$department_id])->where('quantity','>',0)->first();
+        $get_material = Product::with('color')->where(['color_id'=>$color,'showroom_id'=>$department_id])->where('quantity','>',0)->get();
+        $material = $get_material->first();
+        $available_total = $get_material->sum('quantity');
 
         $html = '<tr>
     <td>
         <input type="text" class="form-control" value="'.$material->color->name.'" name="material_name[]">
         <input type="hidden" class="form-control material_id" value="'.$material->color->id.'" name="color_id[]">
+    </td>
+    <td>
+        <input type="text" class="form-control" value="'.$available_total.'" name="available_quantity[]" readonly>
     </td>
     <td>
         <input type="text" class="form-control quantity" value="" name="quantity[]">
@@ -244,7 +255,6 @@ class CartController extends Controller
             $request['created_by'] = Auth::user()->id;
             $request['department_id'] = $department_id;
             $order = Order::create($request->all());
-//            logger("Order Create");
             // Order create Done
 
             // Order details create start
@@ -265,8 +275,6 @@ class CartController extends Controller
                         // reduce stock quantity
                         $data['quantity'] = $stock->quantity - $pro_qty;
                         DB::table( 'products' )->where( 'id', $stock->id )->update( $data );
-//                        logger( ' Updated rest qty 1' . $data['rest_quantity'] );
-
 
                         // Deduct product from transfer
                         if($stock->type == 1){
@@ -281,7 +289,7 @@ class CartController extends Controller
                         $cart->product_id =  6;
                         $cart->color_id = $request->color_id[$i];
                         $cart->product_transfer_id = $stock->id;
-                        $cart->qty = $request->quantity[$i];
+                        $cart->qty = $pro_qty;
                         $cart->selling_price = $request->price[$i];
                         $cart->line_total = $request->line_total[$i];
                         $cart->save();
@@ -293,8 +301,6 @@ class CartController extends Controller
                         // reduce stock quantity
                         $data['quantity'] = $stock->quantity - $pro_qty;
                         DB::table( 'products' )->where( 'id', $stock->id )->update( $data );
-//                        logger( ' Updated rest qty 2 ' . $data['rest_quantity'] );
-//                        logger("Order details".$order->id."Material -id: ".$request->material_id[$i]."Color - ".$request->color_id[$i]."Stock ".$stock->id);
 
                         // Deduct product from transfer
                         if($stock->type == 1){
@@ -310,7 +316,7 @@ class CartController extends Controller
                         $cart->color_id = $request->color_id[$i];
                         $cart->product_transfer_id = $stock->id;
                         $cart->selling_price = $request->price[$i];
-                        $cart->qty = $request->quantity[$i];
+                        $cart->qty = $pro_qty;
                         $cart->line_total = $request->line_total[$i];
                         $cart->save();
                     }
@@ -321,7 +327,6 @@ class CartController extends Controller
 
                 }
                 // Stock deduct from product supply end
-
             }
             // Order details create end
 
@@ -346,7 +351,6 @@ class CartController extends Controller
                 $payment->save();
                 logger("Payment Updated");
 
-//                if($request->payment_process == 'cash'){
                    $fund_info = Fund::where('department_id',$department_id)->first();
                     $fund['current_balance'] = $fund_info->current_balance + $request->paid;
                     $fund_info->update($fund);
@@ -362,7 +366,6 @@ class CartController extends Controller
                     $transaction->reason = 'Order Payment for order id '.$order->id;
                     $transaction->created_by = Auth::user()->id;
                     $transaction->save();
-//                }
             }
             // User account update end
 

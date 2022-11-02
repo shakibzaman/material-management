@@ -30,6 +30,8 @@
                                href="{{route('admin.showroom.product.loss.details',[$department,$key])}}">Self Process Loss Details</a>
                             <a class="btn btn-info text-light"
                                href="{{route('admin.showroom.finish.product.details',[$department,$key])}}">Finish Product Details</a>
+                            <a class="btn btn-success text-light"
+                               href="{{route('admin.showroom.product.costing',[$department,$key])}}">Product Costing</a>
                         </td>
                     </tr>
                     @endforeach

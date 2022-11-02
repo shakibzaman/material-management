@@ -90,6 +90,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
     // Material Config
     Route::resource('material-config', 'MaterialConfigController');
+    Route::get('add-to-purchase-product/{id}', 'MaterialInController@addToPurchase')->name('add.to.purchase');
+
 
     //Product
     Route::resource('product', 'ProductController');
@@ -153,6 +155,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('showroom/transfer/{id}', 'ShowroomController@show')->name('showroom.transfer');
     Route::get('showroom/stock/{id}', 'ShowroomController@stock')->name('showroom.stock');
     Route::get('showroom/product/details/{company_id}/{color_id}', 'ShowroomController@productDetails')->name('showroom.product.details');
+    Route::get('showroom/product/costing/{company_id}/{color_id}', 'ShowroomController@productCosting')->name('showroom.product.costing');
     Route::get('showroom/product/loss/details/{company_id}/{color_id}', 'ShowroomController@productLossDetails')->name('showroom.product.loss.details');
     Route::get('showroom/finish/product/details/{company_id}/{color_id}', 'ShowroomController@finishProductDetails')->name('showroom.finish.product.details');
     Route::get('showroom/product/{id}', 'ShowroomController@productList')->name('showroom.product.list');

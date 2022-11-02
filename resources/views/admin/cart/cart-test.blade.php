@@ -14,7 +14,7 @@
         <div class="col-md-4">
             <div class="form-group {{ $errors->has('invoice_id') ? 'has-error' : '' }}">
                 <label for="name">Invoice No*</label>
-                <input type="text" name="invoice_id" id="invoice_id" class="form-control" required>
+                <input type="text" name="invoice_id" value="{{$invoice_id}}" id="invoice_id" class="form-control" required>
                 @if($errors->has('invoice_id'))
                     <em class="invalid-feedback">
                         {{ $errors->first('invoice_id') }}
@@ -74,6 +74,7 @@
                     <thead>
                     <tr>
                         <th>Name</th>
+                        <th>Available Qty</th>
                         <th>Quantity</th>
                         <th>Price</th>
                         <th>Line Total</th>
@@ -84,44 +85,6 @@
                 </table>
             </div>
         </div>
-{{--        <div class="col-md-3">--}}
-{{--            <div class="col-md-12">--}}
-{{--                <div class="form-group {{ $errors->has('payment_process') ? 'has-error' : '' }}">--}}
-{{--                    <label for="payment_process">Payment Process *</label>--}}
-{{--                    <select name="payment_process" id="payment_process" class="form-control" required>--}}
-{{--                        <option value="">---</option>--}}
-{{--                        <option value="bank">Bank</option>--}}
-{{--                        <option value="bkash">Bkash</option>--}}
-{{--                        <option value="cash">Cash</option>--}}
-{{--                    </select>--}}
-{{--                    @if($errors->has('payment_process'))--}}
-{{--                        <em class="invalid-feedback">--}}
-{{--                            {{ $errors->first('payment_process') }}--}}
-{{--                        </em>--}}
-{{--                    @endif--}}
-{{--                    <p class="helper-block">--}}
-{{--                        {{ trans('cruds.expense.fields.entry_date_helper') }}--}}
-{{--                    </p>--}}
-{{--                </div>--}}
-{{--            </div>--}}
-{{--            <div class="col-md-12">--}}
-{{--                <div class="form-group {{ $errors->has('payment_info') ? 'has-error' : '' }}">--}}
-{{--                    <label for="payment_info">Payment Info </label>--}}
-{{--                    <input type="text" id="payment_info" name="payment_info" class="form-control" required>--}}
-{{--                    @if($errors->has('payment_info'))--}}
-{{--                        <em class="invalid-feedback">--}}
-{{--                            {{ $errors->first('payment_info') }}--}}
-{{--                        </em>--}}
-{{--                    @endif--}}
-{{--                    <p class="helper-block">--}}
-{{--                        {{ trans('cruds.expense.fields.entry_date_helper') }}--}}
-{{--                    </p>--}}
-{{--                </div>--}}
-{{--            </div>--}}
-
-{{--        </div>--}}
-
-
     </div>
         <div class="row">
             <div class="col-md-10"></div>

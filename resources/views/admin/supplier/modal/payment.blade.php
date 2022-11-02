@@ -43,6 +43,18 @@
                     {{ trans('cruds.expense.fields.entry_date_helper') }}
                 </p>
             </div>
+            <div class="form-group {{ $errors->has('date') ? 'has-error' : '' }}">
+                <label for="due_amount">Date *</label>
+                <input type="date" id="date" name="date" class="form-control" value="">
+                @if($errors->has('date'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('date') }}
+                    </em>
+                @endif
+                <p class="helper-block">
+                    {{ trans('cruds.expense.fields.entry_date_helper') }}
+                </p>
+            </div>
             <div class="form-group {{ $errors->has('payment_process') ? 'has-error' : '' }}">
                     <label for="payment_process">Payment Process *</label>
                     <select name="payment_process" id="payment_process" class="form-control" required>
@@ -78,7 +90,7 @@
 
             <div class="form-group {{ $errors->has('payment_info') ? 'has-error' : '' }}">
                 <label for="payment_info">Payment Info </label>
-                <input type="text" id="payment_info" name="payment_info" class="form-control" required>
+                <input type="text" id="payment_info" name="payment_info" class="form-control">
                 @if($errors->has('payment_info'))
                     <em class="invalid-feedback">
                         {{ $errors->first('payment_info') }}
