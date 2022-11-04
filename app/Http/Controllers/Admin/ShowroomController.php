@@ -106,6 +106,45 @@ class ShowroomController extends Controller
 
 
     }
+    public function productDetailCosting($id){
+        $product = Product::with('color')->where('id',$id)->first();
+        // 1 is for processed $product
+        if($product->type == 1){
+            // SHowroom Costing
+            $transfer_product_id_for_showroom = ProductTransfer::where('id',$product->product_transfer_id)->first();
+            $showroom_product_transfer_id = $transfer_product_id_for_showroom->transfer_id;
+            $transfer_product_for_showroom = ProductTransfer::with('transfer')->where('process_type',1)
+                ->whereHas('transfer', function (Builder $query) use ($showroom_product_transfer_id){
+                    $query->where('id', $showroom_product_transfer_id);
+                })->get();
+
+            // Material costing
+            $showroom_transfer_product_id = $transfer_product_for_showroom->pluck('id');
+            $showroom_transfer_id = $transfer_product_for_showroom->pluck('transfer_id')->unique();
+            $material_costing = MaterialTransfer::with('material','detail')->whereIn('product_transfer_id',$showroom_transfer_product_id)
+                ->where('transfer_id',$showroom_transfer_id)->get();
+
+            // Dyeing Costing
+            $transfer_product_for_showroom_unique = $transfer_product_for_showroom->pluck('product_stock_id')->unique();
+            $transfer_product_for_dyeing = ProductTransfer::whereIn('id',$transfer_product_for_showroom_unique)->get();
+
+            // Knitting Costing
+            $transfer_product_for_dyeing_unique = $transfer_product_for_dyeing->pluck('product_stock_id')->unique();
+            $transfer_product_for_knitting = ProductTransfer::whereIn('id',$transfer_product_for_dyeing_unique)->get();
+
+            // Product Purchase Costing
+            $product_for_knitting_unique = $transfer_product_for_knitting->pluck('product_stock_id')->unique();
+            $product_in = MaterialIn::with('material')->whereIn('id',$product_for_knitting_unique)->get();
+
+            // Material Config
+            $material_config = MaterialConfig::all()->keyBy('id');
+
+
+        }
+        return view('admin.showroom.product-costing-detail',compact('material_config','material_costing','product','transfer_product_for_showroom','transfer_product_for_dyeing','transfer_product_for_knitting','product_in'));
+
+
+    }
     public function orderPayment($id){
         $order = Order::with('customer')->where('id',$id)->first();
         return view('admin.showroom.modal.payment',compact('order'));

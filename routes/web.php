@@ -168,6 +168,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('order/payment/history/{id}', 'ShowroomController@orderPaymentHistory')->name('order.payment.history');
 
 
+    Route::get('showroom/product/costing-detail/{id}', 'ShowroomController@productDetailCosting')->name('showroom.product.costing.detail');
+
+
     // Stock Set
     Route::get('stock/set', 'StockSetController@index')->name('stock.set');
     Route::get('add/set', 'StockSetController@create')->name('add.set');

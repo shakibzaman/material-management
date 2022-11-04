@@ -236,12 +236,17 @@ class DyeingController extends Controller
 
                             $product_transfer_id = $productTransfer->id;
 
-                            $material_used = $this->_materialUse($request, $transfer_id, $product_transfer_id = $productTransfer->id, $product_qty = $pro_qty);
-                            if ($material_used) {
+                           $material_used = $this->_materialUse($request, $transfer_id, $product_transfer_id = $productTransfer->id, $product_qty = $pro_qty);
+                            if ($material_used['status'] == 200) {
                                 logger('Material  Used');
                             }
+                            if ($material_used['status'] != 200) {
+                                logger(' material Not used');
+                                return ['status'=>104,'message'=>'Material not accessed,Try again'];
+                            }
                             // Add Product
-                            $material_transfer = MaterialTransfer::where('product_transfer_id', $product_transfer_id)->get();
+                            $material_transfer = MaterialTransfer::where('product_transfer_id', $product_transfer_id)
+                                ->where('transfer_id',$transfer_id)->get();
                             $material_costing = 0;
                             if (count($material_transfer) > 0) {
                                 foreach ($material_transfer as $material) {
@@ -327,8 +332,12 @@ class DyeingController extends Controller
                             $product_transfer_id = $productTransfer->id;
 
                             $material_used = $this->_materialUse($request, $transfer_id, $product_transfer_id = $productTransfer->id, $product_qty = $pro_qty);
-                            if ($material_used) {
+                            if ($material_used['status'] == 200) {
                                 logger('Material  Used');
+                            }
+                            if ($material_used['status'] != 200) {
+                                logger(' material Not used');
+                                return ['status'=>104,'message'=>'Material not accessed,Try again'];
                             }
                             // Add Product
                             $material_transfer = MaterialTransfer::where('product_transfer_id', $product_transfer_id)->get();
@@ -430,11 +439,16 @@ class DyeingController extends Controller
                             $product_transfer_id = $productTransfer->id;
 
                             $material_used = $this->_materialUse($request, $transfer_id, $product_transfer_id = $productTransfer->id, $product_qty = $pro_qty);
-                            if ($material_used) {
+                            if ($material_used['status'] == 200) {
                                 logger('Material  Used');
                             }
+                            if ($material_used['status'] != 200) {
+                                logger(' material Not used');
+                                return ['status'=>104,'message'=>'Material not accessed,Try again'];
+                            }
                             // Add Product
-                            $material_transfer = MaterialTransfer::where('product_transfer_id', $product_transfer_id)->get();
+                            $material_transfer = MaterialTransfer::where('product_transfer_id', $product_transfer_id)
+                                ->where('transfer_id',$transfer_id)->get();
                             $material_costing = 0;
                             if (count($material_transfer) > 0) {
                                 foreach ($material_transfer as $material) {
@@ -502,11 +516,16 @@ class DyeingController extends Controller
                             $product_transfer_id = $productTransfer->id;
 
                             $material_used = $this->_materialUse($request, $transfer_id, $product_transfer_id = $productTransfer->id, $product_qty = $pro_qty);
-                            if ($material_used) {
+                            if ($material_used['status'] == 200) {
                                 logger('Material  Used');
                             }
+                            if ($material_used['status'] != 200) {
+                                logger(' material Not used');
+                                return ['status'=>104,'message'=>'Material not accessed,Try again'];
+                            }
                             // Add Product
-                            $material_transfer = MaterialTransfer::where('product_transfer_id', $product_transfer_id)->get();
+                            $material_transfer = MaterialTransfer::where('product_transfer_id', $product_transfer_id)
+                                ->where('transfer_id',$transfer_id)->get();
                             $material_costing = 0;
                             if (count($material_transfer) > 0) {
                                 foreach ($material_transfer as $material) {
@@ -556,7 +575,6 @@ class DyeingController extends Controller
 
                     }
                 }
-
             }
             DB::commit();
             return ['status' => 200, 'message' => 'Successfully Transfer to showroom'];
@@ -580,23 +598,23 @@ class DyeingController extends Controller
                         DB::rollback();
                         return ['status' => 104, 'message' => "Sorry !!!  " . $material_name->name . " Low Stock"];
                     }
-                    logger("100");
-                    $total_material_stocks = MaterialIn::where('material_id', $key)->where('rest', '>', 0)->get();
+                    logger("Before total_material_stocks");
+                   $total_material_stocks = MaterialIn::where('material_id', $key)->where('rest', '>', 0)->get();
 
                    $needed_material_for_product = ($product_qty * $material) / $request->quantity;
                     $contentQty = $needed_material_for_product;
                     foreach ($total_material_stocks as $stock) {
-                        logger("200");
+                        logger("Foreach in total_material_stocks");
 
-                        $pro_qty = $needed_material_for_product;
-                        if ($stock->rest < $pro_qty) {
+                        $pro_qty = $contentQty;
+                        if ($stock->rest < $contentQty) {
                             $pro_qty = $stock->rest;
                             $contentQty = $contentQty - $stock->rest;
 
                             $materialStore = new MaterialTransfer();
                             $materialStore->material_id = $key;
                             $materialStore->transfer_id = $transfer_id;
-                            $materialStore->quantity = $pro_qty;
+                            $materialStore->quantity = round($pro_qty,2);
                             $materialStore->material_stock_id = $stock->id;
                             $materialStore->product_transfer_id = $product_transfer_id;
                             $materialStore->created_by = Auth::user()->id;
@@ -621,7 +639,7 @@ class DyeingController extends Controller
                                 $expense->material_id = $stock->material_id;
                                 $expense->transfer_product_id = $product_transfer_id;
                                 $expense->save();
-                                logger('Expense 300' . $expense);
+                                logger('Expense Stored 300' . $expense);
 
                             }
                         } else {
@@ -630,7 +648,7 @@ class DyeingController extends Controller
                             $materialStore = new MaterialTransfer();
                             $materialStore->material_id = $key;
                             $materialStore->transfer_id = $transfer_id;
-                            $materialStore->quantity = $pro_qty;
+                            $materialStore->quantity = round($pro_qty,2);
                             $materialStore->material_stock_id = $stock->id;
                             $materialStore->product_transfer_id = $product_transfer_id;
                             $materialStore->created_by = Auth::user()->id;
@@ -657,7 +675,7 @@ class DyeingController extends Controller
                                 $expense->transfer_product_id = $product_transfer_id;
                                 $expense->save();
 
-                                logger('Expense 400' . $expense);
+                                logger('Expense Store 400' . $expense);
 
                             }
                         }
@@ -670,6 +688,7 @@ class DyeingController extends Controller
             }
             DB::commit();
             logger("Material Used Commit done");
+            return ['status'=>200,'message'=>['Material Used Commit done']];
         }catch ( \Exception $e ) {
             DB::rollback();
             return $e->getMessage();
