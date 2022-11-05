@@ -11,7 +11,7 @@
 @endcan
 <div class="card">
     <div class="card-header">
-    Customer {{ trans('global.list') }}
+    Customer List
     </div>
 
     <div class="card-body">
@@ -29,16 +29,7 @@
                             Name
                         </th>
                         <th>
-                            Phone
-                        </th>
-                        <th>
-                            Address
-                        </th>
-                        <th>
                             Total Due
-                        </th>
-                        <th>
-                            Showroom
                         </th>
                         <th>
                             Action
@@ -51,8 +42,6 @@
                         <td></td>
                         <td>{{$user->id}}</td>
                         <td> {{$user->name}} </td>
-                        <td> {{$user->phone}} </td>
-                        <td>{{$user->address}}  </td>
                         <td>{{$user->account->total_due}}  </td>
                         <td>
                         @can('user_edit')

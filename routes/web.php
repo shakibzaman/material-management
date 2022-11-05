@@ -57,6 +57,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('pos', 'CartController@pos')->name('showroom.pos');
     Route::get('add-to-cart/{id}', 'CartController@addToCart')->name('add.to.cart');
     Route::get('add-to-cart-test/{dept}/{color}', 'CartController@addToCartTest')->name('add.to.cart.test');
+    Route::get('add-to-return-cart/{dept}/{color}', 'CartController@addToReturnCart')->name('add.to.return.cart');
     Route::get('add-to-cart-product/{dept}/{color}', 'CartController@addToCartProduct')->name('add.to.cart.product');
     Route::get('add-to-cart-knitting/{dept}/{id}', 'CartController@addToCartKnitting')->name('add.to.cart.knitting');
     Route::patch('update-cart', 'CartController@update')->name('update.cart');
@@ -166,6 +167,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('order/payment/detail/{id}', 'ShowroomController@orderPaymentDetail')->name('order.payment.detail');
     Route::post('order/payment/store', 'ShowroomController@orderPaymentStore')->name('order.payment.store');
     Route::get('order/payment/history/{id}', 'ShowroomController@orderPaymentHistory')->name('order.payment.history');
+    Route::get('order/return/{id}', 'ShowroomController@orderReturn')->name('order.return');
 
 
     Route::get('showroom/product/costing-detail/{id}', 'ShowroomController@productDetailCosting')->name('showroom.product.costing.detail');

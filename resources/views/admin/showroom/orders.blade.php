@@ -91,6 +91,9 @@
                         <a class="btn btn-info btn-xs text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
                            data-attr="{{ route('admin.knitting.order.invoice',$order->id) }}" title="Return"> Invoice
                         </a>
+                        <a class="btn btn-danger btn-xs text-light"
+                            href="{{ route('admin.order.return',$order->id) }}"> Return
+                        </a>
                     </td>
                 </tr>
                 @endforeach

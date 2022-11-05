@@ -6,7 +6,7 @@
         <table class="table table-bordered">
             <tbody>
                 <tr>
-                    <th>Supplier Name</th>
+                    <th>Customer Name</th>
                     <td>{{$customer_detail->name}}</td>
                 </tr>
             </tbody>
@@ -43,36 +43,6 @@
                     {{ trans('cruds.expense.fields.entry_date_helper') }}
                 </p>
             </div>
-{{--            <div class="form-group {{ $errors->has('payment_process') ? 'has-error' : '' }}">--}}
-{{--                    <label for="payment_process">Payment Process *</label>--}}
-{{--                    <select name="payment_process" id="payment_process" class="form-control" required>--}}
-{{--                        <option value="">---</option>--}}
-{{--                        <option value="bank">Bank</option>--}}
-{{--                        <option value="bkash">Bkash</option>--}}
-{{--                        <option value="cash">Cash</option>--}}
-{{--                    </select>--}}
-{{--                    @if($errors->has('payment_process'))--}}
-{{--                        <em class="invalid-feedback">--}}
-{{--                            {{ $errors->first('payment_process') }}--}}
-{{--                        </em>--}}
-{{--                    @endif--}}
-{{--                    <p class="helper-block">--}}
-{{--                        {{ trans('cruds.expense.fields.entry_date_helper') }}--}}
-{{--                    </p>--}}
-{{--            </div>--}}
-
-{{--            <div class="form-group {{ $errors->has('payment_info') ? 'has-error' : '' }}">--}}
-{{--                <label for="payment_info">Payment Info </label>--}}
-{{--                <input type="text" id="payment_info" name="payment_info" class="form-control" required>--}}
-{{--                @if($errors->has('payment_info'))--}}
-{{--                    <em class="invalid-feedback">--}}
-{{--                        {{ $errors->first('payment_info') }}--}}
-{{--                    </em>--}}
-{{--                @endif--}}
-{{--                <p class="helper-block">--}}
-{{--                    {{ trans('cruds.expense.fields.entry_date_helper') }}--}}
-{{--                </p>--}}
-{{--            </div>--}}
             <button id="return_stock_to_main" type="submit" class="btn btn-primary pull-right">Paid</button>
         </form>
     </div>

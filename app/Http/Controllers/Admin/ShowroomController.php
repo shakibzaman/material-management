@@ -35,6 +35,14 @@ class ShowroomController extends Controller
 
 
     }
+    public function orderReturn($id){
+
+        $orders = Order::with('details')->where('id',$id)->first();
+        $materials = Product::with('color')->where('showroom_id',$orders->department_id)->get()
+            ->pluck('color_id','color.name')->prepend( 'Please Select', '' );
+        return view('admin.showroom.modal.cart-return',compact('orders','materials'));
+
+    }
     public function showroomOrders($id){
         $department_id = $id;
         $orders = Order::with('customer')->where('department_id',$department_id)->get();

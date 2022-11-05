@@ -70,6 +70,34 @@ class CartController extends Controller
         return view('admin.cart.cart-test',compact('materials','customers'));
     }
 
+    public function addToReturnCart($department_id,$color){
+
+        $department_id = $department_id;
+        $get_material = Product::with('color')->where(['color_id'=>$color,'showroom_id'=>$department_id])->where('quantity','>',0)->get();
+        $material = $get_material->first();
+        $available_total = $get_material->sum('quantity');
+
+        $html = '<tr>
+    <td>
+        <input type="text" class="form-control" value="'.$material->color->name.'" name="material_name[]">
+        <input type="hidden" class="form-control material_id" value="'.$material->color->id.'" name="color_id[]">
+    </td>
+    <td>
+        <input type="text" class="form-control quantity" value="" name="quantity[]">
+    </td>
+    <td>
+        <input type="text" class="form-control price" value="" name="price[]">
+    </td>
+    <td>
+        <input type="text" class="form-control line_total" value="" name="line_total[]">
+    </td>
+    <td class="actions" data-th="">
+        <button class="btn btn-danger btn-sm remove-from-cart"><i class="fa fa-trash-o"></i></button>
+    </td>
+</tr>';
+        return response()->json(['html'=>$html]);
+    }
+
     public function addToCartProduct($department_id,$color){
         $department_id = $department_id;
         $get_material = Product::with('color')->where(['color_id'=>$color,'showroom_id'=>$department_id])->where('quantity','>',0)->get();

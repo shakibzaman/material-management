@@ -131,18 +131,31 @@ class CustomerController extends Controller
         if ( !$customer_detail ) {
             return ['status' => 105, 'message' => 'Sorry your Customer not founded'];
         }
-        $all_dues = Order::where( 'customer_id', $id )->where( 'due', '>', 0 )->sum( 'due' );
+//        $all_dues = Order::where( 'customer_id', $id )->where( 'due', '>', 0 )->sum( 'due' );
+        $user_account = UserAccount::where('user_id',$customer_detail->id)->where('type',2)->first();
+        $all_dues = $user_account->total_due;
         return view( 'admin.customer.modal.payment', compact( 'all_dues', 'customer_detail' ) );
 
     }
 
     public function paymentStore( Request $request )
     {
+        $user_account = UserAccount::where('user_id',$request->customer_id)->where('type',2)->first();
+        if($user_account->total_due < $request->paid_amount){
+            return ['status' => 103, 'message' => 'Sorry you can not paid more then due'];
+        }
         if($request->total_amount<$request->paid_amount){
             return ['status' => 103, 'message' => 'Sorry you can not paid more then due'];
         }
+        // Total user account adjust
+        $due_adjust['total_due'] = $user_account->total_due - $request->paid_amount;
+        $user_account->update($due_adjust);
+        logger('User account due adjust');
+
+
         $all_dues = Order::where( 'customer_id', $request->customer_id )->where( 'due', '>', 0 )->get();
         if(count($all_dues)>0){
+            logger(' Order Due adjust start');
             $contentQty = $request->paid_amount;
             DB::beginTransaction();
             try {
@@ -157,14 +170,18 @@ class CustomerController extends Controller
                         $order_amount['due']  = $due->due - $paid_amt;
                         $customer_order              = Order::where( 'id', $due->id )->first();
                         $customer_order->update( $order_amount );
+                        logger(' Order customer_order adjust start');
 
                         // Order Amount update end
 
                         // User Account update start
                         $users_account           = UserAccount::where( 'user_id', $due->customer_id )->where('type',2)->first();
-                        $update_due['total_due'] = $users_account->total_due - $paid_amt;
-                        $users_account->update( $update_due );
+//                        $update_due['total_due'] = $users_account->total_due - $paid_amt;
+//                        $users_account->update( $update_due );
                         // User Account update end
+
+                        logger(' User account adjust start');
+
 
                         // Payment data store start
                         $payment                  = new Payment();
@@ -179,10 +196,14 @@ class CustomerController extends Controller
                         $payment->save();
                         // Payment data store end
 
+                        logger(' Payment adjust start');
+
+
                         if($request->paid_amount>0){
                             $fund_info = Fund::where('department_id',$customer_order->department_id)->first();
                             $fund['current_balance'] = $fund_info->current_balance + $request->paid_amount;
                             $fund_info->update($fund);
+                            logger(' Payment amount start');
 
 
 
@@ -199,6 +220,7 @@ class CustomerController extends Controller
                             $transaction->reason = 'Order Due Payment';
                             $transaction->created_by = Auth::user()->id;
                             $transaction->save();
+                            logger(' Payment transaction start');
 
                         }
 
@@ -210,13 +232,15 @@ class CustomerController extends Controller
                         $customer_order              = Order::where( 'id', $due->id )->first();
                         $customer_order->update( $order_amount );
 
+                        logger('1');
                         // Order Amount update end
 
                         // User Account update start
                         $users_account           = UserAccount::where( 'user_id', $due->customer_id )->where('type',2)->first();
-                        $update_due['total_due'] = $users_account->total_due - $paid_amt;
-                        $users_account->update( $update_due );
+//                        $update_due['total_due'] = $users_account->total_due - $paid_amt;
+//                        $users_account->update( $update_due );
                         // User Account update end
+                        logger('2');
 
                         // Payment data store start
                         $payment                  = new Payment();
@@ -229,12 +253,15 @@ class CustomerController extends Controller
                         $payment->releted_department_id = $customer_order->department_id; // Order Showroom Id
                         $payment->created_by = Auth::user()->id;
                         $payment->save();
+                        logger('3');
+
                         // Payment data store end
 
                         if($request->paid_amount>0){
                             $fund_info = Fund::where('department_id',$customer_order->department_id)->first();
                             $fund['current_balance'] = $fund_info->current_balance + $request->paid_amount;
                             $fund_info->update($fund);
+                            logger('4');
 
 
 
@@ -251,6 +278,7 @@ class CustomerController extends Controller
                             $transaction->reason = 'Order Due Payment';
                             $transaction->created_by = Auth::user()->id;
                             $transaction->save();
+                            logger('5');
 
                         }
 
@@ -263,13 +291,14 @@ class CustomerController extends Controller
                 }
 
                 DB::commit();
-                return ['status' => 200, 'message' => 'Successfully Payment Done for Customer'];
+//                return ['status' => 200, 'message' => 'Successfully Payment Done for Customer'];
 
             } catch ( \Exception $e ) {
                 DB::rollback();
                 return $e;
             }
         }
+        return ['status' => 200, 'message' => 'Successfully Payment Done for Customer'];
     }
 
 }

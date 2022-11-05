@@ -13,6 +13,6 @@ class Customer extends Model
 
     public function account()
     {
-        return $this->belongsTo(UserAccount::class,'id','user_id');
+        return $this->belongsTo(UserAccount::class,'id','user_id')->where('type',2);
     }
 }
