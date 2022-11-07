@@ -168,6 +168,12 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::post('order/payment/store', 'ShowroomController@orderPaymentStore')->name('order.payment.store');
     Route::get('order/payment/history/{id}', 'ShowroomController@orderPaymentHistory')->name('order.payment.history');
     Route::get('order/return/{id}', 'ShowroomController@orderReturn')->name('order.return');
+    Route::post('showroom/return/order', 'ShowroomController@orderReturnStore')->name('order.return.store');
+
+
+    Route::get('showroom/return/{department_id}/{color_id}', 'ShowroomController@showroomProductReturn')->name('showroom.product.return');
+    Route::post('showroom/return/product', 'ShowroomController@productReturnStore')->name('showroom.product.return.store');
+    Route::get('showroom/product/return/list/{department_id}/{color_id}', 'ShowroomController@getReturnList')->name('showroom.product.return.list'); // List of Return Product
 
 
     Route::get('showroom/product/costing-detail/{id}', 'ShowroomController@productDetailCosting')->name('showroom.product.costing.detail');

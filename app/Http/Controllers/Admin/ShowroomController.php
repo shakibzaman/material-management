@@ -12,8 +12,10 @@ use App\MaterialIn;
 use App\MaterialTransfer;
 use App\Order;
 use App\OrderDetail;
+use App\OrderReturn;
 use App\Payment;
 use App\Product;
+use App\ProductReturn;
 use App\ProductTransfer;
 use App\Transaction;
 use App\Transfer;
@@ -41,6 +43,90 @@ class ShowroomController extends Controller
         $materials = Product::with('color')->where('showroom_id',$orders->department_id)->get()
             ->pluck('color_id','color.name')->prepend( 'Please Select', '' );
         return view('admin.showroom.modal.cart-return',compact('orders','materials'));
+
+    }
+    public function orderReturnStore(Request $request){
+        DB::beginTransaction();
+        try {
+            $old_order_info = Order::where('id',$request->order_id)->first();
+            $prev_due = $old_order_info->due;
+            logger('Prev_due'.$prev_due);
+            for ($i = 0; $i < count($request->order_detail_id); $i++) {
+                logger('Qty is ' . $request->quantity[$i]);
+                if ($request->quantity[$i] != null && $request->quantity[$i] != 0) {
+                    $old_order_details = OrderDetail::where('id', $request->order_detail_id[$i])->first();
+                    $order_details = OrderDetail::where('id', $request->order_detail_id[$i])->first();
+                    logger('order details retrive');
+                    if (!$order_details) {
+                        return ['status' => 103, 'message' => 'Sorry no order details found'];
+                    }
+                    if ($order_details->qty < $request->quantity[$i]) {
+                        return ['status' => 103, 'message' => 'Sorry you can not return more then you have'];
+                    }
+//                    if ($order_details->qty != $request->quantity[$i]) {
+                        // Order details Product qty reduce start
+                        $order_detail_data['qty'] = $order_details->qty - $request->quantity[$i];
+                        $order_detail_data['line_total'] = ($order_details->qty - $request->quantity[$i]) * $order_details->selling_price;
+                        OrderDetail::where('id', $request->order_detail_id[$i])->update($order_detail_data);
+                        logger('Order details updated');
+                        // Stock added
+                        $product = Product::where('id', $order_details->product_transfer_id)->first();
+                        if (!$product) {
+                            return ['status' => 103, 'message' => 'Sorry no Product details found'];
+                        }
+                        $product_data['quantity'] = $product->quantity+$request->quantity[$i];
+                        Product::where('id', $order_details->product_transfer_id)->update($product_data);
+                        logger('product data updated');
+
+                        $product_transfer = ProductTransfer::where('id', $product->product_transfer_id)->first();
+                        logger('product_transfer');
+                        if (!$product_transfer) {
+                            return ['status' => 103, 'message' => 'Sorry no order details found'];
+                        }
+                        $product_transfer_data['rest_quantity'] = $product_transfer->rest_quantity + $request->quantity[$i];
+                        ProductTransfer::where('id', $product->product_transfer_id)->update($product_transfer_data);
+                        logger('$product_transfer_data updated');
+//                    }
+
+                    // Order return info added
+
+                    $order_return = new OrderReturn();
+                    $order_return->order_details_id = $order_details->id;
+                    $order_return->prev_qty = $old_order_details->qty;
+                    $order_return->return_qty = $request->quantity[$i];
+                    $order_return->qty = ($old_order_details->qty - $request->quantity[$i]);
+                    $order_return->created_by = Auth::user()->id;
+                    $order_return->save();
+                    logger('OrderReturn');
+                }
+            }
+            // Order re-calculate
+            $order_details = OrderDetail::where('order_id', $request->order_id)->get();
+            $sub_total = $order_details->sum('line_total');
+            $order_info = Order::where('id',$request->order_id)->first();
+            $order_data['total'] =  $sub_total - $order_info->discount;
+            $order_data['sub_total'] =  $sub_total;
+            $order_data['due'] =  ($sub_total - $order_info->discount) - $order_info->paid;
+            logger('New Due'.$order_data['due']);
+            Order::where('id',$request->order_id)->update($order_data);
+
+            $customer_account = UserAccount::where('user_id',$order_info->customer_id)->where('type',2)->first();
+            logger("customer_account");
+            if (!$customer_account) {
+                return ['status' => 103, 'message' => 'Sorry no Customer found'];
+            }
+
+            // Order user amount deduct
+            $customer_account_data['total_due'] = $customer_account->total_due - ($prev_due - $order_data['due']);
+            UserAccount::where('user_id',$order_info->customer_id)->where('type',2)->update($customer_account_data);
+            logger('$customer_account_data');
+
+            DB::commit();
+            return ['status'=>200,'message'=>'Order Return successfully','department_id'=>$request->department_id];
+        }catch (\Exception $e){
+            DB::rollBack();
+            return $e->getMessage();
+        }
 
     }
     public function showroomOrders($id){
@@ -105,6 +191,144 @@ class ShowroomController extends Controller
         $transfer_products = Product::with('color')->where('showroom_id',$department)->get()->groupBy('color_id');
 
         return view('admin.showroom.product-list',compact('transfer_products','colors','department'));
+
+    }
+    public function showroomProductReturn($showroom_id,$color_id){
+        $showroomStock = ProductTransfer::with( 'transfer' )->where( 'rest_quantity', '>', 0 )->where('color_id',$color_id)
+            ->where('process_type',1)
+            ->whereHas( 'transfer', function ( Builder $query ) use ( $showroom_id ) {
+                $query->where( 'department_id', $showroom_id );
+            } )->get();
+        $type          = 3;
+        $showroom_id = $showroom_id;
+        $color_id = $color_id;
+        $rest_quantity = ProductTransfer::with( 'transfer' )->where( 'rest_quantity', '>', 0 )->where('color_id',$color_id)
+            ->where('process_type',1)
+            ->whereHas( 'transfer', function ( Builder $query ) use ( $showroom_id ) {
+            $query->where( 'department_id', $showroom_id );
+        } )->get()->groupBy( 'color_id' );
+
+        $material_key_by = MaterialConfig::get()->keyBy( 'id' );
+        return view( 'admin.showroom.modal.return-to-stock', compact('material_key_by','showroomStock', 'color_id','showroom_id', 'type', 'rest_quantity' ) );
+
+    }
+    public function getReturnList($department_id,$color_id){
+        $return_list = ProductReturn::join('product_transfer','product_return.product_transfer_id','product_transfer.id')
+            ->join('material_configs','product_transfer.color_id','material_configs.id')
+            ->join('users','product_return.return_by','users.id')
+            ->join('transfer','product_transfer.transfer_id','transfer.id')
+            ->where('product_return.type',3)
+            ->where('transfer.department_id',$department_id)
+            ->where('product_transfer.color_id',$color_id)
+            ->select('product_return.*','material_configs.name','users.name as return_by_user','transfer.company_id')->get();
+        return view( 'admin.showroom.return-list',compact('return_list'));
+    }
+    public function productReturnStore(Request $request){
+        DB::beginTransaction();
+        try {
+            $showroom_id = $request->showroom_id;
+            $color_id = $request->color_id;
+            $getAllStock = ProductTransfer::with('transfer')->where('rest_quantity', '>', 0)->where('color_id', $color_id)
+                ->where('process_type',1)
+                ->whereHas('transfer', function (Builder $query) use ($showroom_id) {
+                    $query->where('department_id', $showroom_id);
+                })->get();
+
+            $total_quantity = $getAllStock->sum('rest_quantity');
+            if ($total_quantity < $request->transfer_stock) {
+                return ['status' => 103, 'message' => 'Sorry you can\'t return more then you have'];
+            }
+
+            $contentQty = $request->transfer_stock;
+            foreach ($getAllStock as $stock) {
+                $pro_qty = $contentQty;
+                if ($stock->rest_quantity < $contentQty) {
+                    $pro_qty = $stock->rest_quantity;
+                    $contentQty = $contentQty - $stock->rest_quantity;
+
+                    // Product reduce
+                   $product = Product::where('product_transfer_id',$stock->id)->where('color_id',$request->color_id)->first();
+                    if(!$product){
+                        return ['status' => 103, 'message' => 'Product not found'];
+                    }
+
+                   $product_data['quantity'] = $product->quantity - $pro_qty;
+                    Product::where('product_transfer_id',$stock->id)->where('color_id',$request->color_id)->update($product_data);
+
+                    // Product Transfer update start
+                    $productTransfer['quantity'] = $stock->quantity - $pro_qty;
+                    $productTransfer['rest_quantity'] = $stock->rest_quantity - $pro_qty;
+                    $product_transfer = ProductTransfer::where('id', $stock->id)->first();
+                    $product_transfer->update($productTransfer);
+
+                    // Product Transfer update end
+
+                    // Dyeing Product Transfer
+                    $dyeing_product_transfer = ProductTransfer::where('id',$stock->product_stock_id)->first();
+                    if(!$dyeing_product_transfer){
+                        return ['status' => 103, 'message' => 'dyeing_product_transfer not found'];
+                    }
+                    $dyeingProductTransfer['quantity'] = $dyeing_product_transfer->quantity + $pro_qty;
+                    $dyeingProductTransfer['rest_quantity'] = $dyeing_product_transfer->rest_quantity + $pro_qty;
+                    ProductTransfer::where('id',$stock->product_stock_id)->update($dyeingProductTransfer);
+
+                    // Product return data store
+                    $returnData = new ProductReturn();
+                    $returnData->product_transfer_id = $stock->id;
+                    $returnData->type = 3;
+                    $returnData->quantity = $pro_qty;
+                    $returnData->reason = $request->reason;
+                    $returnData->return_by = Auth::user()->id;
+                    $returnData->save();
+
+                } else {
+                    $contentQty = 0;
+
+                    // Product reduce
+                    $product = Product::where('product_transfer_id',$stock->id)->where('color_id',$request->color_id)->first();
+                    if(!$product){
+                        return ['status' => 103, 'message' => 'Product not found'];
+                    }
+                    $product_data['quantity'] = $product->quantity - $pro_qty;
+                    Product::where('product_transfer_id',$stock->id)->where('color_id',$request->color_id)->update($product_data);
+
+                    // Product Transfer update start
+                    $productTransfer['quantity'] = $stock->quantity - $pro_qty;
+                    $productTransfer['rest_quantity'] = $stock->rest_quantity - $pro_qty;
+                    $product_transfer = ProductTransfer::where('id', $stock->id)->first();
+                    $product_transfer->update($productTransfer);
+                    // Product Transfer update end
+
+                    // Dyeing Product Transfer
+                    $dyeing_product_transfer = ProductTransfer::where('id',$stock->product_stock_id)->first();
+                    if(!$dyeing_product_transfer){
+                        return ['status' => 103, 'message' => 'dyeing_product_transfer not found'];
+                    }
+                    $dyeingProductTransfer['quantity'] = $dyeing_product_transfer->quantity + $pro_qty;
+                    $dyeingProductTransfer['rest_quantity'] = $dyeing_product_transfer->rest_quantity + $pro_qty;
+                    $product_transfer_dyeing = ProductTransfer::where('id',$stock->product_stock_id)->update($dyeingProductTransfer);
+
+                    // Product return data store
+                    $returnData = new ProductReturn();
+                    $returnData->product_transfer_id = $stock->id;
+                    $returnData->type = 3;
+                    $returnData->quantity = $pro_qty;
+                    $returnData->reason = $request->reason;
+                    $returnData->return_by = Auth::user()->id;
+                    $returnData->save();
+
+                }
+                if ($contentQty < 1) {
+                    break;
+                }
+            }
+            DB::commit();
+            return ['status'=>200,'message'=>'Product return to Dyeing'];
+        }catch (\Exception $e){
+            DB::rollBack();
+            return $e->getMessage();
+        }
+
 
     }
     public function productCosting($department,$color){
