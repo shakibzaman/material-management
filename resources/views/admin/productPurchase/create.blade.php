@@ -3,7 +3,7 @@
 
     <div class="card">
         <div class="card-header">
-            Material Products
+            Raw Products Purchase
         </div>
 
         <div class="card-body">
@@ -97,7 +97,22 @@
                         </div>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-md-10"></div>
+                    <div class="col-md-2 bg-success align-self-end">
+                        <div class="form-group {{ $errors->has('sub_total') ? 'has-error' : '' }}">
+                            <label for="name">Sub Total *</label>
+                            <input type="number" name="sub_total" id="sub_total" class="form-control" >
+                        </div>
+                    </div>
+                </div>
                 <div class="row bg-dark">
+                    <div class="col-md-2">
+                        <div class="form-group {{ $errors->has('discount') ? 'has-error' : '' }}">
+                            <label for="name">Discount</label>
+                            <input type="number" name="discount" id="discount" class="form-control">
+                        </div>
+                    </div>
                     <div class="col-md-2">
                         <div class="form-group {{ $errors->has('total_price') ? 'has-error' : '' }}">
                             <label for="total_price">Total Price *</label>
@@ -190,13 +205,67 @@
 @section('scripts')
     @parent
     <script>
+        $("#payment_process").change(function () {
 
+            let payment_type = $(this).val();
+            //
+            $.ajax({
+                url: '/admin/supplier/payment/type/' + payment_type,
+                type: 'GET',
+                cache: false,
+                datatype: 'application/json',
+
+                success: function (data) {
+                    console.log(data);
+
+                    var op = '<option value="0" selected>--- Select Account ---</option>';
+                    for (var i = 0; i < data.length; i++) {
+
+                        op += '<option value="' + data[i].id + '">' + data[i].name + '</option>';
+                    }
+                    // set value to the Color
+                    $('.payment_type').html("");
+                    $('.payment_type').append(op);
+
+                },
+                error: function (data) {
+                    // console.log(data);
+                    // sweet alert
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: "Unable to load data form server",
+                        footer: 'Contact with Your Admin'
+                    })
+                    // swal("Error", 'Unable to load data form server', "error");
+                }
+            });
+        });
+    </script>
+
+@endsection
+
+@section('scripts')
+    @parent
+    <script>
+        $("#discount").keyup(function (){
+            calculateTotal();
+        })
+        $("#paid").keyup(function (){
+            calculateTotal();
+        })
         $('#paid_amount').on('keyup', function (e) {
             let paid_amount = $('#paid_amount').val();
             let total_amount = $("#total_price").val();
             let due_amount = total_amount - paid_amount;
             $("#due_amount").val(due_amount);
         })
+        function calculateTotal(){
+            let total = $("#sub_total").val() - $("#discount").val();
+            $("#total_price").val(total);
+            let due = total - $("#paid_amount").val()
+            $("#due_amount").val(due);
+        }
 
 
         $(document).on('change', '.quantity', function() {
@@ -212,9 +281,9 @@
             for(total_sum of line_total_sum) {
                 sum += (parseFloat(total_sum.value));
             }
-            // document.getElementById('sub_total').value = sum;
-            document.getElementById('total_price').value = sum;
-            document.getElementById('due_amount').value = sum;
+            document.getElementById('sub_total').value = sum;
+            document.getElementById('total_price').value = sum - $("#discount").val();
+            document.getElementById('due_amount').value = sum - $("#discount").val() - $("#paid_amount").val() ;
 
         });
 
@@ -230,8 +299,10 @@
             for(total_sum of line_total_sum) {
                 sum += (parseFloat(total_sum.value));
             }
-            document.getElementById('total_price').value = sum;
-            document.getElementById('due_amount').value = sum;
+            document.getElementById('sub_total').value = sum;
+            document.getElementById('total_price').value = sum - $("#discount").val();
+            document.getElementById('due_amount').value = sum - $("#discount").val() - $("#paid_amount").val() ;
+
 
         });
         $(document).on('click', '.remove-from-cart', function() {

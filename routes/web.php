@@ -37,6 +37,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::post('supplier/payment/store', 'SupplierController@paymentStore')->name('supplier.payment.store');
     Route::get('supplier/payment/list/{id}', 'SupplierController@paymentList')->name('supplier.payment.list');
     Route::get('supplier/payment/all/list/{id}', 'SupplierController@paymentAllList')->name('supplier.payment.all.list');
+    Route::get('supplier/invoice/list/{id}', 'SupplierController@invoiceList')->name('supplier.invoice.list');
+    Route::get('supplier/invoice/{id}', 'SupplierController@invoiceShow')->name('supplier.invoice.show');
     Route::get('supplier/return/list/{id}', 'SupplierController@returnList')->name('supplier.return.list');
     Route::get('supplier/payment/type/{id}', 'SupplierController@getPaymentType')->name('supplier.payment.type');
 
@@ -203,6 +205,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
     // HR
     Route::resource('employee', 'EmployeeController');
+    Route::get('employee/salary/{id}', 'EmployeeController@salary')->name('employee.salary');
+    Route::post('employee/payment/store', 'EmployeeController@paymentStore')->name('employee.payment.store');
+    Route::get('employee/payment/list/{id}', 'EmployeeController@paymentList')->name('employee.payment.list');
     // Bank
     Route::resource('bank', 'BankController');
     Route::get('bank/deposit/{id}', 'BankController@deposit')->name('bank.deposit');

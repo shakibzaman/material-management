@@ -11,7 +11,7 @@
 @endcan
 <div class="card">
     <div class="card-header">
-    Employee {{ trans('global.list') }}
+    Employee Salaries List
     </div>
 
     <div class="card-body">
@@ -23,51 +23,31 @@
 
                         </th>
                         <th>
-                            {{ trans('cruds.user.fields.id') }}
+                            id
                         </th>
                         <th>
-                            {{ trans('cruds.user.fields.name') }}
+                            Date
                         </th>
                         <th>
-                            Phone
+                            Month
                         </th>
                         <th>
-                            Department
+                            Year
                         </th>
                         <th>
                             Salary
                         </th>
-                        <th>
-                            Joining
-                        </th>
-                        <th>
-                            Action
-                        </th>
                     </tr>
                 </thead>
                 <tbody>
-                @foreach($users as $user)
+                @foreach($employee_salaries as $salary)
                     <tr>
                         <td></td>
-                        <td>{{$user->id}}</td>
-                        <td> {{$user->name}} </td>
-                        <td> {{$user->phone}} </td>
-                        <td> {{$user->department->name}} </td>
-                        <td> {{$user->salary}} </td>
-                        <td> {{$user->joining_date}} </td>
-                        <td>
-                        @can('user_edit')
-                            <a class="btn btn-xs btn-info" href="{{ route('admin.employee.edit', $user->id) }}">
-                                {{ trans('global.edit') }}
-                            </a>
-                        @endcan
-                            <a class="btn btn-success btn-xs text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
-                               data-attr="{{ route('admin.employee.salary',$user->id) }}" title="Return"> Payment
-                            </a>
-                            <a class="btn btn-xs btn-info" href="{{ route('admin.employee.payment.list', $user->id) }}">
-                                Payment List
-                            </a>
-                        </td>
+                        <td>{{$salary->id}}</td>
+                        <td> {{$salary->date}} </td>
+                        <td> {{$salary->month}} </td>
+                        <td> {{$salary->year}} </td>
+                        <td> {{$salary->amount}} </td>
                     </tr>
                     @endforeach
                 </tbody>

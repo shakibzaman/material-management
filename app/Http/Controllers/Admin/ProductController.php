@@ -4,6 +4,7 @@ namespace App\Http\Controllers\admin;
 
 use App\Bank;
 use App\Fund;
+use App\invoice;
 use App\Payment;
 use App\Product;
 use App\SupplierProduct;
@@ -70,102 +71,151 @@ class ProductController extends Controller
     }
 
     public function finishPurchaseProductStore(Request $request){
-
-
-        //  Product Store
         DB::beginTransaction();
         try {
-        $user_account_detail = UserAccount::where('user_id',$request->supplier_id)->first();
-        if(!$user_account_detail){
+            $user_account_detail = UserAccount::where('user_id',$request->supplier_id)->where('type',1)->first();
+            if(!$user_account_detail){
             return ['status'=>105,'message'=>'Sorry your Supplier not founded'];
         }
 
-        // Product In history start
-        $request['created_by'] = Auth::user()->id;
-        $request['rest'] = 0;
-        $materialIn = MaterialIn::create($request->all());
-        // Product In history end
+        $invoice_store = makeInvoice($request);
+        logger('Invoice Make done');
+        logger('Invoice Id '.$invoice_store);
+        if(!$invoice_store)
+        {
+            return ['status'=>103,'message'=>'Invoice store failed'];
+        }
 
-        if($materialIn){
-            // Supplier Bill start
-            $request['material_in_id'] = $materialIn->id;
-            $request['payment_process'] = $request->payment_process;
-            $request['payment_info'] = $request->payment_info;
-            $supplier_store = SupplierProduct::create($request->all());
+        for($i=0;$i<count($request->material_id);$i++){
+            $material = new MaterialIn();
+            $material->material_id = $request->material_id[$i];
+            $material->quantity = $request->quantity[$i];
+            $material->unit_price = $request->price[$i];
+            $material->total_price = $request->line_total[$i];
+            $material->buying_date = now();
+            $material->unit = 1;
+            $material->type = $request->type;
+            $material->supplier_id = $request->supplier_id;
+            $material->created_by = Auth::user()->id;
+            $material->rest = 0;
+            $material->purchased_by = Auth::user()->id;
+            $material->inv_number = $request->inv_number;
+            $materialIn = $material->save();
 
-            // Product insert Start
+            if(!$materialIn)
+            {
+                return ['status'=>103,'message'=>'Material In store failed'];
+            }
 
-            $product = new Product();
-            $product->color_id = $request->material_id;
-            $product->product_transfer_id = $materialIn->id;
-            $product->showroom_id = $request->showroom_id;
-            $product->process_costing = $request->unit_price;
-            $product->type = 2; // 2 = Finish Product
-            $product->quantity = $request->quantity;
-            $product->save();
+            if($materialIn) {
+                // Supplier Bill start
+                $supplier_product_store = new SupplierProduct();
+                $supplier_product_store->material_in_id = $material->id;
+                $supplier_product_store->material_id = $request->material_id[$i];
+                $supplier_product_store->quantity = $request->quantity[$i];
+                $supplier_product_store->supplier_id = $request->supplier_id;
+                $supplier_product_data_store = $supplier_product_store->save();
 
-
-            if($request->paid_amount>0){
-                $request['amount'] = $request->paid_amount;
-                $request['user_account_id'] = $user_account_detail->id;
-                $request['releted_id'] = $supplier_store->id;
-                $request['releted_id_type'] = 2;
-                $request['releted_department_id'] = 5;
-                $payment = Payment::create($request->all());
-
-                if($request->payment_process == 'bank'){
-                    $bank_info = Bank::where('id',$request->payment_type)->first();
-                    $bank['current_balance'] = $bank_info->current_balance - $request->paid_amount;
-                    $bank_info->update($bank);
-
-                    $transaction = new Transaction();
-                    $transaction->bank_id = $bank_info->id;
-                    $transaction->date = now();
-                    $transaction->source_type = 1; // 2 is account 1 is bank
-                    $transaction->type = 1; // 1 is Widthrow
-                    $transaction->payment_id = $payment->id;
-                    $transaction->amount = $request->paid_amount;
-                    $transaction->reason = 'Supplier Payment for finish Product';
-                    $transaction->created_by = Auth::user()->id;
-
-                    $transaction->save();
-
+                if(!$supplier_product_data_store)
+                {
+                    return ['status'=>103,'message'=>'supplier_product_data_store failed'];
                 }
-                if($request->payment_process == 'account'){
-                    $fund_info = Fund::where('id',$request->payment_type)->first();
-                    $fund['current_balance'] = $fund_info->current_balance - $request->paid_amount;
-                    $fund_info->update($fund);
+                // Product insert Start
 
-                    $transaction = new Transaction();
-                    $transaction->bank_id = $fund_info->id;
-                    $transaction->source_type = 2; // 2 is account 1 is bank
-                    $transaction->type = 1;
-                    $transaction->date = now();
-                    $transaction->payment_id = $payment->id;
-                    $transaction->amount = $request->paid_amount;
-                    $transaction->reason = 'Supplier Payment for finish Product';
-                    $transaction->created_by = Auth::user()->id;
+                $product = new Product();
+                $product->color_id = $request->material_id[$i];
+                $product->product_transfer_id = $material->id;
+                $product->showroom_id = $request->showroom_id;
+                $product->process_costing = $request->price[$i];
+                $product->type = 2; // 2 = Finish Product
+                $product->quantity = $request->quantity[$i];
+                $product_store = $product->save();
 
-                    $transaction->save();
-
+                if(!$product_store)
+                {
+                    return ['status'=>103,'message'=>'Product store failed'];
                 }
+            }
+        }
+        if($request->paid_amount>0){
+
+            $payment = new Payment();
+            $payment->amount = $request->paid_amount;
+            $payment->payment_process = $request->payment_process ?? 'N/A';
+            $payment->user_account_id = $user_account_detail->id;
+            $payment->releted_id = $invoice_store;
+            $payment->releted_department_id = 5;
+            $payment->releted_id_type = 2;
+            $payment->created_by = Auth::user()->id;
+            $payment_store = $payment->save();
+
+            if(!$payment_store)
+            {
+                return ['status'=>103,'message'=>'Payment store failed'];
             }
 
 
-            $user_account['total_due'] = $user_account_detail->total_due + ($request->total_price - $request->paid_amount);
-            $user_account['total_paid'] = $user_account_detail->total_paid + $request->paid_amount;
-            $user_account_detail->update($user_account);
+            if($request->payment_process == 'bank'){
+                $bank_info = Bank::where('id',$request->payment_type)->first();
 
+                if($bank_info->current_balance < $request->paid_amount){
+                    DB::rollback();
+                    return ['status'=>103,'message'=>'Sorry Bank amount low'];
+                }
+
+                $bank['current_balance'] = $bank_info->current_balance - $request->paid_amount;
+                $bank_info->update($bank);
+
+                $transaction = new Transaction();
+                $transaction->bank_id = $bank_info->id;
+                $transaction->date = now();
+                $transaction->source_type = 1; // 2 is account 1 is bank
+                $transaction->type = 1; // 1 is Widthrow
+                $transaction->payment_id = $payment->id;
+                $transaction->amount = $request->paid_amount;
+                $transaction->reason = 'Supplier Payment for finish Product';
+                $transaction->created_by = Auth::user()->id;
+                $transaction->save();
+
+            }
+            if($request->payment_process == 'account'){
+                $fund_info = Fund::where('id',$request->payment_type)->first();
+
+                if($fund_info->current_balance < $request->paid_amount){
+                    DB::rollback();
+                    return ['status'=>103,'message'=>'Sorry Store amount low'];
+                }
+
+                $fund['current_balance'] = $fund_info->current_balance - $request->paid_amount;
+                $fund_info->update($fund);
+
+                $transaction = new Transaction();
+                $transaction->bank_id = $fund_info->id;
+                $transaction->source_type = 2; // 2 is account 1 is bank
+                $transaction->type = 1;
+                $transaction->date = now();
+                $transaction->payment_id = $payment->id;
+                $transaction->amount = $request->paid_amount;
+                $transaction->reason = 'Supplier Payment for finish Product';
+                $transaction->created_by = Auth::user()->id;
+                $transaction->save();
+
+            }
         }
+
+        $user_account['total_due'] = $user_account_detail->total_due + ($request->total_price - $request->paid_amount);
+        $user_account['total_paid'] = $user_account_detail->total_paid + $request->paid_amount;
+        $user_account_detail->update($user_account);
+
 
         DB::commit();
             if($request->showroom_id == 3)
             {
-                return redirect()->route('admin.showroom.stock',3);
+                return redirect()->route('admin.showroom.product.list',3);
             }
             if($request->showroom_id == 4)
             {
-                return redirect()->route('admin.showroom.stock',4);
+                return redirect()->route('admin.showroom.product.list',4);
             }
         } catch (\Exception $e) {
 

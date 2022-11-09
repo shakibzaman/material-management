@@ -11,7 +11,7 @@
 @endcan
 <div class="card">
     <div class="card-header">
-    Employee {{ trans('global.list') }}
+    Supplier List
     </div>
 
     <div class="card-body">
@@ -57,8 +57,8 @@
                                 {{ trans('global.edit') }}
                             </a>
                         @endcan
-                            <a class="btn btn-xs btn-info" href="{{ route('admin.supplier.show', $user->id) }}">
-                                Details
+                            <a class="btn btn-xs btn-info" href="{{ route('admin.supplier.invoice.list', $user->id) }}">
+                                Invoice
                             </a>
                             <a class="btn btn-xs btn-success" href="{{ route('admin.supplier.return.list', $user->id) }}">
                                 Return List

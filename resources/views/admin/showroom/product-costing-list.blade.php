@@ -27,7 +27,9 @@
                         <td>{{$list->process_costing}}</td>
                         <td class="{{$list->type==1?'bg-success':'bg-info'}}">{{$list->type == 1 ? 'Process Product':'Finish Product'}}</td>
                         <td>
-                            <a href="{{route('admin.showroom.product.costing.detail',$list->id)}}" class="btn btn-primary">Details</a>
+                            @if($list->type==1)
+                                <a href="{{route('admin.showroom.product.costing.detail',$list->id)}}" class="btn btn-primary">Details</a>
+                            @endif
                         </td>
                     </tr>
                     @endforeach

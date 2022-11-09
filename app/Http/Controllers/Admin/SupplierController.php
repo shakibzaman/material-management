@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Bank;
 use App\Fund;
+use App\invoice;
 use App\Payment;
 use App\ProductReturn;
 use App\Supplier;
@@ -166,7 +167,10 @@ class SupplierController extends Controller
         if ( !$supplier_detail ) {
             return ['status' => 105, 'message' => 'Sorry your Supplier not founded'];
         }
-        $all_dues = SupplierProduct::where( 'supplier_id', $id )->where( 'due_amount', '>', 0 )->sum( 'due_amount' );
+        $user_account = UserAccount::where('user_id',$id)->where('type',1)->first();
+        $all_dues = $user_account->total_due;
+
+//        $all_dues = invoice::where( 'supplier_id', $id )->where( 'due', '>', 0 )->sum( 'due' );
         return view( 'admin.supplier.modal.payment', compact( 'all_dues', 'supplier_detail' ) );
 
     }
@@ -181,6 +185,27 @@ class SupplierController extends Controller
         return view( 'admin.supplier.modal.payment', compact( 'all_dues', 'supplier_detail' ) );
 
     }
+    public function invoiceList( $id )
+    {
+        $supplier_detail = Supplier::where( 'id', $id )->first();
+        if ( !$supplier_detail ) {
+            return ['status' => 105, 'message' => 'Sorry your Supplier not founded'];
+        }
+        $invoices = invoice::where('supplier_id',$id)->get();
+
+        return view( 'admin.supplier.invoice-list', compact( 'invoices') );
+
+    }
+
+    public function invoiceShow( $id )
+    {
+        $invoices = invoice::where('id',$id)->first();
+        $supplier_product = MaterialIn::with('material')->where('inv_number',$invoices->inv_number)->get();
+
+        return view( 'admin.supplier.invoice-product-list', compact( 'supplier_product') );
+
+    }
+
     public function paymentAllList( $id )
     {
         $supplier_detail = Supplier::where( 'id', $id )->first();
@@ -206,167 +231,272 @@ class SupplierController extends Controller
      */
     public function paymentStore( Request $request )
     {
+
+        if($request->total_amount< $request->paid_amount){
+            return ['status' => 103, 'message' => 'Sorry you can not paid more then due'];
+        }
+
+        $user_account = UserAccount::where('user_id', $request->supplier_id)->where('type', 1)->first();
+
+        if($user_account->total_due < $request->paid_amount){
+            return ['status' => 103, 'message' => 'Sorry you can not paid more then due'];
+        }
         if($request->total_amount<$request->paid_amount){
             return ['status' => 103, 'message' => 'Sorry you can not paid more then due'];
         }
-        $all_dues = SupplierProduct::where( 'supplier_id', $request->supplier_id )->where( 'due_amount', '>', 0 )->get();
 
-        $contentQty = $request->paid_amount;
         DB::beginTransaction();
         try {
-            foreach ( $all_dues as $due ) {
-                $paid_amt = $contentQty;
-                if ( $due->due_amount < $contentQty ) {
-                    $paid_amt   = $due->due_amount;
-                    $contentQty = $contentQty - $due->due_amount;
+        // Total user account adjust
 
-                    // Supplier Amount update start
-                    $supplier_amount['paid_amount'] = $due->paid_amount + $paid_amt;
-                    $supplier_amount['due_amount']  = $due->due_amount - $paid_amt;
-                    $supplier_product               = SupplierProduct::where( 'id', $due->id )->first();
-                    $supplier_product->update( $supplier_amount );
+        $all_dues = invoice::where( 'supplier_id', $request->supplier_id )->where( 'due', '>', 0 )->get();
+        if(count($all_dues)>0) {
+            $contentQty = $request->paid_amount;
+            logger(' Requested paid amt '.$request->paid_amount);
+                foreach ($all_dues as $due) {
+                    $paid_amt = $contentQty;
+                    if ($due->due < $contentQty) {
+                        $paid_amt = $due->due;
+                        $contentQty = $contentQty - $due->due;
 
-                    // Supplier Amount update end
+                        // Supplier Invoice Amount update start
 
-                    // User Account update start
-                    $users_account           = UserAccount::where( 'user_id', $due->supplier_id )->where('type',1)->first();
-                    $update_due['total_due'] = $users_account->total_due - $paid_amt;
-                    $users_account->update( $update_due );
-                    // User Account update end
+                        $supplier_amount['paid'] = $due->paid + $paid_amt;
+                        $supplier_amount['due'] = $due->due - $paid_amt;
+                        $supplier_product = invoice::where('id', $due->id)->update($supplier_amount);
 
-                    // Payment data store start
-                    $payment                  = new Payment();
-                    $payment->amount          = $paid_amt;
-                    $payment->payment_process = $request->payment_process;
-                    $payment->payment_info    = $request->payment_info;
-                    $payment->user_account_id = $users_account->id;
-                    $payment->releted_id = $due->id;
-                    $payment->releted_id_type = 2;
-                    $payment->created_by = Auth::user()->id;
-                    $payment->save();
-                    // Payment data store end
+                        // Supplier Invoice Amount update end
 
-                    if($request->payment_process == 'bank'){
-                        $bank_info = Bank::where('id',$request->payment_type)->first();
-                        $bank['current_balance'] = $bank_info->current_balance - $paid_amt;
-                        $bank_info->update($bank);
+                        $users_account = UserAccount::where('user_id', $due->supplier_id)->where('type', 1)->first();
+                        $due_adjust['total_due'] = $user_account->total_due - $request->paid_amount;
+                        $user_account->update($due_adjust);
 
-                        $transaction = new Transaction();
-                        $transaction->bank_id = $bank_info->id;
-                        $transaction->source_type = 1;
-                        $transaction->date = $request->date ?? now();
-                        $transaction->type = 1; // 1 is Widthrow
-                        $transaction->destination_fund_id = 0;
-                        $transaction->destination_type = 0;
-                        $transaction->payment_id = $payment->id;
-                        $transaction->amount = $paid_amt;
-                        $transaction->reason = 'Supplier Payment';
-                        $transaction->created_by = Auth::user()->id;
+                        // Payment data store start
+                        $payment = new Payment();
+                        $payment->amount = $paid_amt;
+                        $payment->payment_process = $request->payment_process;
+                        $payment->payment_info = $request->payment_info;
+                        $payment->user_account_id = $users_account->id;
+                        $payment->releted_id = $due->id;
+                        $payment->releted_id_type = 2;
+                        $payment->created_by = Auth::user()->id;
+                        $payment->save();
+                        // Payment data store end
 
-                        $transaction->save();
+                        if ($request->payment_process == 'bank') {
+                            $bank_info = Bank::where('id', $request->payment_type)->first();
+
+                            if ($bank_info->current_balance < $paid_amt) {
+                                DB::rollback();
+                                return ['status' => 103, 'message' => 'Sorry Bank amount low'];
+                            }
+
+                            $bank['current_balance'] = $bank_info->current_balance - $paid_amt;
+                            $bank_info->update($bank);
+
+                            $transaction = new Transaction();
+                            $transaction->bank_id = $bank_info->id;
+                            $transaction->source_type = 1;
+                            $transaction->date = $request->date ?? now();
+                            $transaction->type = 1; // 1 is Widthrow
+                            $transaction->destination_fund_id = 0;
+                            $transaction->destination_type = 0;
+                            $transaction->payment_id = $payment->id;
+                            $transaction->amount = $paid_amt;
+                            $transaction->reason = 'Supplier Payment';
+                            $transaction->created_by = Auth::user()->id;
+
+                            $transaction->save();
+
+                        }
+                        if ($request->payment_process == 'account') {
+                            $fund_info = Fund::where('id', $request->payment_type)->first();
+                            logger(' Current blnc '. $fund_info->current_balance.' paid amt '.$paid_amt);
+
+                            if ($fund_info->current_balance < $paid_amt) {
+                                DB::rollback();
+                                return ['status' => 103, 'message' => 'Sorry Fund amount low'];
+                            }
+
+                            $fund['current_balance'] = $fund_info->current_balance - $paid_amt;
+                            $fund_info->update($fund);
+
+                            $transaction = new Transaction();
+                            $transaction->bank_id = $fund_info->id;
+                            $transaction->source_type = 2;
+                            $transaction->date = $request->date ?? now();
+                            $transaction->type = 1;
+                            $transaction->destination_fund_id = 0;
+                            $transaction->destination_type = 0;
+                            $transaction->payment_id = $payment->id;
+                            $transaction->amount = $paid_amt;
+                            $transaction->reason = 'Supplier Payment';
+                            $transaction->created_by = Auth::user()->id;
+
+                            $transaction->save();
+
+                        }
+
+                    } else {
+                        $contentQty = 0;
+                        // Supplier Invoice update start
+
+                        $supplier_amount['paid'] = $due->paid + $paid_amt;
+                        $supplier_amount['due'] = $due->due - $paid_amt;
+                        $supplier_product = invoice::where('id', $due->id)->update($supplier_amount);
+
+                        // Supplier Invoice update end
+
+                        $users_account = UserAccount::where('user_id', $due->supplier_id)->where('type',1)->first();
+                        $due_adjust['total_due'] = $user_account->total_due - $request->paid_amount;
+                        $user_account->update($due_adjust);
+
+                        // Payment data store start
+                        $payment = new Payment();
+                        $payment->amount = $paid_amt;
+                        $payment->payment_process = $request->payment_process;
+                        $payment->releted_department_id = 5;
+                        $payment->payment_info = $request->payment_info;
+                        $payment->user_account_id = $users_account->id;
+                        $payment->releted_id = $due->id;
+                        $payment->releted_id_type = 2;
+                        $payment->created_by = Auth::user()->id;
+                        $payment->save();
+                        // Payment data store end
+
+                        if ($request->payment_process == 'bank') {
+                            $bank_info = Bank::where('id', $request->payment_type)->first();
+
+                            if ($bank_info->current_balance < $paid_amt) {
+                                DB::rollback();
+                                return ['status' => 103, 'message' => 'Sorry Bank amount low'];
+                            }
+
+                            $bank['current_balance'] = $bank_info->current_balance - $request->paid_amount;
+                            $bank_info->update($bank);
+
+                            $transaction = new Transaction();
+                            $transaction->bank_id = $bank_info->id;
+                            $transaction->source_type = 1;
+                            $transaction->type = 1; // 1 is Widthrow
+                            $transaction->date = $request->date ?? now();
+                            $transaction->payment_id = $payment->id;
+                            $transaction->amount = $request->paid_amount;
+                            $transaction->reason = 'Supplier Payment';
+                            $transaction->created_by = Auth::user()->id;
+
+                            $transaction->save();
+
+                        }
+                        if ($request->payment_process == 'account') {
+                            $fund_info = Fund::where('id', $request->payment_type)->first();
+                            logger(' Current blnc '. $fund_info->current_balance.' paid amt '.$paid_amt);
+                            if ($fund_info->current_balance < $paid_amt) {
+                                DB::rollback();
+                                return ['status' => 103, 'message' => 'Sorry Fund amount low'];
+                            }
+
+                            $fund['current_balance'] = $fund_info->current_balance - $request->paid_amount;
+                            $fund_info->update($fund);
+
+                            $transaction = new Transaction();
+                            $transaction->bank_id = $fund_info->id;
+                            $transaction->source_type = 2;
+                            $transaction->type = 1;
+                            $transaction->date = $request->date ?? now();
+                            $transaction->payment_id = $payment->id;
+                            $transaction->amount = $request->paid_amount;
+                            $transaction->reason = 'Supplier Payment';
+                            $transaction->created_by = Auth::user()->id;
+
+                            $transaction->save();
+
+                        }
 
                     }
-                    if($request->payment_process == 'account'){
-                        $fund_info = Fund::where('id',$request->payment_type)->first();
-                        $fund['current_balance'] = $fund_info->current_balance - $paid_amt;
-                        $fund_info->update($fund);
 
-                        $transaction = new Transaction();
-                        $transaction->bank_id = $fund_info->id;
-                        $transaction->source_type = 2;
-                        $transaction->date = $request->date ?? now();
-                        $transaction->type = 1;
-                        $transaction->destination_fund_id = 0;
-                        $transaction->destination_type = 0;
-                        $transaction->payment_id = $payment->id;
-                        $transaction->amount = $paid_amt;
-                        $transaction->reason = 'Supplier Payment';
-                        $transaction->created_by = Auth::user()->id;
-
-                        $transaction->save();
-
+                    if ($contentQty < 1) {
+                        break;
                     }
+                }
+        }
+        else{
+            $user_account = UserAccount::where('user_id', $request->supplier_id)->where('type', 1)->first();
 
-                } else {
-                    $contentQty = 0;
-                    // Supplier Amount update start
-                    $supplier_amount['paid_amount'] = $due->paid_amount + $paid_amt;
-                    $supplier_amount['due_amount']  = $due->due_amount - $paid_amt;
-                    $supplier_product               = SupplierProduct::where( 'id', $due->id )->first();
-                    $supplier_product->update( $supplier_amount );
+            $due_adjust['total_due'] = $user_account->total_due - $request->paid_amount;
+            $user_account->update($due_adjust);
+            logger('User account due adjust');
 
-                    // Supplier Amount update end
 
-                    // User Account update start
-                    $users_account           = UserAccount::where( 'user_id', $due->supplier_id )->first();
-                    $update_due['total_due'] = $users_account->total_due - $paid_amt;
-                    $users_account->update( $update_due );
-                    // User Account update end
+            $payment = new Payment();
+            $payment->amount = $request->paid_amount;
+            $payment->payment_process = $request->payment_process;
+            $payment->payment_info = ' Previous due adjust';
+            $payment->user_account_id = $user_account->id;
+            $payment->releted_id = $user_account->user_id;
+            $payment->releted_id_type = 2;
+            $payment->created_by = Auth::user()->id;
+            $payment->save();
+            // Payment data store end
 
-                    // Payment data store start
-                    $payment                  = new Payment();
-                    $payment->amount          = $paid_amt;
-                    $payment->payment_process = $request->payment_process;
-                    $payment->releted_department_id = 5;
-                    $payment->payment_info    = $request->payment_info;
-                    $payment->user_account_id = $users_account->id;
-                    $payment->releted_id = $due->id;
-                    $payment->releted_id_type = 2;
-                    $payment->created_by = Auth::user()->id;
-                    $payment->save();
-                    // Payment data store end
+            if ($request->payment_process == 'bank') {
+                $bank_info = Bank::where('id', $request->payment_type)->first();
 
-                    if($request->payment_process == 'bank'){
-                        $bank_info = Bank::where('id',$request->payment_type)->first();
-                        $bank['current_balance'] = $bank_info->current_balance - $request->paid_amount;
-                        $bank_info->update($bank);
-
-                        $transaction = new Transaction();
-                        $transaction->bank_id = $bank_info->id;
-                        $transaction->source_type = 1;
-                        $transaction->type = 1; // 1 is Widthrow
-                        $transaction->date = $request->date ?? now();
-                        $transaction->payment_id = $payment->id;
-                        $transaction->amount = $request->paid_amount;
-                        $transaction->reason = 'Supplier Payment';
-                        $transaction->created_by = Auth::user()->id;
-
-                        $transaction->save();
-
-                    }
-                    if($request->payment_process == 'account'){
-                        $fund_info = Fund::where('id',$request->payment_type)->first();
-                        $fund['current_balance'] = $fund_info->current_balance - $request->paid_amount;
-                        $fund_info->update($fund);
-
-                        $transaction = new Transaction();
-                        $transaction->bank_id = $fund_info->id;
-                        $transaction->source_type = 2;
-                        $transaction->type = 1;
-                        $transaction->date = $request->date ?? now();
-                        $transaction->payment_id = $payment->id;
-                        $transaction->amount = $request->paid_amount;
-                        $transaction->reason = 'Supplier Payment';
-                        $transaction->created_by = Auth::user()->id;
-
-                        $transaction->save();
-
-                    }
-
+                if ($bank_info->current_balance < $request->paid_amount) {
+                    DB::rollback();
+                    return ['status' => 103, 'message' => 'Sorry Bank amount low'];
                 }
 
-                if ( $contentQty < 1 ) {
-                    break;
-                }
+                $bank['current_balance'] = $bank_info->current_balance - $request->paid_amount;
+                $bank_info->update($bank);
+
+                $transaction = new Transaction();
+                $transaction->bank_id = $bank_info->id;
+                $transaction->source_type = 1;
+                $transaction->date = $request->date ?? now();
+                $transaction->type = 1; // 1 is Widthrow
+                $transaction->destination_fund_id = 0;
+                $transaction->destination_type = 0;
+                $transaction->payment_id = $payment->id;
+                $transaction->amount = $request->paid_amount;
+                $transaction->reason = 'Supplier Payment for previous Due';
+                $transaction->created_by = Auth::user()->id;
+
+                $transaction->save();
 
             }
+            if ($request->payment_process == 'account') {
+                $fund_info = Fund::where('id', $request->payment_type)->first();
 
+                if ($fund_info->current_balance < $request->paid_amount) {
+                    DB::rollback();
+                    return ['status' => 103, 'message' => 'Sorry Fund amount low'];
+                }
+
+                $fund['current_balance'] = $fund_info->current_balance - $request->paid_amount;
+                $fund_info->update($fund);
+
+                $transaction = new Transaction();
+                $transaction->bank_id = $fund_info->id;
+                $transaction->source_type = 2;
+                $transaction->date = $request->date ?? now();
+                $transaction->type = 1;
+                $transaction->destination_fund_id = 0;
+                $transaction->destination_type = 0;
+                $transaction->payment_id = $payment->id;
+                $transaction->amount = $request->paid_amount;
+                $transaction->reason = 'Supplier Payment for previous Due';
+                $transaction->created_by = Auth::user()->id;
+
+                $transaction->save();
+
+            }
+        }
             DB::commit();
             return ['status' => 200, 'message' => 'Successfully Payment Done'];
-
-        } catch ( \Exception $e ) {
-            DB::rollback();
-            return $e;
-        }
+        } catch (\Exception $e) {
+        DB::rollback();
+        return $e;
+    }
     }
 }

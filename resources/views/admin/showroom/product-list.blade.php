@@ -1,5 +1,12 @@
 @extends('layouts.admin')
 @section('content')
+    <div style="margin-bottom: 10px;" class="row">
+        <div class="col-lg-12">
+            <a class="btn btn-info" href="{{ route("admin.finish.product.purchase.create",$department) }}">
+                Finish Product Purchase
+            </a>
+        </div>
+    </div>
     <div class="card">
         <div class="card-header">
             <b>Showroom Product List</b>

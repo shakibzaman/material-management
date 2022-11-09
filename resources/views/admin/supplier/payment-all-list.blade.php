@@ -2,11 +2,6 @@
 @section('content')
 @can('employee_create')
     <div style="margin-bottom: 10px;" class="row">
-        <div class="col-lg-12">
-            <a class="btn btn-success text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
-                                                data-attr="{{ route('admin.supplier.create') }}" title="Return"> Add Supplier
-            </a>
-        </div>
     </div>
 @endcan
 <div class="card">

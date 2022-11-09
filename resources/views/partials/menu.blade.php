@@ -209,14 +209,14 @@
                                     Showroom Product
                                 </a>
                             </li>
-{{--                            <li class="nav-item">--}}
-{{--                                <a href="{{ route("admin.showroom.stock",4) }}" class="nav-link {{ request()->is('admin/showroom/stock') || request()->is('admin/showroom/stock') ? 'active' : '' }}">--}}
-{{--                                    <i class="fa-fw fas fa-list nav-icon">--}}
+                            <li class="nav-item">
+                                <a href="{{ route("admin.showroom.stock",4) }}" class="nav-link {{ request()->is('admin/showroom/stock') || request()->is('admin/showroom/stock') ? 'active' : '' }}">
+                                    <i class="fa-fw fas fa-list nav-icon">
 
-{{--                                    </i>--}}
-{{--                                    Showroom Stock--}}
-{{--                                </a>--}}
-{{--                            </li>--}}
+                                    </i>
+                                    Finish Product
+                                </a>
+                            </li>
                         @endcan
                             <li class="nav-item">
                                 <a href="{{ route("admin.showroom.orders",4) }}" class="nav-link {{ request()->is('admin/showroom/stock') || request()->is('admin/showroom/stock') ? 'active' : '' }}">

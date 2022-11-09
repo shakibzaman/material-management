@@ -46,34 +46,8 @@
                     {{ trans('cruds.user.fields.email_helper') }}
                 </p>
             </div>
-            <div class="form-group {{ $errors->has('nid') ? 'has-error' : '' }}">
-                <label for="nid">NID *</label>
-                <input type="text" id="nid" name="nid" class="form-control" value="{{ old('nid', isset($employee) ? $employee->nid : '') }}" required>
-                @if($errors->has('nid'))
-                    <em class="invalid-feedback">
-                        {{ $errors->first('nid') }}
-                    </em>
-                @endif
-                <p class="helper-block">
-                    {{ trans('cruds.user.fields.email_helper') }}
-                </p>
-            </div>
-            <div class="form-group {{ $errors->has('nid') ? 'has-error' : '' }}">
-                <label for="reference">Reference *</label>
-                <input type="text" id="reference" name="reference" class="form-control" value="{{ old('reference', isset($employee) ? $employee->reference : '') }}" required>
-                @if($errors->has('reference'))
-                    <em class="invalid-feedback">
-                        {{ $errors->first('reference') }}
-                    </em>
-                @endif
-                <p class="helper-block">
-                    {{ trans('cruds.user.fields.email_helper') }}
-                </p>
-            </div>
             <div class="form-group {{ $errors->has('roles') ? 'has-error' : '' }}">
                 <label for="department">Department *
-                    <!-- <span class="btn btn-info btn-xs select-all">{{ trans('global.select_all') }}</span>
-                    <span class="btn btn-info btn-xs deselect-all">{{ trans('global.deselect_all') }}</span> -->
                 </label>
                 <select name="department_id" id="department_id" class="form-control select2"  required>
                     @foreach($departments as $id => $department)
@@ -87,30 +61,6 @@
                 @endif
                 <p class="helper-block">
                     {{ trans('cruds.user.fields.roles_helper') }}
-                </p>
-            </div>
-            <div class="form-group {{ $errors->has('designation') ? 'has-error' : '' }}">
-                <label for="designation">Designation *</label>
-                <input type="text" id="designation" name="designation" class="form-control" value="{{ old('designation', isset($employee) ? $employee->designation : '') }}" required>
-                @if($errors->has('designation'))
-                    <em class="invalid-feedback">
-                        {{ $errors->first('designation') }}
-                    </em>
-                @endif
-                <p class="helper-block">
-                    {{ trans('cruds.user.fields.email_helper') }}
-                </p>
-            </div>
-            <div class="form-group {{ $errors->has('education') ? 'has-error' : '' }}">
-                <label for="education">Education *</label>
-                <input type="text" id="education" name="education" class="form-control" value="{{ old('education', isset($employee) ? $employee->education : '') }}" required>
-                @if($errors->has('education'))
-                    <em class="invalid-feedback">
-                        {{ $errors->first('education') }}
-                    </em>
-                @endif
-                <p class="helper-block">
-                    {{ trans('cruds.user.fields.email_helper') }}
                 </p>
             </div>
             <div class="form-group {{ $errors->has('salary') ? 'has-error' : '' }}">
