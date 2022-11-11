@@ -21,7 +21,7 @@
                     <div class="col-md-2">
                         <div class="form-group">
                             <label for="start_date">Start Date*</label>
-                            <input type="date" id="start_date" name="start_date" class="form-control">
+                            <input type="date" id="start_date" name="start_date" class="form-control" required>
                             @if($errors->has('start_date'))
                                 <em class="invalid-feedback">
                                     {{ $errors->first('start_date') }}
@@ -35,7 +35,7 @@
                     <div class="col-md-2">
                         <div class="form-group">
                             <label for="start_date">End Date*</label>
-                            <input type="date" id="end_date" name="end_date" class="form-control">
+                            <input type="date" id="end_date" name="end_date" class="form-control" required>
                             @if($errors->has('start_date'))
                                 <em class="invalid-feedback">
                                     {{ $errors->first('start_date') }}
@@ -178,7 +178,6 @@
                     console.log(data);
                     $("#card-table").html('');
                     $("#card-table").append(data);
-                    // $('.academicLevel').append(op);
                     // if(data) {
                     //     if(data.status == 103){
                     //         Swal.fire({

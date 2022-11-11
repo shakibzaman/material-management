@@ -509,8 +509,51 @@
                     </ul>
                 </li>
             @endcan
+            @can('dyeing_management_access')
+                    <li class="nav-item nav-dropdown">
+                        <a class="nav-link  nav-dropdown-toggle" href="#">
+                            <i class="fa-fw fas fa-users nav-icon">
 
-            <li class="nav-item">
+                            </i>
+                            Report
+                        </a>
+                        <ul class="nav-dropdown-items">
+                            @can('department_category_access')
+                                <li class="nav-item">
+                                    <a href="{{ route("admin.customer.order.report") }}" class="nav-link {{ request()->is('admin/report/customer/report') || request()->is('admin/report/customer/report/*') ? 'active' : '' }}">
+                                        <i class="fa-fw fas fa-list nav-icon">
+
+                                        </i>
+                                        Customer Order
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('color_access')
+                                <li class="nav-item">
+                                    <a href="{{ route("admin.color.index") }}" class="nav-link {{ request()->is('admin/color') || request()->is('admin/color/*') ? 'active' : '' }}">
+                                        <i class="fa-fw fas fa-list nav-icon">
+
+                                        </i>
+                                        Color
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('company_access')
+                                <li class="nav-item">
+                                    <a href="{{ route("admin.company.index") }}" class="nav-link {{ request()->is('admin/company') || request()->is('admin/company/*') ? 'active' : '' }}">
+                                        <i class="fa-fw fas fa-list nav-icon">
+
+                                        </i>
+                                        Company
+                                    </a>
+                                </li>
+                            @endcan
+                        </ul>
+                    </li>
+                @endcan
+
+
+                <li class="nav-item">
                 <a href="#" class="nav-link" onclick="event.preventDefault(); document.getElementById('logoutform').submit();">
                     <i class="nav-icon fas fa-fw fa-sign-out-alt">
 

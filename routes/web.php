@@ -226,4 +226,11 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::post('fund/deposit', 'FundController@depositStore')->name('fund.deposit.store');
 
 
+
+});
+
+Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Report', 'middleware' => ['auth']], function () {
+    // Report
+    Route::get('report/customer/report', 'CustomerReportController@customerOrderReport')->name('customer.order.report');
+    Route::post('report/customer/report/search', 'CustomerReportController@customerOrderReportSearch')->name('customer.order.report.search');
 });

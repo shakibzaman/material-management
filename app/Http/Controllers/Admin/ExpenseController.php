@@ -42,6 +42,10 @@ class ExpenseController extends Controller
             $expenses = Expense::get();
             return view('admin.expenses.list', compact('expenses'))->render();
         }
+        else if($start_date && $end_date && is_null($expense_category_id)){
+            $expenses = Expense::get();
+            return view('admin.expenses.list', compact('expenses'))->render();
+        }
         else{
             $expenses = Expense::where('expense_category_id',$expense_category_id)
                 ->where('entry_date','>=',$request->start_date)
