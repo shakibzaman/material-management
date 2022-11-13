@@ -1,6 +1,7 @@
 <?php
 
 use App\invoice;
+use App\Payment;
 use Illuminate\Support\Facades\Auth;
 
 function makeInvoice($request){
@@ -17,6 +18,19 @@ function makeInvoice($request){
     $invoice->created_by = Auth::user()->id;
     $invoice_store = $invoice->save();
     return $invoice->id;
+}
+
+function payment($payment){
+    $payment                  = new Payment();
+    $payment->amount          = $payment->paid;
+    $payment->payment_process = $payment->payment_process;
+    $payment->payment_info    = $payment->payment_info;
+    $payment->user_account_id = $payment->id;
+    $payment->releted_department_id = $payment->department_id;
+    $payment->releted_id = $payment->$order->id;
+    $payment->releted_id_type = 1;
+    $payment->created_by = Auth::user()->id;
+    $payment->save();
 }
 
 

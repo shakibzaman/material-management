@@ -6,6 +6,7 @@ use App\Bank;
 use App\Department;
 use App\Employee;
 use App\EmployeeSalary;
+use App\Expense;
 use App\Fund;
 use App\Http\Controllers\Controller;
 use App\Payment;
@@ -142,6 +143,8 @@ class EmployeeController extends Controller
             $year = date_format($date, "Y");
             $month = date_format($date, "m");
 
+            $employee = Employee::where('id',$request->employee_id)->first();
+
             $employee_salaries = new EmployeeSalary();
             $employee_salaries->employee_id = $request->employee_id;
             $employee_salaries->date = $request->date;
@@ -150,6 +153,19 @@ class EmployeeController extends Controller
             $employee_salaries->amount = $request->paid_amount;
             $employee_salaries->created_by = Auth::user()->id;
             $employee_salaries->save();
+
+            // Add expense
+
+            $expense = new Expense();
+            $expense->entry_date = date("Y-m-d");
+            $expense->amount = $request->paid_amount;
+            $expense->description = "Employee Salary for employee ID ".$request->employee_id;
+            $expense->expense_category_id = 4;
+            $expense->department_id = $employee->department_id;
+            $expense->transfer_id = $employee_salaries->id;
+            $expense->created_by_id = Auth::user()->id;
+            $expense->material_id = $request->employee_id;
+            $expense->save();
 
             // Payment data store start
             $payment = new Payment();

@@ -231,6 +231,16 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Report', 'middleware' => ['auth']], function () {
     // Report
+    // Customer Order
     Route::get('report/customer/report', 'CustomerReportController@customerOrderReport')->name('customer.order.report');
     Route::post('report/customer/report/search', 'CustomerReportController@customerOrderReportSearch')->name('customer.order.report.search');
+
+    // Expense report
+    Route::get('report/expense-report', 'CustomerReportController@expenseReport')->name('expense.report');
+    Route::post('report/expense-report/search', 'CustomerReportController@expenseReportSearch')->name('expense.report.search');
+
+    // Knitting report
+    Route::get('report/knitting-report', 'CustomerReportController@knittingInReport')->name('knitting.in.report');
+    Route::post('report/knitting-report/search', 'CustomerReportController@knittingReportSearch')->name('knitting.report.search');
+
 });

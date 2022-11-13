@@ -16,4 +16,8 @@ class ProductDelivered extends Model
     {
         return $this->belongsTo(MaterialConfig::class,'product_id');
     }
+    public function company()
+    {
+        return $this->belongsTo(Company::class,'company_id');
+    }
 }

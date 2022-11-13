@@ -3,8 +3,10 @@
     <div class="card">
         <div class="card-header">
             <b>Showroom Product Costing List</b>
+            <input type="button" class="btn btn-success float-right" onclick="printableDiv('printableArea')" value="print" />
+
         </div>
-        <div class="card-body">
+        <div class="card-body" id="printableArea">
             <div class="col-md-12 shadow-lg p-3 mb-5 bg-white rounded">
                 <h4>Product Details</h4>
                 <table class="table">
@@ -165,7 +167,22 @@
                     </tbody>
                 </table>
             </div>
-
         </div>
     </div>
+
+@endsection
+@section('scripts')
+
+    <script>
+        function printableDiv(printableAreaDivId) {
+            var printContents = document.getElementById(printableAreaDivId).innerHTML;
+            var originalContents = document.body.innerHTML;
+
+            document.body.innerHTML = printContents;
+
+            window.print();
+
+            document.body.innerHTML = originalContents;
+        }
+    </script>
 @endsection

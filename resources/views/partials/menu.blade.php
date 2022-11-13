@@ -530,21 +530,21 @@
                             @endcan
                             @can('color_access')
                                 <li class="nav-item">
-                                    <a href="{{ route("admin.color.index") }}" class="nav-link {{ request()->is('admin/color') || request()->is('admin/color/*') ? 'active' : '' }}">
+                                    <a href="{{ route("admin.expense.report") }}" class="nav-link {{ request()->is('admin/report/expense-report') || request()->is('admin/report/expense-report/*') ? 'active' : '' }}">
                                         <i class="fa-fw fas fa-list nav-icon">
 
                                         </i>
-                                        Color
+                                        Expense Report
                                     </a>
                                 </li>
                             @endcan
                             @can('company_access')
                                 <li class="nav-item">
-                                    <a href="{{ route("admin.company.index") }}" class="nav-link {{ request()->is('admin/company') || request()->is('admin/company/*') ? 'active' : '' }}">
+                                    <a href="{{ route("admin.knitting.in.report") }}" class="nav-link {{ request()->is('admin/report/knitting-report') || request()->is('admin/report/knitting-report/*') ? 'active' : '' }}">
                                         <i class="fa-fw fas fa-list nav-icon">
 
                                         </i>
-                                        Company
+                                        Knitting Report
                                     </a>
                                 </li>
                             @endcan

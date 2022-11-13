@@ -7,7 +7,7 @@
     </div>
 
     <div class="card-body">
-        <form action="{{ route("admin.expenses.store") }}" method="POST" enctype="multipart/form-data">
+        <form id="expense-form">
             @csrf
             <div class="form-group {{ $errors->has('expense_category_id') ? 'has-error' : '' }}">
                 <label for="expense_category">{{ trans('cruds.expense.fields.expense_category') }}</label>
@@ -71,12 +71,162 @@
                     {{ trans('cruds.expense.fields.description_helper') }}
                 </p>
             </div>
+            <div class="form-group {{ $errors->has('payment_process') ? 'has-error' : '' }}">
+                <label for="payment_process">Payment Process *</label>
+                <select name="payment_process" id="payment_process" class="form-control" required>
+                    <option value="">---</option>
+                    <option value="bank">Bank</option>
+                    <option value="account">Funds</option>
+                    <option value="cash">Cash</option>
+                </select>
+                @if($errors->has('payment_process'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('payment_process') }}
+                    </em>
+                @endif
+                <p class="helper-block">
+                    {{ trans('cruds.expense.fields.entry_date_helper') }}
+                </p>
+            </div>
+
+            <div class="form-group {{ $errors->has('payment_type') ? 'has-error' : '' }}">
+                <label for="payment_type">Select Account *</label>
+                <select name="payment_type" id="payment_type" class="form-control select2 payment_type" >
+
+                </select>
+                @if($errors->has('payment_type'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('payment_type') }}
+                    </em>
+                @endif
+                <p class="helper-block">
+                    {{ trans('cruds.expense.fields.entry_date_helper') }}
+                </p>
+            </div>
+
+            <div class="form-group {{ $errors->has('payment_info') ? 'has-error' : '' }}">
+                <label for="payment_info">Payment Info </label>
+                <input type="text" id="payment_info" name="payment_info" class="form-control">
+                @if($errors->has('payment_info'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('payment_info') }}
+                    </em>
+                @endif
+                <p class="helper-block">
+                    {{ trans('cruds.expense.fields.entry_date_helper') }}
+                </p>
+            </div>
             <div>
                 <input class="btn btn-danger" type="submit" value="{{ trans('global.save') }}">
             </div>
         </form>
-
-
     </div>
 </div>
+@endsection
+@section('scripts')
+    <script>
+        $( "#payment_process" ).change(function() {
+
+            let payment_type = $(this).val();
+            //
+            $.ajax({
+                url: '/admin/supplier/payment/type/'+payment_type,
+                type: 'GET',
+                cache: false,
+                datatype: 'application/json',
+
+                success:function(data){
+                    console.log(data);
+
+                    var op ='<option value="0" selected>--- Select Account ---</option>';
+                    for(var i=0;i<data.length;i++){
+
+                        op+='<option value="'+data[i].id+'">'+data[i].name+'</option>';
+                    }
+                    // set value to the Color
+                    $('.payment_type').html("");
+                    $('.payment_type').append(op);
+
+                },
+                error:function(data){
+                    // console.log(data);
+                    // sweet alert
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: "Unable to load data form server",
+                        footer: 'Contact with Your Admin'
+                    })
+                    // swal("Error", 'Unable to load data form server', "error");
+                }
+            });
+        });
+
+
+        $('form#expense-form').on('submit', function (e) {
+            e.preventDefault();
+            searchStockSet();
+        });
+
+        function searchStockSet(){
+            $.ajax({
+                url: '/admin/expenses',
+                type: 'POST',
+                cache: false,
+                data: $('form#expense-form').serialize(),
+                datatype: 'html',
+                // datatype: 'application/json',
+
+                beforeSend: function() {
+                    // show waiting dialog
+                    // waitingDialog.show('Loading...');
+                },
+
+                success:function(data){
+                    console.log(data);
+                    if(data) {
+                        if(data.status == 103){
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: data.message,
+                                footer: 'Check your Stock'
+                            })
+                        }
+                        else if(data.status == 200){
+                            Swal.fire({
+                                position: 'top-end',
+                                icon: 'success',
+                                title: data.message,
+                                showConfirmButton: false,
+                                timer: 1500
+                            })
+                            // $('#mediumModal').modal('hide');
+                            window.location.href='/admin/expenses';
+
+                        }
+                        else{
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: "Unable to load data form server",
+                                footer: 'Contact with Your Admin'
+                            })
+                        }
+                    }
+                },
+                error:function(data){
+                    console.log(data);
+                    // sweet alert
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: "Unable to load data form server",
+                        footer: 'Contact with Your Admin'
+                    })
+                    // swal("Error", 'Unable to load data form server', "error");
+                }
+            });
+        }
+    </script>
 @endsection

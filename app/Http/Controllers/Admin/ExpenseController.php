@@ -2,15 +2,22 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Bank;
 use App\Department;
 use App\Expense;
 use App\ExpenseCategory;
+use App\Fund;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MassDestroyExpenseRequest;
 use App\Http\Requests\StoreExpenseRequest;
 use App\Http\Requests\UpdateExpenseRequest;
+use App\Payment;
+use App\Transaction;
 use Gate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use PHPUnit\Exception;
 use Symfony\Component\HttpFoundation\Response;
 
 class ExpenseController extends Controller
@@ -58,9 +65,81 @@ class ExpenseController extends Controller
 
     public function store(StoreExpenseRequest $request)
     {
+        DB::beginTransaction();
+        try{
         $expense = Expense::create($request->all());
+        if($expense){
+            // Payment data store start
+            $payment = new Payment();
 
-        return redirect()->route('admin.expenses.index');
+            $payment->amount          = $request->amount;
+            $payment->payment_process = $request->payment_process;
+            $payment->payment_info    = $request->payment_info;
+            $payment->releted_department_id = $request->department_id;
+            $payment->releted_id = $expense->id;
+            $payment->releted_id_type = 5;
+            $payment->created_by = Auth::user()->id;
+            $payment->save();
+
+            // Payment data store end
+
+            if ($request->payment_process == 'bank') {
+                $bank_info = Bank::where('id', $request->payment_type)->first();
+
+                if ($bank_info->current_balance < $request->amount) {
+                    DB::rollback();
+                    return ['status' => 103, 'message' => 'Sorry Bank amount low'];
+                }
+
+                $bank['current_balance'] = $bank_info->current_balance - $request->amount;
+                $bank_info->update($bank);
+
+                $transaction = new Transaction();
+                $transaction->bank_id = $bank_info->id;
+                $transaction->source_type = 1;
+                $transaction->type = 1; // 1 is Widthrow
+                $transaction->date = $request->date ?? now();
+                $transaction->payment_id = $payment->id;
+                $transaction->amount = $request->amount;
+                $transaction->reason = $request->description;
+                $transaction->created_by = Auth::user()->id;
+
+                $transaction->save();
+
+            }
+            if ($request->payment_process == 'account') {
+                $fund_info = Fund::where('id', $request->payment_type)->first();
+                if ($fund_info->current_balance < $request->amount) {
+                    DB::rollback();
+                    return ['status' => 103, 'message' => 'Sorry Fund amount low'];
+                }
+
+                $fund['current_balance'] = $fund_info->current_balance - $request->amount;
+                $fund_info->update($fund);
+
+                $transaction = new Transaction();
+                $transaction->bank_id = $fund_info->id;
+                $transaction->source_type = 2;
+                $transaction->type = 1;
+                $transaction->date = $request->date ?? now();
+                $transaction->payment_id = $payment->id;
+                $transaction->amount = $request->amount;
+                $transaction->reason = $request->description;
+                $transaction->created_by = Auth::user()->id;
+
+                $transaction->save();
+
+            }
+        }
+        DB::commit();
+        return ['status'=>200,'message'=>'Expense added successfully'];
+        }catch (Exception $e){
+            DB::rollBack();
+            return $e->getMessage();
+        }
+
+
+//        return redirect()->route('admin.expenses.index');
     }
 
     public function edit(Expense $expense)

@@ -42,12 +42,27 @@
                                 <label for="expense_category">Showroom Name</label>
                                 <select name="showroom_id" id="" class="form-control select2">
                                     <option value="0">--- Select ---</option>
-                                    <option value="3">Nganj</option>
-                                    <option value="4">Mirpur</option>
+                                    <option value="3">Showroom Nganj</option>
+                                    <option value="4">Showroom Mirpur</option>
                                 </select>
                                 @if($errors->has('showroom_id'))
                                     <em class="invalid-feedback">
                                         {{ $errors->first('showroom_id') }}
+                                    </em>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="expense_category">Customer Name</label>
+                                <select name="customer_id" id="" class="form-control select2">
+                                    @foreach($customers as $key => $customer)
+                                    <option value={{$key}}>{{$customer}}</option>
+                                    @endforeach
+                                </select>
+                                @if($errors->has('customer_id'))
+                                    <em class="invalid-feedback">
+                                        {{ $errors->first('customer_id') }}
                                     </em>
                                 @endif
                             </div>

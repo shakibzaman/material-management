@@ -29,10 +29,7 @@
                             {{ trans('cruds.user.fields.name') }}
                         </th>
                         <th>
-                            Phone
-                        </th>
-                        <th>
-                            Address
+                            Type
                         </th>
                         <th>
                             Due
@@ -48,19 +45,18 @@
                         <td></td>
                         <td>{{$company->id}}</td>
                         <td> {{$company->name}} </td>
-                        <td> {{$company->phone}} </td>
-                        <td> {{$company->address}} </td>
+                        <td> {{$company->type==1?'Self':'Others'}} </td>
                         <td> {{$company->account->total_due}} </td>
                         <td>
                         @can('user_edit')
-                            <a class="btn btn-xs btn-info" href="{{ route('admin.company.edit', $company->id) }}">
-                                {{ trans('global.edit') }}
-                            </a>
+{{--                            <a class="btn btn-xs btn-info" href="{{ route('admin.company.edit', $company->id) }}">--}}
+{{--                                {{ trans('global.edit') }}--}}
+{{--                            </a>--}}
                         @endcan
                             <a class="btn btn-xs btn-success" href="{{ route('admin.company.return.list', $company->id) }}">
                                 Return List
                             </a>
-                            <a href="" class="btn btn-info btn-xs">View</a>
+{{--                            <a href="" class="btn btn-info btn-xs">View</a>--}}
                             <a class="btn btn-success btn-xs text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
                                data-attr="{{ route('admin.company.payment',$company->id) }}" title="Return"> Payment
                             </a>
