@@ -6,7 +6,7 @@
 @endcan
 <div class="card">
     <div class="card-header">
-        Knitting List
+        Dyeing Process List
     </div>
     <div class="filter-box">
         <form id="search-filter">
