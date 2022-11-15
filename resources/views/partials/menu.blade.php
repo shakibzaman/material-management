@@ -457,16 +457,16 @@
                     </ul>
                 </li>
             @endcan
-            @can('expense_report_access')
-                <li class="nav-item">
-                    <a href="{{ route("admin.expense-reports.index") }}" class="nav-link {{ request()->is('admin/expense-reports') || request()->is('admin/expense-reports/*') ? 'active' : '' }}">
-                        <i class="fa-fw fas fa-chart-line nav-icon">
+{{--            @can('expense_report_access')--}}
+{{--                <li class="nav-item">--}}
+{{--                    <a href="{{ route("admin.expense-reports.index") }}" class="nav-link {{ request()->is('admin/expense-reports') || request()->is('admin/expense-reports/*') ? 'active' : '' }}">--}}
+{{--                        <i class="fa-fw fas fa-chart-line nav-icon">--}}
 
-                        </i>
-                        {{ trans('cruds.expenseReport.title') }}
-                    </a>
-                </li>
-            @endcan
+{{--                        </i>--}}
+{{--                        {{ trans('cruds.expenseReport.title') }}--}}
+{{--                    </a>--}}
+{{--                </li>--}}
+{{--            @endcan--}}
             @can('dyeing_management_access')
                 <li class="nav-item nav-dropdown">
                     <a class="nav-link  nav-dropdown-toggle" href="#">
