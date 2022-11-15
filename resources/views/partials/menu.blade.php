@@ -548,6 +548,16 @@
                                     </a>
                                 </li>
                             @endcan
+                            @can('company_access')
+                                <li class="nav-item">
+                                    <a href="{{ route("admin.dyeing.report") }}" class="nav-link {{ request()->is('admin/report/dyeing-report') || request()->is('admin/report/dyeing-report/*') ? 'active' : '' }}">
+                                        <i class="fa-fw fas fa-list nav-icon">
+
+                                        </i>
+                                        Dyeing Report
+                                    </a>
+                                </li>
+                            @endcan
                         </ul>
                     </li>
                 @endcan

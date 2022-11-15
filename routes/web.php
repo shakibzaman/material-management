@@ -243,4 +243,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Report', 'm
     Route::get('report/knitting-report', 'CustomerReportController@knittingInReport')->name('knitting.in.report');
     Route::post('report/knitting-report/search', 'CustomerReportController@knittingReportSearch')->name('knitting.report.search');
 
+    // Knitting report
+    Route::get('report/dyeing-report', 'CustomerReportController@dyeingReport')->name('dyeing.report');
+    Route::post('report/dyeing-report/search', 'CustomerReportController@dyeingReportSearch')->name('dyeing.report.search');
+
 });

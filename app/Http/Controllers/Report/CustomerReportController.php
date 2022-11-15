@@ -13,6 +13,7 @@ use App\ProductDelivered;
 use App\ProductTransfer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use DB;
 
 class CustomerReportController extends Controller
 {
@@ -157,4 +158,36 @@ class CustomerReportController extends Controller
 
         }
     }
+
+    public function dyeingReport(){
+        $departments = Department::whereIn('id',[3,4])->get()->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
+        $transfer_products = DB::table('product_transfer')->join('transfer','product_transfer.transfer_id','transfer.id')
+            ->join('material_configs','product_transfer.color_id','material_configs.id')
+            ->join('departments','transfer.department_id','departments.id')
+            ->whereIn('department_id',[3,4])
+            ->select('product_transfer.*','material_configs.name AS color_name','departments.name AS department_name')->get();
+
+        return view('admin.reports.dyeing.dyeing-report', compact('transfer_products','departments'));
+    }
+    public function dyeingReportSearch(Request $request){
+
+        $start_date = $request->start_date;
+        $end_date = date('Y-m-d', strtotime($request->end_date . ' +1 day'));
+        $department_id = $request->department_id;
+        $type = $request->type;
+
+        $allSearchInputs = array();
+        if ($department_id) $allSearchInputs['department_id'] = $department_id;
+        if ($type != null) $allSearchInputs['process_type'] = $type;
+
+        $transfer_products = DB::table('product_transfer')->join('transfer','product_transfer.transfer_id','transfer.id')
+            ->join('material_configs','product_transfer.color_id','material_configs.id')
+            ->join('departments','transfer.department_id','departments.id')
+            ->where('product_transfer.created_at','>=',$request->start_date)
+            ->where('product_transfer.created_at','<=',$end_date)
+            ->where($allSearchInputs)
+            ->select('product_transfer.*','material_configs.name AS color_name','departments.name AS department_name')->get();
+        return view('admin.reports.dyeing.list', compact('transfer_products'))->render();
+    }
+
 }
