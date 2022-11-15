@@ -105,7 +105,7 @@
                         Quantity
                     </th>
                     <th>
-                        Process Fee
+                        Process Charge
                     </th>
                     <th>
                         Dyeing Charge
@@ -114,7 +114,7 @@
                         Dry Charge
                     </th>
                     <th>
-                        Compact Fee
+                        Compact Charge
                     </th>
                 </tr>
                 </thead>
