@@ -77,24 +77,24 @@
                                     {{--                                    </a>--}}
                                     {{--                                    @endcan--}}
 
-                                    @can('expense_edit')
-                                        <a class="btn btn-xs btn-info"
-                                           href="{{ route('admin.material-in.edit', $material->id) }}">
-                                            {{ trans('global.edit') }}
-                                        </a>
-                                    @endcan
+{{--                                    @can('expense_edit')--}}
+{{--                                        <a class="btn btn-xs btn-info"--}}
+{{--                                           href="{{ route('admin.material-in.edit', $material->id) }}">--}}
+{{--                                            {{ trans('global.edit') }}--}}
+{{--                                        </a>--}}
+{{--                                    @endcan--}}
 
-                                    @can('expense_delete')
-                                        <form action="{{ route('admin.material-in.destroy', $material->id) }}"
-                                              method="POST"
-                                              onsubmit="return confirm('{{ trans('global.areYouSure') }}');"
-                                              style="display: inline-block;">
-                                            <input type="hidden" name="_method" value="DELETE">
-                                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                            <input type="submit" class="btn btn-xs btn-danger"
-                                                   value="{{ trans('global.delete') }}">
-                                        </form>
-                                    @endcan
+{{--                                    @can('expense_delete')--}}
+{{--                                        <form action="{{ route('admin.material-in.destroy', $material->id) }}"--}}
+{{--                                              method="POST"--}}
+{{--                                              onsubmit="return confirm('{{ trans('global.areYouSure') }}');"--}}
+{{--                                              style="display: inline-block;">--}}
+{{--                                            <input type="hidden" name="_method" value="DELETE">--}}
+{{--                                            <input type="hidden" name="_token" value="{{ csrf_token() }}">--}}
+{{--                                            <input type="submit" class="btn btn-xs btn-danger"--}}
+{{--                                                   value="{{ trans('global.delete') }}">--}}
+{{--                                        </form>--}}
+{{--                                    @endcan--}}
                                 </td>
                             </tr>
                         @endisset

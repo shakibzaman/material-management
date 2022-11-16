@@ -59,11 +59,11 @@
                                 {{ $bank->rate_type ?? '' }}
                             </td>
                             <td>
-                                @can('material_show')
-                                    <a class="btn btn-xs btn-primary" href="{{ route('admin.bank.show', $bank->id) }}">
-                                        {{ trans('global.view') }}
-                                    </a>
-                                @endcan
+{{--                                @can('material_show')--}}
+{{--                                    <a class="btn btn-xs btn-primary" href="{{ route('admin.bank.show', $bank->id) }}">--}}
+{{--                                        {{ trans('global.view') }}--}}
+{{--                                    </a>--}}
+{{--                                @endcan--}}
                                 <a class="btn btn-xs btn-primary text-white" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
                                    data-attr="{{ route('admin.bank.deposit', $bank->id) }}"> Deposit
                                 </a>
@@ -79,19 +79,19 @@
                                    data-attr="{{ route('admin.bank.add.charge', $bank->id) }}"> Service Charge
                                 </a>
 
-                                @can('expense_edit')
-                                    <a class="btn btn-xs btn-info" href="{{ route('admin.bank.edit', $bank->id) }}">
-                                        {{ trans('global.edit') }}
-                                    </a>
-                                @endcan
+{{--                                @can('expense_edit')--}}
+{{--                                    <a class="btn btn-xs btn-info" href="{{ route('admin.bank.edit', $bank->id) }}">--}}
+{{--                                        {{ trans('global.edit') }}--}}
+{{--                                    </a>--}}
+{{--                                @endcan--}}
 
-                                @can('expense_delete')
-                                    <form action="{{ route('admin.bank.destroy', $bank->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
-                                        <input type="hidden" name="_method" value="DELETE">
-                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                        <input type="submit" class="btn btn-xs btn-danger" value="{{ trans('global.delete') }}">
-                                    </form>
-                                @endcan
+{{--                                @can('expense_delete')--}}
+{{--                                    <form action="{{ route('admin.bank.destroy', $bank->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">--}}
+{{--                                        <input type="hidden" name="_method" value="DELETE">--}}
+{{--                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">--}}
+{{--                                        <input type="submit" class="btn btn-xs btn-danger" value="{{ trans('global.delete') }}">--}}
+{{--                                    </form>--}}
+{{--                                @endcan--}}
 
                             </td>
 

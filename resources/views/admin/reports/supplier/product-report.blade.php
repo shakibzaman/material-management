@@ -2,16 +2,11 @@
 @section('content')
 @can('expense_create')
     <div style="margin-bottom: 10px;" class="row">
-        <div class="col-lg-12">
-            <a class="btn btn-success" href="{{ route("admin.expenses.create") }}">
-                {{ trans('global.add') }} {{ trans('cruds.expense.title_singular') }}
-            </a>
-        </div>
     </div>
 @endcan
 <div class="card">
     <div class="card-header">
-        {{ trans('cruds.expense.title_singular') }} {{ trans('global.list') }}
+        Supplier Invoice List
     </div>
     <div class="filter-box">
         <form id="search-filter">
@@ -47,16 +42,32 @@
                         </div>
                     </div>
                     <div class="col-md-2">
-                        <div class="form-group {{ $errors->has('expense_category_id') ? 'has-error' : '' }}">
-                            <label for="expense_category">{{ trans('cruds.expense.fields.expense_category') }}</label>
-                            <select name="expense_category_id" id="expense_category" class="form-control select2">
-                                @foreach($expense_categories as $id => $expense_category)
-                                    <option value="{{ $id }}" {{ (isset($expense) && $expense->expense_category ? $expense->expense_category->id : old('expense_category_id')) == $id ? 'selected' : '' }}>{{ $expense_category }}</option>
+                        <div class="form-group {{ $errors->has('supplier_id') ? 'has-error' : '' }}">
+                            <label for="company_id">Supplier</label>
+                            <select name="supplier_id" id="supplier_id" class="form-control select2">
+                                @foreach($suppliers as $id => $supplier)
+                                    <option value="{{ $id }}" >{{ $supplier }}</option>
                                 @endforeach
                             </select>
-                            @if($errors->has('expense_category_id'))
+                            @if($errors->has('supplier_id'))
                                 <em class="invalid-feedback">
-                                    {{ $errors->first('expense_category_id') }}
+                                    {{ $errors->first('supplier_id') }}
+                                </em>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group {{ $errors->has('type') ? 'has-error' : '' }}">
+                            <label for="type">Type</label>
+                            <select name="type" id="type" class="form-control select2">
+                                <option value="">--- Select ---</option>
+                                <option value="1" >Material</option>
+                                <option value="2" >Product</option>
+                                <option value="3" >Finish Product</option>
+                            </select>
+                            @if($errors->has('type'))
+                                <em class="invalid-feedback">
+                                    {{ $errors->first('type') }}
                                 </em>
                             @endif
                         </div>
@@ -77,76 +88,79 @@
 
                     </th>
                     <th>
-                        {{ trans('cruds.expense.fields.id') }}
+                        Id
                     </th>
                     <th>
-                        {{ trans('cruds.expense.fields.expense_category') }}
+                        Date
                     </th>
                     <th>
-                        {{ trans('cruds.expense.fields.entry_date') }}
+                        Invoice
                     </th>
                     <th>
-                        {{ trans('cruds.expense.fields.amount') }}
+                        Name
                     </th>
                     <th>
-                        {{ trans('cruds.expense.fields.description') }}
+                        Type
                     </th>
                     <th>
-                        &nbsp;
+                        Sub Total
+                    </th>
+                    <th>
+                        Total
+                    </th>
+                    <th>
+                        Paid
+                    </th>
+                    <th>
+                        Discount
+                    </th>
+                    <th>
+                        Due
                     </th>
                 </tr>
                 </thead>
                 <tbody id="table-body">
-                @foreach($expenses as $key => $expense)
-                    <tr data-entry-id="{{ $expense->id }}">
+                @foreach($invoices as $key => $invoice)
+                    <tr data-entry-id="{{ $invoice->id }}">
                         <td>
 
                         </td>
                         <td>
-                            {{ $expense->id ?? '' }}
+                            {{$invoice->id}}
                         </td>
                         <td>
-                            {{ $expense->expense_category->name ?? '' }}
+                            {{ $invoice->date ?? '' }}
                         </td>
                         <td>
-                            {{ $expense->entry_date ?? '' }}
+                            {{ $invoice->inv_number ?? '' }}
                         </td>
                         <td>
-                            {{ $expense->amount ?? '' }}
+                            {{ $invoice->supplier_name ?? '' }}
                         </td>
                         <td>
-                            {{ $expense->description ?? '' }}
+                            {{ $invoice->type == 1 ?'Material':($invoice->type==2 ?'Product':'FInish Product') ?? '' }}
                         </td>
                         <td>
-                            @can('expense_show')
-                                <a class="btn btn-xs btn-primary" href="{{ route('admin.expenses.show', $expense->id) }}">
-                                    {{ trans('global.view') }}
-                                </a>
-                            @endcan
-
-{{--                            @can('expense_edit')--}}
-{{--                                <a class="btn btn-xs btn-info" href="{{ route('admin.expenses.edit', $expense->id) }}">--}}
-{{--                                    {{ trans('global.edit') }}--}}
-{{--                                </a>--}}
-{{--                            @endcan--}}
-
-{{--                            @can('expense_delete')--}}
-{{--                                <form action="{{ route('admin.expenses.destroy', $expense->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">--}}
-{{--                                    <input type="hidden" name="_method" value="DELETE">--}}
-{{--                                    <input type="hidden" name="_token" value="{{ csrf_token() }}">--}}
-{{--                                    <input type="submit" class="btn btn-xs btn-danger" value="{{ trans('global.delete') }}">--}}
-{{--                                </form>--}}
-{{--                            @endcan--}}
-
+                            {{ $invoice->sub_total ?? '' }}
                         </td>
-
+                        <td>
+                            {{ $invoice->total ?? '' }}
+                        </td>
+                        <td>
+                            {{ $invoice->paid ?? '' }}
+                        </td>
+                        <td>
+                            {{ $invoice->discount ?? '' }}
+                        </td>
+                        <td>
+                            {{ $invoice->due ?? '' }}
+                        </td>
                     </tr>
                 @endforeach
                 </tbody>
             </table>
         </div>
 
-        {{--        @include('$admin.expenses.list')--}}
     </div>
 </div>
 @endsection
@@ -162,7 +176,7 @@
 
         function searchStockSet(){
             $.ajax({
-                url: '/admin/expense/search',
+                url: '/admin/report/supplier-product-report/search',
                 type: 'POST',
                 cache: false,
                 data: $('form#search-filter').serialize(),
@@ -178,28 +192,28 @@
                     console.log(data);
                     $("#card-table").html('');
                     $("#card-table").append(data);
-                    // if(data) {
-                    //     if(data.status == 103){
-                    //         Swal.fire({
-                    //             icon: 'error',
-                    //             title: 'Oops...',
-                    //             text: data.message,
-                    //             footer: 'Check your Stock'
-                    //         })
-                    //     }
-                    //     else{
-                    //         Swal.fire({
-                    //             position: 'top-end',
-                    //             icon: 'success',
-                    //             title: 'Product Successfully Return',
-                    //             showConfirmButton: false,
-                    //             timer: 1500
-                    //         })
-                    //         $('#mediumModal').modal('hide');
-                    //         window.location.reload();
-                    //
-                    //     }
-                    // }
+                    if(data) {
+                        if(data.status == 103){
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: data.message,
+                                footer: 'Check your Stock'
+                            })
+                        }
+                        else{
+                            Swal.fire({
+                                position: 'top-end',
+                                icon: 'success',
+                                title: 'Successfully data found',
+                                showConfirmButton: false,
+                                timer: 2500
+                            })
+                            // $('#mediumModal').modal('hide');
+                            // window.location.reload();
+
+                        }
+                    }
                 },
                 error:function(data){
                     console.log(data);

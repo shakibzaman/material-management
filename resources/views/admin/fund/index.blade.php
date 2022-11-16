@@ -24,7 +24,7 @@
                         <th>ID</th>
                         <th>Name</th>
                         <th>Current Balance</th>
-                        <th>Action</th>
+{{--                        <th>Action</th>--}}
                     </tr>
                 </thead>
                 <tbody>
@@ -43,36 +43,36 @@
                                 {{ $fund->current_balance ?? '' }}
                             </td>
 
-                            <td>
-                                @can('material_show')
-                                    <a class="btn btn-xs btn-primary" href="{{ route('admin.fund.show', $fund->id) }}">
-                                        {{ trans('global.view') }}
-                                    </a>
-                                @endcan
-                                @if($fund->id == 1)
-                                    <a class="btn btn-xs btn-primary text-white" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
-                                       data-attr="{{ route('admin.fund.deposit', $fund->id) }}"> Deposit
-                                    </a>
-                                    <a class="btn btn-xs btn-info" href="{{ route('admin.fund.deposit.list', $fund->id) }}">
-                                        Deposit List
-                                    </a>
-                                @endif
+{{--                            <td>--}}
+{{--                                @can('material_show')--}}
+{{--                                    <a class="btn btn-xs btn-primary" href="{{ route('admin.fund.show', $fund->id) }}">--}}
+{{--                                        {{ trans('global.view') }}--}}
+{{--                                    </a>--}}
+{{--                                @endcan--}}
+{{--                                @if($fund->id == 1)--}}
+{{--                                    <a class="btn btn-xs btn-primary text-white" data-toggle="modal" id="mediumButton" data-target="#mediumModal"--}}
+{{--                                       data-attr="{{ route('admin.fund.deposit', $fund->id) }}"> Deposit--}}
+{{--                                    </a>--}}
+{{--                                    <a class="btn btn-xs btn-info" href="{{ route('admin.fund.deposit.list', $fund->id) }}">--}}
+{{--                                        Deposit List--}}
+{{--                                    </a>--}}
+{{--                                @endif--}}
 
-                                @can('expense_edit')
-                                    <a class="btn btn-xs btn-info" href="{{ route('admin.fund.edit', $fund->id) }}">
-                                        {{ trans('global.edit') }}
-                                    </a>
-                                @endcan
+{{--                                @can('expense_edit')--}}
+{{--                                    <a class="btn btn-xs btn-info" href="{{ route('admin.fund.edit', $fund->id) }}">--}}
+{{--                                        {{ trans('global.edit') }}--}}
+{{--                                    </a>--}}
+{{--                                @endcan--}}
 
-                                @can('expense_delete')
-                                    <form action="{{ route('admin.fund.destroy', $fund->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
-                                        <input type="hidden" name="_method" value="DELETE">
-                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                        <input type="submit" class="btn btn-xs btn-danger" value="{{ trans('global.delete') }}">
-                                    </form>
-                                @endcan
+{{--                                @can('expense_delete')--}}
+{{--                                    <form action="{{ route('admin.fund.destroy', $fund->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">--}}
+{{--                                        <input type="hidden" name="_method" value="DELETE">--}}
+{{--                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">--}}
+{{--                                        <input type="submit" class="btn btn-xs btn-danger" value="{{ trans('global.delete') }}">--}}
+{{--                                    </form>--}}
+{{--                                @endcan--}}
 
-                            </td>
+{{--                            </td>--}}
 
                         </tr>
                     @endforeach

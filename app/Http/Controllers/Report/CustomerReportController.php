@@ -8,9 +8,12 @@ use App\Department;
 use App\Expense;
 use App\ExpenseCategory;
 use App\Http\Controllers\Controller;
+use App\invoice;
 use App\Order;
 use App\ProductDelivered;
 use App\ProductTransfer;
+use App\Supplier;
+use App\SupplierProduct;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use DB;
@@ -189,5 +192,33 @@ class CustomerReportController extends Controller
             ->select('product_transfer.*','material_configs.name AS color_name','departments.name AS department_name')->get();
         return view('admin.reports.dyeing.list', compact('transfer_products'))->render();
     }
+
+    public function supplierProductReport()
+    {
+        $suppliers = Supplier::all()->pluck( 'name', 'id' )->prepend( trans( 'global.pleaseSelect' ), '' );
+        $invoices = invoice::join('suppliers','invoices.supplier_id','suppliers.id')
+            ->select('invoices.*','suppliers.name as supplier_name')->get();
+        return view('admin.reports.supplier.product-report', compact('invoices','suppliers'));
+
+    }
+
+    public function supplierProductReportSearch(Request $request){
+        $start_date = $request->start_date;
+        $end_date = date('Y-m-d', strtotime($request->end_date . ' +1 day'));
+        $supplier_id = $request->supplier_id;
+        $type = $request->type;
+
+        $allSearchInputs = array();
+        if ($supplier_id) $allSearchInputs['supplier_id'] = $supplier_id;
+        if ($type != null) $allSearchInputs['type'] = $type;
+
+        $invoices = invoice::join('suppliers','invoices.supplier_id','suppliers.id')
+            ->where('invoices.date','>=',$request->start_date)
+            ->where('invoices.date','<=',$request->end_date)
+            ->where($allSearchInputs)
+            ->select('invoices.*','suppliers.name as supplier_name')->get();
+        return view('admin.reports.supplier.list', compact('invoices'))->render();
+    }
+
 
 }

@@ -52,11 +52,11 @@
                         <td>{{$user->address}}  </td>
                         <td>{{$user->account->total_due}}  </td>
                         <td>
-                        @can('user_edit')
-                            <a class="btn btn-xs btn-info" href="{{ route('admin.supplier.edit', $user->id) }}">
-                                {{ trans('global.edit') }}
-                            </a>
-                        @endcan
+{{--                        @can('user_edit')--}}
+{{--                            <a class="btn btn-xs btn-info" href="{{ route('admin.supplier.edit', $user->id) }}">--}}
+{{--                                {{ trans('global.edit') }}--}}
+{{--                            </a>--}}
+{{--                        @endcan--}}
                             <a class="btn btn-xs btn-info" href="{{ route('admin.supplier.invoice.list', $user->id) }}">
                                 Invoice
                             </a>

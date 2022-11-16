@@ -44,11 +44,11 @@
                         <td> {{$user->name}} </td>
                         <td>{{$user->account->total_due}}  </td>
                         <td>
-                        @can('user_edit')
-                            <a class="btn btn-xs btn-info" href="{{ route('admin.customer.edit', $user->id) }}">
-                                {{ trans('global.edit') }}
-                            </a>
-                        @endcan
+{{--                        @can('user_edit')--}}
+{{--                            <a class="btn btn-xs btn-info" href="{{ route('admin.customer.edit', $user->id) }}">--}}
+{{--                                {{ trans('global.edit') }}--}}
+{{--                            </a>--}}
+{{--                        @endcan--}}
                             <a class="btn btn-xs btn-info" href="{{ route('admin.customer.show', $user->id) }}">
                                 Orders
                             </a>

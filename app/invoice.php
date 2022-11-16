@@ -8,4 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class invoice extends Model
 {
     use HasFactory;
+    protected $table='invoices';
 }
