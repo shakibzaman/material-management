@@ -558,6 +558,16 @@
                                     </a>
                                 </li>
                             @endcan
+                            @can('company_access')
+                                <li class="nav-item">
+                                    <a href="{{ route("admin.supplier.product.report") }}" class="nav-link {{ request()->is('admin/report/supplier-product-report') || request()->is('admin/report/supplier-product-report/*') ? 'active' : '' }}">
+                                        <i class="fa-fw fas fa-list nav-icon">
+
+                                        </i>
+                                        Supplier Invoice Report
+                                    </a>
+                                </li>
+                            @endcan
                         </ul>
                     </li>
                 @endcan
