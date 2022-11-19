@@ -60,13 +60,18 @@ class ShowroomController extends Controller
                     if (!$order_details) {
                         return ['status' => 103, 'message' => 'Sorry no order details found'];
                     }
-                    if ($order_details->qty < $request->quantity[$i]) {
+                    if ($order_details->qty < (($request->quantity[$i]) / 2.20462262)) {
                         return ['status' => 103, 'message' => 'Sorry you can not return more then you have'];
                     }
-//                    if ($order_details->qty != $request->quantity[$i]) {
+                    if($order_details->unit == 2){
+                        $request_quantity = (($request->quantity[$i]) / 2.20462262);
+                    }
+                    if($order_details->unit == 1){
+                        $request_quantity = $request->quantity[$i];
+                    }
                         // Order details Product qty reduce start
-                        $order_detail_data['qty'] = $order_details->qty - $request->quantity[$i];
-                        $order_detail_data['line_total'] = ($order_details->qty - $request->quantity[$i]) * $order_details->selling_price;
+                        $order_detail_data['qty'] = $order_details->qty - ($request_quantity);
+                        $order_detail_data['line_total'] = ($order_details->qty - $request_quantity) * $order_details->selling_price;
                         OrderDetail::where('id', $request->order_detail_id[$i])->update($order_detail_data);
                         logger('Order details updated');
                         // Stock added
@@ -74,7 +79,7 @@ class ShowroomController extends Controller
                         if (!$product) {
                             return ['status' => 103, 'message' => 'Sorry no Product details found'];
                         }
-                        $product_data['quantity'] = $product->quantity+$request->quantity[$i];
+                        $product_data['quantity'] = $product->quantity+$request_quantity;
                         Product::where('id', $order_details->product_transfer_id)->update($product_data);
                         logger('product data updated');
 
@@ -83,7 +88,7 @@ class ShowroomController extends Controller
                         if (!$product_transfer) {
                             return ['status' => 103, 'message' => 'Sorry no order details found'];
                         }
-                        $product_transfer_data['rest_quantity'] = $product_transfer->rest_quantity + $request->quantity[$i];
+                        $product_transfer_data['rest_quantity'] = $product_transfer->rest_quantity +$request_quantity;
                         ProductTransfer::where('id', $product->product_transfer_id)->update($product_transfer_data);
                         logger('$product_transfer_data updated');
 //                    }
@@ -93,8 +98,9 @@ class ShowroomController extends Controller
                     $order_return = new OrderReturn();
                     $order_return->order_details_id = $order_details->id;
                     $order_return->prev_qty = $old_order_details->qty;
-                    $order_return->return_qty = $request->quantity[$i];
-                    $order_return->qty = ($old_order_details->qty - $request->quantity[$i]);
+                    $order_return->return_qty = $request_quantity;
+                    $order_return->qty = ($old_order_details->qty - $request_quantity);
+                    $order_return->unit = $order_details->unit;
                     $order_return->created_by = Auth::user()->id;
                     $order_return->save();
                     logger('OrderReturn');

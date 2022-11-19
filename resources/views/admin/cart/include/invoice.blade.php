@@ -55,8 +55,9 @@
                             <thead>
                             <tr>
                                 <th class="text-center" style="width:5%">#</th>
-                                <th style="width:50%">Item</th>
+                                <th style="width:25%">Item</th>
                                 <th class="text-right" style="width:15%">Quantity</th>
+                                <th class="text-right" style="width:15%">Unit</th>
                                 <th class="text-right" style="width:15%">Unit Price</th>
                                 <th class="text-right" style="width:15%">Total Price</th>
                             </tr>
@@ -66,7 +67,8 @@
                             <tr>
                                 <td class="text-center">1</td>
                                 <td>{{$item->color->name}}</td>
-                                <td class="text-right">{{$item->qty}}</td>
+                                <td class="text-right">{{$item->unit == 2 ? ($item->qty * 2.20462262) : $item->qty}}</td>
+                                <td class="text-right">{{$item->unit == 1 ? 'KG' : 'Pound'}}</td>
                                 <td class="text-right"><b><strong>৳</strong></b> {{$item->selling_price}}</td>
                                 <td class="text-right"><b><strong>৳</strong></b> {{$item->line_total}}0</td>
                             </tr>

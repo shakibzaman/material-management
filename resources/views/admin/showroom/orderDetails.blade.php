@@ -8,6 +8,7 @@
                 <th>Color</th>
                 <th>Selling Price</th>
                 <th>Qty</th>
+                <th>Unit</th>
                 <th>Line Total</th>
             </tr>
         </thead>
@@ -16,7 +17,8 @@
             <tr>
                 <td>{{$detail->color ?? '' ? $detail->color->name : ''}}</td>
                 <td>{{$detail->selling_price}}</td>
-                <td>{{$detail->qty}}</td>
+                <td>{{$detail->unit == 2 ? ($detail->qty * 2.20462262) : $detail->qty}}</td>
+                <td>{{$detail->unit == 1 ? 'KG' : 'Pound'}}</td>
                 <td>{{$detail->line_total}}</td>
             </tr>
         @endforeach

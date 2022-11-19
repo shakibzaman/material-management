@@ -75,6 +75,7 @@
                     <tr>
                         <th>Name</th>
                         <th>Available Qty</th>
+                        <th>Unit</th>
                         <th>Quantity</th>
                         <th>Price</th>
                         <th>Line Total</th>

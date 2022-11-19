@@ -102,7 +102,14 @@ class CartController extends Controller
         $department_id = $department_id;
         $get_material = Product::with('color')->where(['color_id'=>$color,'showroom_id'=>$department_id])->where('quantity','>',0)->get();
         $material = $get_material->first();
-        $available_total = $get_material->sum('quantity');
+        if($department_id==3){
+            $available_total = $get_material->sum('quantity') * 2.20462262;  // 1 kg = 2.20 Pound
+            $unit = 'Pound';
+        }
+        else{
+            $available_total = $get_material->sum('quantity');
+            $unit = 'KG';
+        }
 
         $html = '<tr>
     <td>
@@ -112,6 +119,7 @@ class CartController extends Controller
     <td>
         <input type="text" class="form-control" value="'.$available_total.'" name="available_quantity[]" readonly>
     </td>
+    <td>'.$unit.'</td>
     <td>
         <input type="text" class="form-control quantity" value="" name="quantity[]">
     </td>
@@ -240,10 +248,11 @@ class CartController extends Controller
         $low_stock = [];
         for($i=0;$i<count($request->color_id);$i++) {
            $getAllStock = Product::where('color_id',$request->color_id[$i])
+                ->where('showroom_id',$department_id)
                 ->where('quantity', '>', 0)->get()
                 ->sum('quantity');
 
-            if($getAllStock < $request->quantity[$i]){
+            if($getAllStock < ($department_id == 3 ? ($request->quantity[$i] / 2.20462262 ) : $request->quantity[$i])){
                 logger("Low Stock");
                     array_push($low_stock,$request->color_id[$i]);
             }
@@ -269,10 +278,11 @@ class CartController extends Controller
             for($i=0;$i<count($request->color_id);$i++){
 
                 $getAllStock = Product::where('color_id',$request->color_id[$i])
+                    ->where('showroom_id',$department_id)
                     ->where('quantity', '>', 0)->get();
 
                 // Stock deduct from product supply start
-               $quantity = $request->quantity[$i];
+               $quantity = ($department_id ==3 ? ($request->quantity[$i]/2.20462262 ): $request->quantity[$i]);
                 $contentQty = $quantity;
                 foreach ( $getAllStock as $stock ) {
                     $pro_qty = $contentQty;
@@ -298,6 +308,7 @@ class CartController extends Controller
                         $cart->color_id = $request->color_id[$i];
                         $cart->product_transfer_id = $stock->id;
                         $cart->qty = $pro_qty;
+                        $cart->unit = ($department_id == 3) ? 2 : 1;
                         $cart->selling_price = $request->price[$i];
                         $cart->line_total = $request->line_total[$i];
                         $cart->save();
@@ -324,6 +335,7 @@ class CartController extends Controller
                         $cart->color_id = $request->color_id[$i];
                         $cart->product_transfer_id = $stock->id;
                         $cart->selling_price = $request->price[$i];
+                        $cart->unit = ($department_id == 3) ? 2 : 1;
                         $cart->qty = $pro_qty;
                         $cart->line_total = $request->line_total[$i];
                         $cart->save();

@@ -19,6 +19,7 @@
                     <tr>
                         <th>Name</th>
                         <th>Order Quantity</th>
+                        <th>Unit</th>
                         <th class="bg-danger">Return Quantity</th>
                     </tr>
                     </thead>
@@ -30,8 +31,9 @@
                                 <input type="hidden" class="form-control order_detail_id" value="{{$detail->id}}" name="order_detail_id[]">
                             </td>
                             <td>
-                                <input type="text" class="form-control" value="{{$detail->qty}}" readonly>
+                                <input type="text" class="form-control" value="{{$detail->unit == 2 ? ($detail->qty * 2.20462262) : $detail->qty}}" readonly>
                             </td>
+                            <td>{{$detail->unit == 1 ? 'KG' : 'Pound'}}</td>
                             <td class="bg-danger">
                                 <input type="text" class="form-control quantity" value="" name="quantity[]">
                             </td>
