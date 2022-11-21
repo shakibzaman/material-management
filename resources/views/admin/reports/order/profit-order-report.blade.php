@@ -120,10 +120,12 @@
                     @foreach($orders as $order)
                         @php
                         $sell_price_total = 0;
+                        if(isset($order_details[$order->id])){
                             $total_sell_price = $order_details[$order->id];
                             foreach ($total_sell_price as $sell_price){
                                 $sell_price_total += ($sell_price->process_costing * $sell_price->qty);
                             }
+                        }
 
                             @endphp
                         <tr>
@@ -138,7 +140,7 @@
                             <td>{{$order->paid}}  </td>
                             <td>{{$order->due}}  </td>
                             <td> {{$sell_price_total}} </td>
-                            <td>{{$order_details[$order->id] ?? 0 ? ($order->total - $sell_price_total) : 0}}</td>
+                            <td>{{$order->total - $sell_price_total}}</td>
                         </tr>
                     @endforeach
                     </tbody>
