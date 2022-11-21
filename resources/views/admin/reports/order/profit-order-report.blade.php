@@ -138,7 +138,7 @@
                             <td>{{$order->paid}}  </td>
                             <td>{{$order->due}}  </td>
                             <td> {{$sell_price_total}} </td>
-                            <td>{{$order->total - $sell_price_total}}</td>
+                            <td>{{$order_details[$order->id] ?? 0 ? ($order->total - $sell_price_total) : 0}}</td>
                         </tr>
                     @endforeach
                     </tbody>
