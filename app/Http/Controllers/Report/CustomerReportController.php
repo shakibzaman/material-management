@@ -224,7 +224,7 @@ class CustomerReportController extends Controller
     public function profitOrderReport(){
         $customers = Customer::get()->pluck('name','id')->prepend( trans( 'global.pleaseSelect' ), '' );
         $orders = Order::all();
-        $order_details = OrderDetail::join('products','order_details.product_id','products.id')
+        $order_details = OrderDetail::join('products','order_details.product_transfer_id','products.id')
             ->select('order_details.*','products.process_costing')
             ->get()->groupBy('order_id');
         return view('admin.reports.order.profit-order-report',compact('orders','customers','order_details'));
@@ -242,7 +242,7 @@ class CustomerReportController extends Controller
             ->where('date','<=',$request->end_date)
             ->where($allSearchInputs)
             ->get();
-        $order_details = OrderDetail::join('products','order_details.product_id','products.id')
+        $order_details = OrderDetail::join('products','order_details.product_transfer_id','products.id')
             ->select('order_details.*','products.process_costing')
             ->get()->groupBy('order_id');
             return view('admin.reports.order.profit-order-list', compact('orders','order_details'))->render();
