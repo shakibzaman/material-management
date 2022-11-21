@@ -528,6 +528,16 @@
                                     </a>
                                 </li>
                             @endcan
+                                @can('department_category_access')
+                                    <li class="nav-item">
+                                        <a href="{{ route("admin.profit.order.report") }}" class="nav-link {{ request()->is('admin/report/customer/report') || request()->is('admin/report/customer/report/*') ? 'active' : '' }}">
+                                            <i class="fa-fw fas fa-list nav-icon">
+
+                                            </i>
+                                            Profit Order
+                                        </a>
+                                    </li>
+                                @endcan
                             @can('color_access')
                                 <li class="nav-item">
                                     <a href="{{ route("admin.expense.report") }}" class="nav-link {{ request()->is('admin/report/expense-report') || request()->is('admin/report/expense-report/*') ? 'active' : '' }}">

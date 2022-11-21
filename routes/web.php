@@ -235,6 +235,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Report', 'm
     Route::get('report/customer/report', 'CustomerReportController@customerOrderReport')->name('customer.order.report');
     Route::post('report/customer/report/search', 'CustomerReportController@customerOrderReportSearch')->name('customer.order.report.search');
 
+    // Customer Order profit
+    Route::get('report/order/profit', 'CustomerReportController@profitOrderReport')->name('profit.order.report');
+    Route::post('report/order/profit/search', 'CustomerReportController@profitOrderReportSearch')->name('profit.order.report.search');
+
     // Expense report
     Route::get('report/expense-report', 'CustomerReportController@expenseReport')->name('expense.report');
     Route::post('report/expense-report/search', 'CustomerReportController@expenseReportSearch')->name('expense.report.search');

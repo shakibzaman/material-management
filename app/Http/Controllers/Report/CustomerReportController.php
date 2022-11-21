@@ -10,6 +10,7 @@ use App\ExpenseCategory;
 use App\Http\Controllers\Controller;
 use App\invoice;
 use App\Order;
+use App\OrderDetail;
 use App\ProductDelivered;
 use App\ProductTransfer;
 use App\Supplier;
@@ -218,6 +219,33 @@ class CustomerReportController extends Controller
             ->where($allSearchInputs)
             ->select('invoices.*','suppliers.name as supplier_name')->get();
         return view('admin.reports.supplier.list', compact('invoices'))->render();
+    }
+
+    public function profitOrderReport(){
+        $customers = Customer::get()->pluck('name','id')->prepend( trans( 'global.pleaseSelect' ), '' );
+        $orders = Order::all();
+        $order_details = OrderDetail::join('products','order_details.product_id','products.id')
+            ->select('order_details.*','products.process_costing')
+            ->get()->groupBy('order_id');
+        return view('admin.reports.order.profit-order-report',compact('orders','customers','order_details'));
+    }
+
+    public function profitOrderReportSearch(Request $request){
+        $showroom_id = $request->showroom_id;
+        $customer_id = $request->customer_id;
+
+        $allSearchInputs = array();
+        if ($showroom_id) $allSearchInputs['department_id'] = $showroom_id;
+        if ($customer_id) $allSearchInputs['customer_id'] = $customer_id;
+
+       $orders = Order::where('date','>=',$request->start_date)
+            ->where('date','<=',$request->end_date)
+            ->where($allSearchInputs)
+            ->get();
+        $order_details = OrderDetail::join('products','order_details.product_id','products.id')
+            ->select('order_details.*','products.process_costing')
+            ->get()->groupBy('order_id');
+            return view('admin.reports.order.profit-order-list', compact('orders','order_details'))->render();
     }
 
 
