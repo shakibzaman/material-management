@@ -17,7 +17,7 @@
             <tr>
                 <td>{{$detail->color ?? '' ? $detail->color->name : ''}}</td>
                 <td>{{$detail->selling_price}}</td>
-                <td>{{$detail->unit == 2 ? ($detail->qty * 2.20462262) : $detail->qty}}</td>
+                <td>{{$detail->unit == 2 ? round($detail->qty * 2.20462262, 1) : $detail->qty}}</td>
                 <td>{{$detail->unit == 1 ? 'KG' : 'Pound'}}</td>
                 <td>{{$detail->line_total}}</td>
             </tr>

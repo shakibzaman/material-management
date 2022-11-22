@@ -67,7 +67,7 @@
                             <tr>
                                 <td class="text-center">1</td>
                                 <td>{{$item->color->name}}</td>
-                                <td class="text-right">{{$item->unit == 2 ? ($item->qty * 2.20462262) : $item->qty}}</td>
+                                <td class="text-right">{{$item->unit == 2 ? round($item->qty * 2.20462262, 1) : $item->qty}}</td>
                                 <td class="text-right">{{$item->unit == 1 ? 'KG' : 'Pound'}}</td>
                                 <td class="text-right"><b><strong>৳</strong></b> {{$item->selling_price}}</td>
                                 <td class="text-right"><b><strong>৳</strong></b> {{$item->line_total}}0</td>
