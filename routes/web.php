@@ -208,6 +208,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('employee/salary/{id}', 'EmployeeController@salary')->name('employee.salary');
     Route::post('employee/payment/store', 'EmployeeController@paymentStore')->name('employee.payment.store');
     Route::get('employee/payment/list/{id}', 'EmployeeController@paymentList')->name('employee.payment.list');
+    Route::get('employee/photo/{id}', 'EmployeeController@getPhoto')->name('employee.get.photo');
+    Route::post('employee/photo/{id}', 'EmployeeController@uploadPhoto')->name('employee.upload.photo');
     // Bank
     Route::resource('bank', 'BankController');
     Route::get('bank/deposit/{id}', 'BankController@deposit')->name('bank.deposit');

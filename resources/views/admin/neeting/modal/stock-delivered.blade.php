@@ -120,7 +120,7 @@
                 <div class="col-md-4">
                     <div class="form-group {{ $errors->has('payment_process') ? 'has-error' : '' }}">
                         <label for="payment_process">Payment Process *</label>
-                        <select name="payment_process" id="payment_process" class="form-control" required>
+                        <select name="payment_process" id="payment_process" class="form-control">
                             <option value="">---</option>
                             <option value="bank">Bank</option>
                             <option value="account">Funds</option>

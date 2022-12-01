@@ -439,10 +439,10 @@ class NeetingController extends Controller
                 $expense->save();
 
 
-                if ( $request->paid ) {
+                if ( $request->paid && $request->paid >0) {
                     // Payment data store start
                     $payment                  = new Payment();
-                    $payment->amount          = ($stock->process_fee*$request->stock_value[$i]);
+                    $payment->amount          = $request->paid;
                     $payment->payment_process = $request->payment_process;
                     $payment->payment_info    = $request->payment_info;
                     $payment->user_account_id = $request->company_id;
@@ -451,43 +451,45 @@ class NeetingController extends Controller
                     $payment->created_by      = Auth::user()->id;
                     $payment->save();
                     // Payment data store end
+
+                    if($request->payment_process && $request->payment_process == 'bank'){
+                        $bank_info = Bank::where('id',$request->payment_type)->first();
+                        $bank['current_balance'] = $bank_info->current_balance + $request->paid;
+                        $bank_info->update($bank);
+
+                        $transaction = new Transaction();
+                        $transaction->bank_id = $bank_info->id;
+                        $transaction->source_type = 1;
+                        $transaction->date = now();
+                        $transaction->type = 2; // 1 is Widthrow
+                        $transaction->payment_id = $payment->id;
+                        $transaction->amount = $request->paid;
+                        $transaction->reason = 'Supplier Payment';
+                        $transaction->created_by = Auth::user()->id;
+
+                        $transaction->save();
+
+                    }
+                    if($request->payment_process && $request->payment_process == 'account'){
+                        $fund_info = Fund::where('id',$request->payment_type)->first();
+                        $fund['current_balance'] = $fund_info->current_balance + $request->paid;
+                        $fund_info->update($fund);
+
+                        $transaction = new Transaction();
+                        $transaction->bank_id = $fund_info->id;
+                        $transaction->source_type = 2;
+                        $transaction->type = 2;
+                        $transaction->date = now();
+                        $transaction->payment_id = $payment->id;
+                        $transaction->amount = $request->paid;
+                        $transaction->reason = 'Supplier Payment';
+                        $transaction->created_by = Auth::user()->id;
+
+                        $transaction->save();
+
+                    }
                 }
-                if($request->payment_process == 'bank'){
-                    $bank_info = Bank::where('id',$request->payment_type)->first();
-                    $bank['current_balance'] = $bank_info->current_balance + ($stock->process_fee*$request->stock_value[$i]);
-                    $bank_info->update($bank);
 
-                    $transaction = new Transaction();
-                    $transaction->bank_id = $bank_info->id;
-                    $transaction->source_type = 1;
-                    $transaction->date = now();
-                    $transaction->type = 2; // 1 is Widthrow
-                    $transaction->payment_id = $payment->id;
-                    $transaction->amount = ($stock->process_fee*$request->stock_value[$i]);
-                    $transaction->reason = 'Supplier Payment';
-                    $transaction->created_by = Auth::user()->id;
-
-                    $transaction->save();
-
-                }
-                if($request->payment_process == 'account'){
-                    $fund_info = Fund::where('id',$request->payment_type)->first();
-                    $fund['current_balance'] = $fund_info->current_balance + ($stock->process_fee*$request->stock_value[$i]);
-                    $fund_info->update($fund);
-
-                    $transaction = new Transaction();
-                    $transaction->bank_id = $fund_info->id;
-                    $transaction->source_type = 2;
-                    $transaction->type = 2;
-                    $transaction->date = now();
-                    $transaction->payment_id = $payment->id;
-                    $transaction->amount = ($stock->process_fee*$request->stock_value[$i]);
-                    $transaction->reason = 'Supplier Payment';
-                    $transaction->created_by = Auth::user()->id;
-
-                    $transaction->save();
-
-                }
 
             }
 

@@ -68,6 +68,37 @@ class EmployeeController extends Controller
         return redirect()->route('admin.employee.index');
     }
 
+    public function getPhoto($id){
+
+        $employee_detail = Employee::where('id',$id)->first();
+        return view('admin.employee.modal.photo',compact('employee_detail'));
+
+    }
+
+    public function uploadPhoto(Request $request,$id){
+        $request->validate([
+            'image' => 'required|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+
+        $imageName = time().'.'.$request->image->extension();
+
+        $request->image->move(public_path('images'), $imageName);
+
+        $detail = Employee::where('id',$id)->first();
+
+        $userPhoto = public_path('/images/').$detail->image;
+        if(file_exists($userPhoto)){
+            @unlink($userPhoto);
+        }
+
+        $data['image'] = $imageName;
+        Employee::where('id',$id)->update($data);
+
+        return back()
+            ->with('success','You have successfully upload image.')
+            ->with('image',$imageName);
+
+    }
     /**
      * Display the specified resource.
      *

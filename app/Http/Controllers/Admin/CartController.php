@@ -8,6 +8,7 @@ use App\Department;
 use App\Expense;
 use App\Fund;
 use App\Http\Controllers\Controller;
+use App\Income;
 use App\MaterialIn;
 use App\Order;
 use App\OrderDetail;
@@ -17,6 +18,7 @@ use App\ProductTransfer;
 use App\Transaction;
 use App\UserAccount;
 //use Gloudemans\Shoppingcart\Cart;
+use Carbon\Carbon;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -273,7 +275,8 @@ class CartController extends Controller
             $request['department_id'] = $department_id;
             $order = Order::create($request->all());
             // Order create Done
-
+            $total_sell_amount = 0;
+            $total_product_price_amount =0;
             // Order details create start
             for($i=0;$i<count($request->color_id);$i++){
 
@@ -312,6 +315,9 @@ class CartController extends Controller
                         $cart->selling_price = $request->price[$i];
                         $cart->line_total = $request->line_total[$i];
                         $cart->save();
+                        // Store sell amount
+                        $total_sell_amount += ($request->line_total[$i]);
+                        $total_product_price_amount += ($stock->process_costing * $pro_qty);
 
                     } else {
 
@@ -339,6 +345,11 @@ class CartController extends Controller
                         $cart->qty = $pro_qty;
                         $cart->line_total = $request->line_total[$i];
                         $cart->save();
+
+                        // Store sell amount
+                        $total_sell_amount += ($request->line_total[$i]);
+                        $total_product_price_amount += ($stock->process_costing * $pro_qty);
+
                     }
 
                     if ( $contentQty < 1 ) {
@@ -346,9 +357,22 @@ class CartController extends Controller
                     }
 
                 }
+
                 // Stock deduct from product supply end
             }
             // Order details create end
+
+            $order_profit = $total_sell_amount - $total_product_price_amount - ($request->discount ?? 0);
+            $income = new Income();
+            $income->entry_date = Carbon::now()->format('Y-m-d');
+            $income->amount = $order_profit;
+            $income->description = "Order Profit Amount . Order ID ".$request->invoice_id;
+            $income->income_category_id  = 6;
+            $income->created_by_id   = Auth::user()->id;
+            $income->releted_id   = $order->id;
+            $income->releted_id_type   = 1; // 1 is for Order
+            $income->department_id   = $department_id;
+            $income->save();
 
             // User account update start
             $user_account = UserAccount::where('user_id',$request->customer_id)->where('type',2)->first();

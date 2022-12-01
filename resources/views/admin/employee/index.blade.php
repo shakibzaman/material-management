@@ -29,6 +29,9 @@
                             {{ trans('cruds.user.fields.name') }}
                         </th>
                         <th>
+                            Photo
+                        </th>
+                        <th>
                             Phone
                         </th>
                         <th>
@@ -51,6 +54,13 @@
                         <td></td>
                         <td>{{$user->id}}</td>
                         <td> {{$user->name}} </td>
+                        <td>
+                            @if($user->image != Null)
+                                <img style="border:2px solid" src="/images/{{$user->image}}" alt="" width="50">
+                            @else
+                                <img style="border:2px solid" src="/images/avatar-dummy.jpg" alt="" width="50">
+                            @endif
+                        </td>
                         <td> {{$user->phone}} </td>
                         <td> {{$user->department->name}} </td>
                         <td> {{$user->salary}} </td>
@@ -59,6 +69,9 @@
                         @can('user_edit')
                             <a class="btn btn-xs btn-info" href="{{ route('admin.employee.edit', $user->id) }}">
                                 {{ trans('global.edit') }}
+                            </a>
+                            <a class="btn btn-success btn-xs text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
+                               data-attr="{{ route('admin.employee.get.photo',$user->id) }}" title="Return"> Photo
                             </a>
                         @endcan
                             <a class="btn btn-success btn-xs text-light" data-toggle="modal" id="mediumButton" data-target="#mediumModal"
