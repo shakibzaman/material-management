@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Report;
 
+use App\Bank;
 use App\Company;
 use App\Customer;
 use App\Department;
@@ -15,6 +16,7 @@ use App\ProductDelivered;
 use App\ProductTransfer;
 use App\Supplier;
 use App\SupplierProduct;
+use App\Transaction;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use DB;
@@ -201,6 +203,48 @@ class CustomerReportController extends Controller
             ->select('invoices.*','suppliers.name as supplier_name')->get();
         return view('admin.reports.supplier.product-report', compact('invoices','suppliers'));
 
+    }
+    public function productReport()
+    {
+        $orders = Order::join('order_details','orders.id','order_details.order_id')
+            ->get()->groupBy('date');
+        return view('admin.reports.product.stock-report',compact('orders'));
+
+    }
+
+    public function productReportSearch(Request $request){
+        $showroom_id = $request->showroom_id;
+
+        $allSearchInputs = array();
+        if ($showroom_id) $allSearchInputs['department_id'] = $showroom_id;
+
+       $orders = Order::join('order_details','orders.id','order_details.order_id')
+                        ->where('date','>=',$request->start_date)
+                        ->where('date','<=',$request->end_date)
+                        ->where($allSearchInputs)
+                        ->get()->groupBy('date');
+        return view('admin.reports.product.product-order-list', compact('orders'))->render();
+    }
+    public function bankReport()
+    {
+        $default_bank_id = 1;
+        $banks = Bank::all()->pluck('name','id')->prepend( trans( 'global.pleaseSelect' ), '' );
+        $bank_deposit = Transaction::with('fund','user')->where('bank_id',$default_bank_id)->where('type',2)->get();
+        $bank_withdraw = Transaction::where('bank_id',$default_bank_id)->where('bank_id',$default_bank_id)->where('source_type',1)->where('type',1)->get();
+        return view('admin.reports.bank.bank-report',compact('bank_deposit','bank_withdraw','banks'));
+
+    }
+
+    public function bankReportSearch(Request $request){
+        $bank_id = $request->bank_id;
+
+        $allSearchInputs = array();
+        if ($bank_id) $allSearchInputs['bank_id'] = $bank_id;
+
+        $bank_deposit = Transaction::with('fund','user')->where($allSearchInputs)
+            ->where('type',2)->get();
+        $bank_withdraw = Transaction::where('source_type',1)->where('type',1)->where($allSearchInputs)->get();
+        return view('admin.reports.bank.bank-report-list', compact('bank_deposit','bank_withdraw'))->render();
     }
 
     public function supplierProductReportSearch(Request $request){

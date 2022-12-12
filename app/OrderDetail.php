@@ -16,4 +16,7 @@ class OrderDetail extends Model
     public function color(){
         return $this->belongsTo(MaterialConfig::class);
     }
+    public function order(){
+        return $this->hasOne(Order::class,'id','order_id');
+    }
 }

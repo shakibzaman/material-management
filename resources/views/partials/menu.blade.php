@@ -528,6 +528,26 @@
                                         </a>
                                     </li>
                                 @endcan
+                                @can('department_category_access')
+                                    <li class="nav-item">
+                                        <a href="{{ route("admin.product.report") }}" class="nav-link {{ request()->is('admin/report/product') || request()->is('admin/report/product/*') ? 'active' : '' }}">
+                                            <i class="fa-fw fas fa-list nav-icon">
+
+                                            </i>
+                                            Product Sell Order
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('department_category_access')
+                                    <li class="nav-item">
+                                        <a href="{{ route("admin.bank.report") }}" class="nav-link {{ request()->is('admin/report/bank') || request()->is('admin/report/bank/*') ? 'active' : '' }}">
+                                            <i class="fa-fw fas fa-list nav-icon">
+
+                                            </i>
+                                            Bank Report
+                                        </a>
+                                    </li>
+                                @endcan
                             @can('color_access')
                                 <li class="nav-item">
                                     <a href="{{ route("admin.expense.report") }}" class="nav-link {{ request()->is('admin/report/expense-report') || request()->is('admin/report/expense-report/*') ? 'active' : '' }}">

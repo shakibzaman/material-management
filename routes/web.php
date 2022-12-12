@@ -257,4 +257,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Report', 'm
     Route::get('report/supplier-product-report', 'CustomerReportController@supplierProductReport')->name('supplier.product.report');
     Route::post('report/supplier-product-report/search', 'CustomerReportController@supplierProductReportSearch')->name('supplier.product.search');
 
+    // Customer Order profit
+    Route::get('report/product', 'CustomerReportController@productReport')->name('product.report');
+    Route::post('report/product/search', 'CustomerReportController@productReportSearch')->name('product.report.search');
+    // Customer Order profit
+    Route::get('report/bank', 'CustomerReportController@bankReport')->name('bank.report');
+    Route::post('report/bank/search', 'CustomerReportController@bankReportSearch')->name('bank.report.search');
 });
